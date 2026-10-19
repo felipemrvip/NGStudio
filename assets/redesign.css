@@ -215,3 +215,106 @@ html[data-theme=light] .ng-v2-main .ng-detail-notes p{color:#253d55}
  .ng-v2-shell .mobile-menu-overlay{position:fixed;z-index:61;bottom:66px;left:0;right:0;max-height:75vh;overflow:auto}
  .ng-v2-shell .mobile-menu-links .navbtn{color:var(--ng-text)}
 }
+
+/* KPI cards — refinamento aprovado, sem faixa brilhante artificial */
+.ng-v2-main .ng-new-dashboard .ng-new-kpis{
+ gap:12px;
+}
+.ng-v2-main .ng-new-dashboard .ng-new-kpis>.kpi{
+ --kpi-ink:#dcecff;
+ --kpi-accent:#348af6;
+ background:linear-gradient(152deg,#102f59 0%,#091f3c 100%)!important;
+ color:var(--kpi-ink)!important;
+ border:1px solid color-mix(in srgb,var(--kpi-accent) 58%,transparent)!important;
+ border-radius:22px;
+ padding:20px 17px 19px!important;
+ min-height:205px;
+ box-shadow:inset 0 1px 0 #ffffff0a,0 8px 20px #00102016!important;
+ display:flex;
+ flex-direction:column;
+ align-items:flex-start;
+ overflow:hidden;
+ isolation:isolate;
+ transition:transform .33s cubic-bezier(.22,1,.36,1),border-color .25s ease,box-shadow .25s ease;
+}
+.ng-v2-main .ng-new-dashboard .ng-new-kpis>.kpi:nth-child(2){
+ --kpi-ink:#fff0cc;--kpi-accent:#dfac37;
+ background:linear-gradient(155deg,#3d3117,#211f1b)!important;
+}
+.ng-v2-main .ng-new-dashboard .ng-new-kpis>.kpi:nth-child(3){
+ --kpi-ink:#c9f9eb;--kpi-accent:#0ab98f;
+ background:linear-gradient(155deg,#063e37,#052b29)!important;
+}
+.ng-v2-main .ng-new-dashboard .ng-new-kpis>.kpi:nth-child(4){
+ --kpi-ink:#ffe4b5;--kpi-accent:#b8872c;
+ background:linear-gradient(155deg,#3b301f,#24252a)!important;
+}
+.ng-v2-main .ng-new-dashboard .ng-new-kpis>.kpi:nth-child(5){
+ --kpi-ink:#e5ebff;--kpi-accent:#666bf5;
+ background:linear-gradient(155deg,#1b326a,#101d41)!important;
+}
+.ng-v2-main .ng-new-dashboard .ng-new-kpis>.kpi::before,
+.ng-v2-main .ng-new-dashboard .ng-new-kpis>.kpi::after{
+ content:none!important;display:none!important;
+ background:none!important;
+}
+.ng-v2-main .ng-new-dashboard .ng-new-kpis>.kpi>.badge-icon{
+ width:48px!important;height:48px!important;min-width:48px;
+ display:grid;place-items:center;
+ margin:0 0 16px!important;
+ padding:0;
+ flex:none;
+ float:none;
+ border-radius:15px!important;
+ background:color-mix(in srgb,var(--kpi-accent) 17%,transparent)!important;
+ border:1px solid color-mix(in srgb,var(--kpi-accent) 29%,transparent)!important;
+ color:var(--kpi-accent)!important;
+ box-shadow:inset 0 1px 0 #ffffff14;
+}
+.ng-v2-main .ng-new-dashboard .ng-new-kpis>.kpi>.badge-icon .ico{
+ width:25px;height:25px;
+}
+.ng-v2-main .ng-new-dashboard .ng-new-kpis>.kpi>.kpi-label{
+ font-size:12px!important;
+ font-weight:650;
+ min-height:0;
+ padding:0;
+ color:var(--kpi-ink)!important;
+ opacity:.9!important;
+ line-height:1.35;
+}
+.ng-v2-main .ng-new-dashboard .ng-new-kpis>.kpi>strong{
+ display:block;
+ font-size:clamp(20px,1.85vw,32px)!important;
+ line-height:1.18;
+ font-weight:780!important;
+ letter-spacing:-1px;
+ margin:14px 0 7px!important;
+ color:var(--kpi-ink)!important;
+ white-space:normal;
+ overflow-wrap:anywhere;
+}
+.ng-v2-main .ng-new-dashboard .ng-new-kpis>.kpi>small{
+ margin-top:auto;
+ font-size:11px!important;
+ color:var(--kpi-ink)!important;
+ opacity:.68!important;
+ line-height:1.35;
+}
+.ng-v2-main .ng-new-dashboard .ng-new-kpis>.kpi:hover{
+ transform:translateY(-3px);
+ border-color:var(--kpi-accent)!important;
+ box-shadow:inset 0 1px 0 #ffffff12,0 12px 24px #00102038!important;
+}
+@media(max-width:1450px){
+ .ng-v2-main .ng-new-dashboard .ng-new-kpis>.kpi{padding:16px 12px!important;min-height:177px}
+ .ng-v2-main .ng-new-dashboard .ng-new-kpis>.kpi>.badge-icon{width:42px!important;height:42px!important;min-width:42px;margin-bottom:12px!important}
+ .ng-v2-main .ng-new-dashboard .ng-new-kpis>.kpi>strong{font-size:clamp(17px,1.7vw,26px)!important}
+}
+@media(max-width:750px){
+ .ng-v2-main .ng-new-dashboard .ng-new-kpis>.kpi{min-height:160px}
+ .ng-v2-main .ng-new-dashboard .ng-new-kpis>.kpi>strong{font-size:clamp(18px,5vw,27px)!important}
+}
+@media(prefers-reduced-motion:reduce){
+ .ng-v2-main .ng-new-dashboard .ng-new-kpis>.kpi{transition:none!important}
+}
