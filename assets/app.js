@@ -297,7 +297,6 @@ function dashboard(individual=false){
     ${kpi('A Receber',money(stat.receivable),'wallet','yellow','Saldo pendente','receivable')}
     ${kpi('Recebido no Mês',money(stat.receivedMonth),'chart','blue','Recebimentos do mês','received')}
    </div>
-   <section class="panel ng-attention"><div class="panel-head"><div><h3>Precisa de atenção</h3><p>Clique para consultar as ordens correspondentes</p></div></div><div class="ng-attention-grid">${[['overdue','Prazos vencidos'],['upcoming','Entregas em até 3 dias'],['delivered-due','Entregues com saldo']].map(([action,label])=>`<button type="button" data-dashboard-action="${action}"><strong>${viewOrders.filter(o=>actionMatches(o,action)).length}</strong><span>${label}</span>${ico('arrow')}</button>`).join('')}</div></section>
    ${revenuePanel(viewOrders,individual)}
    <section class="panel ng-design-week-panel"><div class="panel-head"><div class="panel-title"><span class="badge-icon yellow">${ico('chart')}</span><div><h3>Fluxo de Produção</h3><p>Serviços iniciados e entregues nos últimos 7 dias</p></div></div><span class="caption">Últimos 7 dias</span></div><div class="chart">${chartMarkup(viewOrders)}</div></section>
    <section class="panel table-panel ng-design-recent"><div class="panel-head"><div class="panel-title"><span class="badge-icon yellow">${ico('file')}</span><div><h3>Últimas Ordens de Serviço</h3><p>Acompanhe os pedidos mais recentes</p></div></div><button data-nav="ordens" class="btn btn-sm">Ver todas ${ico('arrow')}</button></div>${ordersTable(recent)}</section>
