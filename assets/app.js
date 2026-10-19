@@ -81,7 +81,7 @@ function nav(){
  const mobileMenu=NAV_GROUPS.map(group=>`<div class="mobile-menu-category"><span>${esc(group.title)}</span>${group.items.map(([id,icon,label])=>navItem(id,icon,label,true)).join('')}</div>`).join('');
  return `<aside class="sidebar ${collapsed?'is-collapsed':''}" aria-label="Navegação">
   <div class="sidebar-brand-row">
-   <div class="logo"><img class="sidebar-brand-logo" src="assets/brand.svg" alt="NG PrintSign Gráfica"/><div class="sidebar-brand-label"><h2>NG Studio</h2><p>Gestão da gráfica</p></div></div>
+   <div class="logo"><img class="sidebar-brand-logo sidebar-brand-full" src="assets/brand.svg" alt="NG PrintSign Gráfica"/><img class="sidebar-brand-logo sidebar-brand-symbol" src="assets/brand-symbol.svg" alt="NG"/><div class="sidebar-brand-label"><h2>NG Studio</h2><p>Gestão da gráfica</p></div></div>
    <button type="button" class="sidebar-collapse" data-collapse-sidebar title="${collapsed?'Expandir menu':'Recolher menu'}" aria-label="${collapsed?'Expandir menu':'Recolher menu'}">${ico('panel')}</button>
   </div>
   <nav class="nav-list sidebar-navigation" aria-label="Menu principal">
