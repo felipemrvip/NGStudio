@@ -379,3 +379,162 @@ html[data-theme=dark] .ng-stage-picker .stage-producao{--stage-bg:#3a2b14;--stag
 html[data-theme=dark] .ng-stage-picker .stage-pronto{--stage-bg:#12382e;--stage-ink:#6de2b5;--stage-line:#27654f}
 html[data-theme=dark] .ng-stage-picker .stage-entregue{--stage-bg:#2b2247;--stage-ink:#c5aeff;--stage-line:#594587}
 @media(prefers-reduced-motion:reduce){html[data-theme] .ng-stage-options{animation:none!important}}
+
+
+/* NG Studio: menu de STATUS inteiramente personalizado.
+   Não usa mais o popup cinza nativo do macOS. Portal fixo evita recorte por tabelas/overflow. */
+html[data-theme] .ng-stage-floating {
+ position:fixed;
+ z-index:10000;
+ box-sizing:border-box;
+ padding:7px;
+ border:1px solid var(--studio-line);
+ border-radius:17px;
+ background:var(--studio-surface);
+ color:var(--studio-text);
+ box-shadow:0 22px 55px #050f2342,0 3px 12px #050f231b;
+ animation:ng-stage-open .22s cubic-bezier(.2,.8,.2,1) both;
+}
+html[data-theme] .ng-stage-menu-heading {
+ padding:9px 12px 10px;
+ color:var(--studio-muted);
+ font-size:10px;
+ font-weight:750;
+ letter-spacing:1.15px;
+ line-height:1.3;
+}
+html[data-theme] .ng-stage-menu-choice {
+ --stage-bg:#eaf2ff;
+ --stage-ink:#1462d3;
+ --stage-line:#b9d2fc;
+ box-sizing:border-box;
+ width:100%;
+ display:flex;
+ align-items:center;
+ gap:11px;
+ min-height:44px;
+ padding:10px 12px;
+ border-radius:10px;
+ border:1px solid transparent;
+ background:transparent;
+ color:var(--studio-text);
+ font-family:inherit;
+ font-size:13px;
+ font-weight:600;
+ text-align:left;
+ cursor:pointer;
+ transition:background .18s ease,border-color .18s ease,transform .18s ease;
+}
+html[data-theme] .ng-stage-menu-choice .ng-stage-menu-marker {
+ flex:none;
+ width:9px;
+ height:9px;
+ border-radius:50%;
+ background:var(--stage-ink);
+ box-shadow:0 0 0 3px color-mix(in srgb,var(--stage-ink) 12%,transparent);
+}
+html[data-theme] .ng-stage-menu-choice .ico,
+html[data-theme] .ng-stage-menu-choice .ng-stage-menu-spacer {
+ width:16px;
+ height:16px;
+ flex:none;
+ margin-left:auto;
+ color:var(--stage-ink);
+}
+html[data-theme] .ng-stage-menu-choice:hover,
+html[data-theme] .ng-stage-menu-choice:focus-visible,
+html[data-theme] .ng-stage-menu-choice[aria-selected="true"] {
+ background:var(--stage-bg);
+ border-color:var(--stage-line);
+ color:var(--stage-ink);
+}
+html[data-theme] .ng-stage-menu-choice:active {
+ transform:scale(.98);
+}
+html[data-theme] .ng-stage-menu-choice:focus-visible {
+ outline:2px solid var(--stage-ink);
+ outline-offset:-2px;
+}
+html[data-theme] .ng-stage-menu-choice.stage-andamento {
+ --stage-bg:#eaf2ff;
+ --stage-ink:#1462d3;
+ --stage-line:#b9d2fc;
+}
+html[data-theme] .ng-stage-menu-choice.stage-producao {
+ --stage-bg:#fff3d8;
+ --stage-ink:#a56600;
+ --stage-line:#f3d28d;
+}
+html[data-theme] .ng-stage-menu-choice.stage-pronto {
+ --stage-bg:#dff7ee;
+ --stage-ink:#07845b;
+ --stage-line:#a4e3cc;
+}
+html[data-theme] .ng-stage-menu-choice.stage-entregue {
+ --stage-bg:#efe9ff;
+ --stage-ink:#7450c9;
+ --stage-line:#d5c5ff;
+}
+html[data-theme=dark] .ng-stage-menu-choice.stage-andamento {
+ --stage-bg:#132b4c;
+ --stage-ink:#83b8ff;
+ --stage-line:#2b5081;
+}
+html[data-theme=dark] .ng-stage-menu-choice.stage-producao {
+ --stage-bg:#3a2b14;
+ --stage-ink:#f3c66d;
+ --stage-line:#725522;
+}
+html[data-theme=dark] .ng-stage-menu-choice.stage-pronto {
+ --stage-bg:#12382e;
+ --stage-ink:#6de2b5;
+ --stage-line:#27654f;
+}
+html[data-theme=dark] .ng-stage-menu-choice.stage-entregue {
+ --stage-bg:#2b2247;
+ --stage-ink:#c5aeff;
+ --stage-line:#594587;
+}
+html[data-theme] .studio-shell .ng-v2-main .ng-table-stage-wrap {
+ background:transparent!important;
+ padding:0!important;
+ border:0!important;
+ border-radius:10px;
+ box-shadow:none;
+ display:inline-flex;
+ vertical-align:middle;
+ max-width:100%;
+}
+html[data-theme] .studio-shell .ng-v2-main .ng-table-stage-wrap::before {content:none!important}
+html[data-theme] .studio-shell .ng-v2-main .ng-stage-compact .ng-stage-trigger {
+ min-height:33px;
+ padding:6px 9px;
+ border-radius:9px;
+ font-size:11px;
+ white-space:nowrap;
+ gap:7px;
+}
+html[data-theme] .studio-shell .ng-v2-main .ng-stage-compact .ng-stage-trigger>.ico {width:13px;height:13px}
+html[data-theme] .studio-shell .ng-v2-main .ng-stage-compact .ng-stage-dot {width:7px;height:7px}
+html[data-theme] .studio-shell .ng-v2-main .ng-stage-quick .ng-stage-trigger {
+ width:100%;
+ min-height:46px;
+ font-size:13px;
+}
+html[data-theme] .studio-shell .ng-v2-main .ng-stage-quick .ng-stage-picker,
+html[data-theme] .studio-shell .ng-v2-main .ng-stage-editor {min-width:0}
+html[data-theme] .studio-shell .ng-v2-main .ng-glance-stage-label {
+ display:block;
+ margin-bottom:8px;
+ color:var(--studio-muted);
+ font-size:12px;
+ font-weight:600;
+}
+html[data-theme] .studio-shell .ng-v2-main .ng-stage-trigger:disabled {
+ opacity:.65;
+ cursor:wait;
+}
+@media(prefers-reduced-motion:reduce) {
+ html[data-theme] .ng-stage-floating,
+ html[data-theme] .ng-stage-menu-choice {animation:none!important;transition:none!important}
+}
