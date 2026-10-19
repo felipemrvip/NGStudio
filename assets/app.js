@@ -350,8 +350,8 @@ function renderOrderDetail(){
      <div class="ng-glance-section-heading"><span class="ng-glance-icon gold">${ico('dollar')}</span><div><h2>Ações rápidas</h2><p>Altere o status e o pagamento desta OS.</p></div></div>
      <div class="ng-glance-action-field"><label for="ng-quick-stage">Status da OS</label><select id="ng-quick-stage" class="select" aria-label="Alterar status da OS">${stageOptions}</select></div>
      <div class="ng-glance-action-field"><span class="ng-glance-action-label">Status do pagamento</span><div class="ng-glance-payment-toggle ng-glance-payment-single"><button type="button" data-quick-payment="paid" aria-pressed="${fullyPaid}" class="${fullyPaid?'is-active is-paid':''}" ${total<=0||fullyPaid?'disabled':''}>${ico('check')} ${fullyPaid?'Pagamento concluído':'Marcar como pago'}</button></div></div>
-     <p class="ng-glance-pay-hint" id="ng-quick-payment-hint">${total<=0?'Sem valor a receber nesta ordem.':fullyPaid?'Pagamento integral já registrado.':`Ao marcar Pago, serão registrados ${money(due)} como recebidos agora.`}</p>
-     <button type="button" class="btn btn-primary ng-glance-save" data-quick-save="${esc(order.id)}">${ico('check')} Salvar alterações</button>
+     <p class="ng-glance-pay-hint" id="ng-quick-payment-hint">${total<=0?'Sem valor a receber nesta ordem.':fullyPaid?'Pagamento integral já registrado.':`Ao clicar, ${money(due)} serão registrados automaticamente como recebidos.`}</p>
+     <p class="ng-glance-autosave" id="ng-glance-autosave" role="status" aria-live="polite">${ico('check')} Alterações salvas automaticamente</p>
      <button type="button" class="btn ng-glance-edit" data-order-edit="${esc(order.id)}">${ico('edit')} Editar OS</button>
      <div class="ng-glance-action-row"><button type="button" class="btn" data-export-pdf="${esc(order.id)}">${ico('download')} Baixar PDF</button><button type="button" class="btn" data-print="${esc(order.id)}">${ico('printer')} Imprimir</button></div>
      <button type="button" class="btn btn-danger ng-glance-delete" data-delete-order="${esc(order.id)}">${ico('trash')} Excluir OS</button>
@@ -373,51 +373,43 @@ function renderOrderDetail(){
  if(fullFrame)fullFrame.srcdoc=docHtml;
  void ensureDetailImages(order.id,attachments);
 }
-function setQuickPayment(mode){
- const order=state.orders.find(o=>o.id===state.viewingOrderId);
- if(!order||Number(order.total||0)<=0)return;
- const buttons=document.querySelectorAll('[data-quick-payment]');
- buttons.forEach(button=>{
-  const checked=button.dataset.quickPayment===mode;
-  button.classList.toggle('is-active',checked);
-  button.classList.toggle('is-paid',checked&&mode==='paid');
-  button.setAttribute('aria-pressed',String(checked));
- });
- const hint=$('#ng-quick-payment-hint');
- if(hint)hint.textContent=mode==='paid'?(remaining(order)>0?'Ao salvar, será registrado '+money(remaining(order))+' como recebido hoje.':'Esta OS já está totalmente paga.'):(remaining(order)<=.001?'Para reabrir uma OS já paga, use Editar OS para ajustar os recebimentos.':'O valor pendente continuará em aberto.');
-}
-async function saveQuickOrder(id){
+async function saveQuickOrder(id,action){
  const order=state.orders.find(o=>o.id===id);
- const control=$('#ng-quick-stage'),paidButton=document.querySelector('[data-quick-payment="paid"]');
+ const control=$('#ng-quick-stage');
+ const paymentButton=document.querySelector('[data-quick-payment="paid"]');
  if(!order||!control||state.busy)return;
  const stage=control.value;
- if(!STAGES.some(s=>s.id===stage)){toast('Status inválido.',true);return;}
- const shouldPay=paidButton?.getAttribute('aria-pressed')==='true';
+ if(action==='stage'&&!STAGES.some(s=>s.id===stage)){control.value=order.stage;toast('Status inválido.',true);return;}
  const copy=structuredClone(order),now=new Date().toISOString();
- if(stage!==copy.stage){
+ if(action==='stage'){
+  if(stage===copy.stage)return;
   const previous=stageLabel(copy.stage);
   copy.stage=stage;
   copy.delivered_at=stage==='entregue'?now:null;
   copy.history=[...(copy.history||[]),{action:'Status alterado: '+previous+' → '+stageLabel(stage),date:now}];
- }
- const due=remaining(copy);
- if(shouldPay&&due>.001){
+ }else if(action==='paid'){
+  const due=remaining(copy);
+  if(Number(copy.total||0)<=0||due<=.001)return;
   copy.payments=[...(copy.payments||[]),{id:uid(),amount:Math.round(due*100)/100,method:copy.method||'PIX',date:now,note:'Quitação automática'}];
   copy.history=[...(copy.history||[]),{action:'Pagamento concluído: '+money(due),date:now}];
- }
- if(stage===order.stage&&!(shouldPay&&due>.001)){toast('Nenhuma alteração para salvar.');return;}
- const btn=document.querySelector('[data-quick-save]');
+ }else return;
+ const indicator=$('#ng-glance-autosave');
  state.busy=true;
- if(btn){btn.disabled=true;btn.textContent='Salvando...';}
+ control.disabled=true;
+ if(paymentButton)paymentButton.disabled=true;
+ if(indicator){indicator.classList.add('is-saving');indicator.classList.remove('is-error');indicator.innerHTML=ico('clock')+' Salvando...';}
  try{
   const saved=state.mode==='cloud'?await cloud.persistOrder(copy,true):copy;
   state.orders=state.orders.map(o=>o.id===id?saved:o);
   if(state.mode==='demo')persistDemo();
   renderOrderDetail();
-  toast('Alterações salvas com sucesso.');
+  toast(action==='paid'?'Pagamento registrado com sucesso.':'Status atualizado com sucesso.');
  }catch(e){
-  toast('Não foi possível salvar as alterações: '+e.message,true);
-  if(btn?.isConnected){btn.disabled=false;btn.innerHTML=ico('check')+' Salvar alterações';}
+  control.value=order.stage;
+  control.disabled=false;
+  if(paymentButton)paymentButton.disabled=Number(order.total||0)<=0||remaining(order)<=.001;
+  if(indicator){indicator.classList.remove('is-saving');indicator.classList.add('is-error');indicator.innerHTML=ico('clock')+' Não foi possível salvar';}
+  toast('Não foi possível salvar automaticamente: '+e.message,true);
  }finally{state.busy=false;}
 }
 function updateFullOrderPreviewScale(){
@@ -649,8 +641,7 @@ document.addEventListener('click',async e=>{
  if(target.matches('[data-filter]')){state.filter=target.dataset.filter;state.ordersPage=1;refreshView();return;}
  if(target.matches('[data-orders-page]')){const page=Number(target.dataset.ordersPage);if(Number.isInteger(page)&&page>0){state.ordersPage=page;refreshView();}return;}
  if(target.matches('[data-close]')){if(state.clientDraft&&state.draft){state.clientDraft=null;$('#modal-root').innerHTML='';return;}if(state.draft&&state.orders.some(o=>o.id===state.draft.id)){const id=state.draft.id;closeModal();state.viewingOrderId=id;}else closeModal();render();return;}
- if(target.matches('[data-quick-payment]')){setQuickPayment(target.dataset.quickPayment);return;}
- if(target.matches('[data-quick-save]')){await saveQuickOrder(target.dataset.quickSave);return;}
+ if(target.matches('[data-quick-payment]')){await saveQuickOrder(state.viewingOrderId,'paid');return;}
  if(target.matches('[data-detail-preview-expand]')){toggleFullOrderPreview();return;}
  if(target.matches('[data-history-expand]')){const list=$('#ng-glance-timeline');if(list){const expanded=list.classList.toggle('is-expanded');target.setAttribute('aria-expanded',String(expanded));target.textContent=expanded?'Ver menos':'Ver tudo';}return;}
  if(target.matches('[data-order-add-images]')){openEditor(target.dataset.orderAddImages);setTimeout(()=>document.querySelector('[data-pick-images]')?.scrollIntoView({behavior:'smooth',block:'center'}),60);return;}
@@ -672,6 +663,7 @@ document.addEventListener('click',async e=>{
  if(target.matches('[data-logout]')){await cloud.signout();renderLogin();return;}
 });
 document.addEventListener('change',async e=>{const target=e.target;
+ if(target.id==='ng-quick-stage'){await saveQuickOrder(state.viewingOrderId,'stage');return;}
  if(target.id==='ng-revenue-year'){state.revenueYear=Number(target.value);state.revenueHoverMonth=null;refreshView();return;}
  if(target.id==='ng-revenue-month-select'){updateMonthlySelection(Number(target.value));return;}
  if(target.id==='orders-page-size'){state.ordersPerPage=Number(target.value)||15;state.ordersPage=1;refreshView();return;}
