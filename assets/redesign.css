@@ -1,0 +1,160 @@
+/* NG Studio v2 — redesign estrutural em vez de nova pintura */
+:root{--v2-ease:cubic-bezier(.22,1,.36,1);--v2-navy:#071c3c}
+html[data-theme=light]{--ng-body:#e9e7df;--ng-surface:#fffefa;--ng-card:#fffefa;--ng-border:#e9e8e0;--ng-soft:#f5f3ed;--ng-hover:#f1efe8;--ng-text:#232934;--ng-secondary:#89908e;--ng-shadow:0 7px 24px #3b34230b}
+html[data-theme=dark]{--ng-body:#040b18;--ng-surface:#0f2035;--ng-card:#102238;--ng-border:#233b57;--ng-soft:#172e47;--ng-hover:#1d3855;--ng-text:#eef5ff;--ng-secondary:#9aacc5;--ng-shadow:0 8px 24px #01091429}
+body{background:var(--ng-body)!important;letter-spacing:-.012em}
+.ng-v2-shell{max-width:1920px;min-height:100vh;margin:0 auto;padding:clamp(0px,2.2vw,32px);gap:0;overflow:clip;background:transparent!important;align-items:stretch}
+.ng-v2-shell .ng-design-sidebar{height:auto;max-height:none;min-height:calc(100vh - clamp(0px,4.4vw,64px));width:232px;flex-shrink:0;position:relative;top:auto;z-index:20;padding:29px 16px 22px;background:linear-gradient(168deg,#082144 0%,#051b3a 70%,#06264e 100%)!important;border:0;border-radius:26px 0 0 26px;box-shadow:0 14px 35px #111b2c13}
+.ng-v2-shell .ng-v2-main{background:var(--ng-surface)!important;min-width:0;max-width:none;width:calc(100% - 232px);padding:30px clamp(18px,2.4vw,37px) 42px;border-radius:0 26px 26px 0;color:var(--ng-text);box-shadow:0 14px 35px #111b2c13}
+.ng-v2-shell.sidebar-collapsed .ng-design-sidebar{width:76px}
+.ng-v2-shell.sidebar-collapsed .ng-v2-main{width:calc(100% - 76px)}
+.ng-v2-shell .sidebar-brand-row{margin-bottom:17px;padding:0 3px 8px;border:0;align-items:center;gap:6px}
+.ng-v2-shell .sidebar-brand-row .logo{padding:0;display:flex;align-items:center;gap:9px;margin:0;flex:1}
+.ng-v2-shell .sidebar-brand-logo{width:38px;height:38px;border-radius:9px;object-fit:contain}
+.ng-v2-shell .sidebar-brand-label h2{font-size:17px;white-space:nowrap;color:#f9fbff;margin:0}
+.ng-v2-shell .sidebar-brand-label p{font-size:9px;letter-spacing:.15px;color:#adc0d8;margin:4px 0 0}
+.ng-v2-shell .sidebar-collapse{opacity:.65;color:#b8cfe9;border:0;background:#ffffff0d;border-radius:8px;width:26px;height:26px}
+.ng-v2-shell .sidebar-collapse:hover{opacity:1;background:#ffffff1e}
+.ng-sidebar-person{width:100%;display:flex;flex-direction:column;align-items:center;border:0;background:none;color:#fff;text-align:center;padding:14px 4px 23px;margin:0 0 10px;border-bottom:1px solid #ffffff18;cursor:pointer}
+.ng-sidebar-avatar{width:76px;height:76px;display:grid;place-items:center;border-radius:50%;margin-bottom:16px;background:radial-gradient(circle at 35% 28%,#538dd1,#063367);color:white;border:3px solid #ecf3fb;box-shadow:0 7px 19px #00112f6b;font-size:25px;font-weight:800;letter-spacing:-1px;transition:transform .4s var(--v2-ease)}
+.ng-sidebar-person:hover .ng-sidebar-avatar{transform:scale(1.06)}
+.ng-sidebar-welcome{font-size:10px;color:#c4d4e9;margin-bottom:6px}
+.ng-sidebar-person strong{font-size:16px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ng-sidebar-person small{font-size:10px;color:#a8bfdb;margin-top:7px;display:flex;align-items:center;gap:4px}
+.ng-sidebar-person small .ico{width:12px;height:12px}
+.ng-sidebar-caption{font-size:9px;font-weight:750;letter-spacing:1.45px;color:#6994bb;margin:6px 0 6px 12px;white-space:nowrap}
+.ng-sidebar-caption-later{margin-top:19px}
+.ng-v2-shell .sidebar-navigation{display:flex;flex-direction:column;gap:4px}
+.ng-v2-shell .sidebar .navbtn{min-height:42px;padding:10px 12px;font-size:11.5px;color:#e0e9f6;font-weight:510;border:1px solid transparent;border-radius:11px;background:transparent;gap:11px;transition:transform .25s var(--v2-ease),background .25s ease,color .25s ease}
+.ng-v2-shell .sidebar .navbtn.active{background:linear-gradient(110deg,#ffcb42 0%,#ecc46b 100%)!important;color:#162440!important;border-color:#f9d36c;box-shadow:0 5px 14px #0004;transform:none}
+.ng-v2-shell .sidebar .navbtn.active .ico{color:#122c54}
+.ng-v2-shell .sidebar .navbtn.active:before{display:none}
+.ng-v2-shell .sidebar .navbtn:not(.active):hover{background:#ffffff17;transform:translateX(3px)}
+.ng-v2-shell .sidebar .navbtn .ico{width:17px;height:17px}
+.ng-v2-shell .sidebar-bottom{display:grid;gap:10px;margin-top:auto;padding-top:20px}
+.ng-v2-shell .sidebar-create{background:#154579;border-color:#2b6396;color:#fff;border-radius:12px;box-shadow:none;font-size:11px}
+.ng-v2-shell .sidebar-create .ico{color:#ffdb74}
+.ng-sidebar-signature{display:flex;align-items:center;gap:10px;padding:12px;border-radius:15px;background:linear-gradient(125deg,#112f57,#071d3b);border:1px solid #33547b;color:#fff}
+.ng-sidebar-signature img{width:39px;height:39px;object-fit:contain}
+.ng-sidebar-signature b{font-size:11px}
+.ng-sidebar-signature small{display:block;font-size:9px;color:#b4c4dc;margin-top:5px}
+.ng-v2-shell.sidebar-collapsed .ng-sidebar-person{padding:10px 0 12px}
+.ng-v2-shell.sidebar-collapsed .ng-sidebar-person>:not(.ng-sidebar-avatar),.ng-v2-shell.sidebar-collapsed .ng-sidebar-caption,.ng-v2-shell.sidebar-collapsed .ng-sidebar-signature div{display:none}
+.ng-v2-shell.sidebar-collapsed .ng-sidebar-avatar{width:43px;height:43px;font-size:14px;margin:0}
+.ng-v2-shell.sidebar-collapsed .ng-sidebar-signature{padding:6px}
+.ng-v2-shell.sidebar-collapsed .ng-sidebar-signature img{width:32px;height:32px}
+.ng-v2-shell.sidebar-collapsed .sidebar-brand-row .logo{justify-content:center}
+.ng-v2-shell .ng-design-topbar{padding:0 0 22px;border-bottom:1px solid var(--ng-border);margin-bottom:21px;align-items:center;gap:18px}
+.ng-design-topbar .ng-heading-eyebrow{font-size:9px;font-weight:750;letter-spacing:1.55px;color:var(--ng-secondary);display:block;margin-bottom:7px}
+.ng-design-topbar .heading h1{font-size:clamp(21px,1.8vw,30px);font-weight:740;letter-spacing:-.95px;margin-bottom:5px;color:var(--ng-text)}
+.ng-design-topbar .heading p{color:var(--ng-secondary);font-size:11px}
+.ng-design-topbar .tools{gap:9px;min-width:0}
+.ng-design-topbar .search{min-width:clamp(170px,24vw,420px);height:45px;padding:0 13px;background:var(--ng-soft);border:1px solid transparent;border-radius:14px;transition:box-shadow .22s ease,border-color .22s ease}
+.ng-design-topbar .search:focus-within{border-color:#5e9de6;box-shadow:0 0 0 4px #388bee1a}
+.ng-design-topbar .search input{color:var(--ng-text)}
+.ng-design-topbar .search input::placeholder{color:var(--ng-secondary)}
+.ng-design-topbar .search .shortcut{color:var(--ng-secondary);background:var(--ng-surface);border-color:var(--ng-border)}
+.ng-design-topbar .theme-toggle,.ng-design-topbar .ng-refresh-btn,.ng-design-topbar .ng-topbar-logout{width:38px;height:38px;border:1px solid var(--ng-border);border-radius:50%;background:var(--ng-soft);color:var(--ng-text)}
+.ng-topbar-profile{display:flex;align-items:center;gap:7px;background:var(--ng-soft);border:1px solid var(--ng-border);padding:4px 8px 4px 4px;border-radius:99px;color:var(--ng-text)}
+.ng-topbar-profile span{height:32px;width:32px;display:grid;place-items:center;background:#1d5093;color:#fff;border-radius:50%;font-size:10px;font-weight:750}
+.ng-topbar-profile .ico{width:12px;height:12px}
+.ng-v2-main .page-actions{margin-bottom:15px}
+.ng-v2-main .page-actions .caption{font-size:11px;color:var(--ng-secondary)}
+.ng-v2-main .btn-primary{background:linear-gradient(130deg,#f5c237,#ffe481);border:1px solid #ebbe3e;color:#152846;border-radius:11px;box-shadow:none}
+.ng-v2-main .btn{transition:transform .22s var(--v2-ease),box-shadow .22s ease,background .22s ease}
+.ng-v2-main .btn:active{transform:scale(.97)}
+.ng-v2-main .btn-primary:hover{filter:none;box-shadow:0 7px 17px #d6a72d2c;transform:translateY(-1px)}
+.ng-v2-main .panel{border:1px solid var(--ng-border);border-radius:17px;background:var(--ng-card);box-shadow:0 4px 17px #061e3610}
+.ng-v2-main .panel-head{padding:18px 19px 0}
+.ng-v2-main .panel-head h3{font-size:14px;font-weight:720;letter-spacing:-.35px;color:var(--ng-text)}
+.ng-v2-main .panel-head p{color:var(--ng-secondary)}
+.ng-v2-main .panel-title{align-items:center}
+.ng-v2-main .ng-new-dashboard .ng-dash-columns{grid-template-columns:minmax(0,1fr) 268px;gap:15px}
+.ng-v2-main .ng-new-dashboard .ng-dash-primary,.ng-v2-main .ng-new-dashboard .ng-dash-aside{gap:14px}
+.ng-v2-main .ng-new-dashboard .kpis{gap:9px}
+.ng-v2-main .ng-new-dashboard .kpi{border:0;box-shadow:none;border-radius:20px;min-height:160px;padding:17px 12px 14px}
+.ng-v2-main .ng-new-dashboard .kpi:nth-child(1){background:#dfedfa;color:#17314d}
+.ng-v2-main .ng-new-dashboard .kpi:nth-child(2){background:#fce7a8;color:#583b12}
+.ng-v2-main .ng-new-dashboard .kpi:nth-child(3){background:#ddefe5;color:#1c5036}
+.ng-v2-main .ng-new-dashboard .kpi:nth-child(4){background:#f9edca;color:#69521d}
+.ng-v2-main .ng-new-dashboard .kpi:nth-child(5){background:#e6e7ff;color:#263974}
+.ng-v2-main .ng-new-dashboard .kpi:after{inset:auto -15% 0;width:130%;height:38px;opacity:.5;background:radial-gradient(ellipse at 20% 100%,#ffffff9e 0,transparent 70%)}
+.ng-v2-main .ng-new-dashboard .kpi .badge-icon{float:none;border-radius:50%;margin-bottom:12px;background:#ffffff91;color:#2667be}
+.ng-v2-main .ng-new-dashboard .kpi:nth-child(2) .badge-icon{color:#ac6b00}
+.ng-v2-main .ng-new-dashboard .kpi:nth-child(3) .badge-icon{color:#199465}
+.ng-v2-main .ng-new-dashboard .kpi:nth-child(4) .badge-icon{color:#b58c20}
+.ng-v2-main .ng-new-dashboard .kpi:nth-child(5) .badge-icon{color:#5b58c9}
+.ng-v2-main .ng-new-dashboard .kpi .kpi-label{color:inherit;opacity:.77}
+.ng-v2-main .ng-new-dashboard .kpi strong{color:inherit;font-weight:800;font-size:clamp(16px,1.5vw,23px)}
+.ng-v2-main .ng-new-dashboard .kpi small{color:inherit;opacity:.65}
+.ng-v2-main .ng-new-dashboard .ng-revenue-panel{border-radius:18px}
+.ng-v2-main .ng-revenue-panel .ng-revenue-chart{height:234px}
+.ng-v2-main .ng-revenue-columns{height:196px}
+.ng-v2-main .ng-revenue-bar{border-radius:8px 8px 0 0}
+.ng-v2-main .ng-revenue-billed{background:linear-gradient(0deg,#143974,#278cfc)}
+.ng-v2-main .ng-revenue-received{background:linear-gradient(0deg,#a8811f,#ffd348)}
+.ng-v2-main .ng-revenue-panel .ng-revenue-legend{color:var(--ng-secondary)}
+.ng-v2-main .ng-revenue-chart-wrap{background:transparent}
+.ng-v2-main .ng-revenue-toggle{color:var(--ng-text);background:var(--ng-soft);border-color:var(--ng-border);border-radius:10px}
+.ng-v2-main .ng-design-side-panel .panel-head{padding:20px 17px 0}
+.ng-v2-main .ng-design-side-panel .panel-head h3{font-size:13px}
+.ng-v2-main .ng-design-donut-layout{padding:18px 17px;gap:12px}
+.ng-v2-main .ng-design-donut{height:148px;width:148px}
+.ng-v2-main .ng-design-donut>div{height:101px;width:101px;background:var(--ng-surface)}
+.ng-v2-main .ng-activity-list{padding:9px 16px 15px}
+.ng-v2-main .ng-activity-item{padding:12px 0}
+.ng-v2-main .ng-brand-panel{min-height:138px;border-radius:18px}
+.ng-v2-main .ng-brand-panel button{position:relative;z-index:1}
+.ng-v2-main .ng-design-recent .table-scroll{padding:12px 13px}
+.ng-v2-main .data-table th{background:var(--ng-soft);color:var(--ng-secondary);font-weight:600}
+.ng-v2-main .data-table td{color:var(--ng-text);border-color:var(--ng-border)}
+.ng-v2-main .data-table tr:hover{background:var(--ng-hover)}
+.ng-v2-main .table-scroll{background:transparent}
+.ng-v2-main .ng-table-stage-wrap,.ng-v2-main .ng-payment-badge{box-shadow:none}
+.ng-v2-main .filter-pills{background:var(--ng-soft);border-radius:12px;padding:5px;display:inline-flex}
+.ng-v2-main .filter-pill{border:0;border-radius:8px;background:transparent;color:var(--ng-secondary)}
+.ng-v2-main .filter-pill.active{background:var(--ng-surface);color:var(--ng-text);box-shadow:0 2px 10px #081c2a12}
+.ng-v2-main .toolbar-line{margin-bottom:19px}
+.ng-v2-main .toolbar-line h2{color:var(--ng-text);font-size:20px}
+.ng-v2-main .toolbar-line p{color:var(--ng-secondary)}
+.ng-v2-main .client-grid{gap:13px}
+.ng-v2-main .client-card{background:var(--ng-card);border:1px solid var(--ng-border);border-radius:17px;box-shadow:var(--ng-shadow);transition:transform .3s var(--v2-ease),box-shadow .3s ease}
+.ng-v2-main .client-card:hover{transform:translateY(-3px);box-shadow:0 12px 24px #122a4317}
+.ng-v2-main .kanban{gap:13px}
+.ng-v2-main .kan-col{border:1px solid var(--ng-border);background:var(--ng-soft);border-radius:17px}
+.ng-v2-main .kan-card{background:var(--ng-surface);border:1px solid var(--ng-border);border-radius:12px;box-shadow:0 3px 8px #111a2c0a}
+.ng-v2-main .mini-stat{background:var(--ng-card);border:1px solid var(--ng-border);border-radius:18px}
+.ng-v2-main .os-editor-main{gap:18px}
+.ng-v2-main .ng-os-card,.ng-v2-main .ng-glance-main,.ng-v2-main .ng-glance-attachments,.ng-v2-main .ng-glance-actions,.ng-v2-main .ng-glance-history,.ng-v2-main .ng-glance-finance{background:var(--ng-card);border:1px solid var(--ng-border);border-radius:18px}
+.ng-v2-main .input,.ng-v2-main .textarea,.ng-v2-main .select{border:1px solid var(--ng-border);border-radius:11px;background:var(--ng-soft);color:var(--ng-text)}
+.ng-v2-main .input:focus,.ng-v2-main .textarea:focus,.ng-v2-main .select:focus{border-color:#7eacd9;box-shadow:0 0 0 3px #3b7db91a}
+.ng-v2-main .ng-os-extras{border:1px solid var(--ng-border);border-radius:16px;background:var(--ng-card)}
+.ng-v2-main .payment-status-group{border-color:var(--ng-border)}
+.ng-v2-main .ng-glance-facts small,.ng-v2-main .ng-glance-notes small{color:var(--ng-secondary)}
+.ng-v2-main .ng-glance-facts strong{color:var(--ng-text)}
+.ng-v2-main .ng-glance-notes,.ng-v2-main .ng-glance-preview-column,.ng-v2-main .ng-glance-fact-icon{background:var(--ng-soft);border-color:var(--ng-border)}
+.ng-v2-main .ng-glance-notes p{color:var(--ng-text)}
+.ng-v2-main .ng-detail-finance,.ng-v2-main .ng-detail-history{background:var(--ng-card)}
+.ng-v2-main .ng-detail-panel .ng-detail-fields{color:var(--ng-text)}
+.ng-v2-main .ng-order-detail{animation:ng-v2-page-arrive .48s var(--v2-ease) both}
+@keyframes ng-v2-page-arrive{from{opacity:.2;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+html[data-theme=dark] .ng-v2-main .ng-new-dashboard .kpi:nth-child(1){background:linear-gradient(140deg,#0c397b,#09264d);color:#eff6ff}
+html[data-theme=dark] .ng-v2-main .ng-new-dashboard .kpi:nth-child(2){background:linear-gradient(140deg,#443715,#2c2619);color:#ffe5a4}
+html[data-theme=dark] .ng-v2-main .ng-new-dashboard .kpi:nth-child(3){background:linear-gradient(140deg,#0a3f39,#092922);color:#b8f8dc}
+html[data-theme=dark] .ng-v2-main .ng-new-dashboard .kpi:nth-child(4){background:linear-gradient(140deg,#413721,#2a2730);color:#ffdd87}
+html[data-theme=dark] .ng-v2-main .ng-new-dashboard .kpi:nth-child(5){background:linear-gradient(140deg,#1c3678,#102b56);color:#ecf1ff}
+html[data-theme=dark] .ng-v2-main .ng-new-dashboard .kpi .badge-icon{background:#ffffff14}
+html[data-theme=light] .ng-v2-main .ng-revenue-chart{background:repeating-linear-gradient(to top,#9dadbd25 0 1px,transparent 1px 25%);border-color:#cdd6e2}
+html[data-theme=light] .ng-v2-main .ng-revenue-month-label{color:#637287}
+html[data-theme=light] .ng-v2-main .ng-revenue-chart-wrap,.ng-v2-main .ng-revenue-panel{background:var(--ng-card)}
+html[data-theme=light] .ng-v2-main .ng-glance-action-label,html[data-theme=light] .ng-v2-main .ng-glance-action-field label{color:#60718a}
+html[data-theme=light] .ng-v2-main .ng-glance-action-field .select{background:#f3f7fc;color:#233d5b}
+html[data-theme=light] .ng-v2-main .ng-os-quick-card .payment-remaining.is-placeholder{background:#f4f7fc;color:#8c9bab}
+html[data-theme=light] .ng-v2-main .ng-glance-history-item strong{color:#263650}
+html[data-theme=light] .ng-v2-main .ng-detail-notes p{color:#253d55}
+@media(min-width:1520px){.ng-v2-main .ng-new-dashboard .ng-dash-columns{grid-template-columns:minmax(0,1fr) 296px}}
+@media(max-width:1390px){.ng-v2-main .ng-new-dashboard .ng-dash-columns{grid-template-columns:minmax(0,1fr) 235px}.ng-v2-main .ng-new-dashboard .kpi{min-height:140px;padding:13px 8px 14px}.ng-v2-main .ng-new-dashboard .kpi .kpi-label{font-size:10px}.ng-v2-main .ng-new-dashboard .kpi strong{font-size:16px}}
+@media(max-width:1150px){.ng-v2-main .ng-new-dashboard .ng-dash-columns{grid-template-columns:1fr}.ng-v2-main .ng-dash-aside{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.ng-v2-main .ng-brand-panel{grid-column:1/-1}.ng-v2-main .ng-new-dashboard .kpi strong{font-size:clamp(18px,2vw,24px)}}
+@media(max-width:1000px){.ng-v2-shell{padding:0}.ng-v2-shell .ng-design-sidebar{min-height:100vh;border-radius:0;width:205px}.ng-v2-shell .ng-v2-main{width:calc(100% - 205px);border-radius:0}.ng-v2-shell.sidebar-collapsed .ng-design-sidebar{width:66px}.ng-v2-shell.sidebar-collapsed .ng-v2-main{width:calc(100% - 66px)}.ng-v2-main .ng-new-dashboard .ng-new-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}.ng-v2-main .ng-new-dashboard .kpi{min-height:138px}}
+@media(max-width:700px){.ng-v2-shell{display:block!important;padding:0!important}.ng-v2-shell .ng-design-sidebar{width:100%!important;min-height:0!important;max-height:none!important;height:auto!important;position:relative;border-radius:0;padding:10px 12px 0}.ng-v2-shell .sidebar-brand-row{margin:0;padding:5px}.ng-v2-shell .ng-sidebar-person,.ng-v2-shell .sidebar-navigation,.ng-v2-shell .sidebar-bottom{display:none}.ng-v2-shell .ng-v2-main{width:100%!important;max-width:none!important;border-radius:0;box-shadow:none;padding:19px 14px 90px}.ng-design-topbar{flex-wrap:wrap;align-items:flex-start}.ng-design-topbar .heading{width:100%}.ng-design-topbar .tools{width:100%;display:flex;gap:7px}.ng-design-topbar .search{flex:1;min-width:0}.ng-design-topbar .ng-refresh-btn,.ng-design-topbar .ng-topbar-logout{display:none}.ng-v2-main .ng-new-dashboard .ng-new-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.ng-v2-main .ng-new-dashboard .kpi{min-height:136px}.ng-v2-main .ng-new-dashboard .kpi:last-child{grid-column:1/-1}.ng-v2-main .ng-dash-aside{grid-template-columns:1fr}.ng-v2-main .ng-brand-panel{grid-column:auto}.ng-v2-main .ng-new-dashboard .ng-dash-columns{gap:14px}.ng-v2-main .ng-new-dashboard .kpi strong{font-size:22px}.ng-v2-main .ng-design-topbar .search .shortcut{display:none}}
+@media(prefers-reduced-motion:reduce){.ng-v2-main .ng-order-detail,.ng-sidebar-avatar,.ng-v2-main .btn,.ng-v2-main .client-card,.ng-v2-main .ng-new-dashboard .kpi,.ng-v2-shell .sidebar .navbtn{transition:none!important;animation:none!important}}
