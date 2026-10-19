@@ -559,3 +559,25 @@ body.ng-glance-modal-open{overflow:hidden}
 @media(prefers-reduced-motion:reduce){.ng-os-quick-card,.ng-os-extras,.ng-os-extras-body{animation:none}.ng-os-extras summary>.ico:last-child{transition:none}}
 
 .os-editor-page .ng-os-quick-card .payment-remaining.is-placeholder{color:#8094af;font-size:11px;font-weight:500;background:#102038;border-color:#2a415f}
+
+/* Status editável diretamente nas tabelas de OS */
+.data-table .ng-table-stage-cell{min-width:166px}
+.ng-table-stage-wrap{position:relative;display:inline-flex;align-items:center;max-width:100%;border-radius:999px;background:#443618;color:#ffcc4c;border:1px solid transparent;transition:background .18s ease,border-color .18s ease,opacity .18s ease}
+.ng-table-stage-wrap.andamento{background:#443618;color:#ffcc4c}
+.ng-table-stage-wrap.producao{background:#352346;color:#c390f4}
+.ng-table-stage-wrap.pronto{background:#103d35;color:#55d8a8}
+.ng-table-stage-wrap.entregue{background:#192f53;color:#83b8ff}
+.ng-table-stage-wrap:focus-within{border-color:currentColor;box-shadow:0 0 0 3px #4b89d92a}
+.ng-table-stage-wrap.is-saving{opacity:.5}
+.ng-table-stage-wrap::before{content:'';height:6px;width:6px;flex-shrink:0;background:currentColor;border-radius:50%;margin-left:11px}
+.ng-table-stage-select{appearance:none;-webkit-appearance:none;cursor:pointer;border:0;background:transparent;color:inherit;font:inherit;font-size:11px;font-weight:650;outline:0;padding:7px 25px 7px 8px;width:100%;min-width:110px}
+.ng-table-stage-select option{background:#13233a;color:#e4edfa}
+.ng-table-stage-select:disabled{cursor:wait}
+.ng-table-stage-wrap>.ico{pointer-events:none;position:absolute;right:9px;width:13px;height:13px;color:inherit}
+.ng-payment-badge{display:inline-flex;align-items:center;gap:7px;border-radius:999px;padding:7px 11px;font-size:11px;font-weight:650;white-space:nowrap}
+.ng-payment-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor}
+.ng-payment-badge.paid{background:#103d35;color:#55d8a8}
+.ng-payment-badge.pending{background:#443618;color:#ffcc4c}
+.ng-payment-badge.no-charge{background:#263449;color:#acbbd0}
+.data-table tr[data-open-order] .ng-table-stage-select{position:relative;z-index:1}
+@media(prefers-reduced-motion:reduce){.ng-table-stage-wrap{transition:none}}
