@@ -5,9 +5,10 @@ const base=String(config.supabaseUrl||'').replace(/\/$/,'');
 const anon=String(config.supabaseAnonKey||'');
 const sessionKey='ngstudio_session_v1';
 let session=null;
+let rememberSession=true;
 export function getSession(){return session;}
 export function authUserId(){if(!session?.access_token)return null;try{return JSON.parse(atob(session.access_token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))).sub;}catch{return null;}}
-function saveSession(value){session=value; if(value)localStorage.setItem(sessionKey,JSON.stringify(value));else localStorage.removeItem(sessionKey);}
+function saveSession(value){session=value;localStorage.removeItem(sessionKey);sessionStorage.removeItem(sessionKey);if(value)(rememberSession?localStorage:sessionStorage).setItem(sessionKey,JSON.stringify(value));}
 function parseSession(value){if(!value)return null;const saved={...value};if(saved.expires_in&&!saved.expires_at)saved.expires_at=Math.floor(Date.now()/1000)+Number(saved.expires_in);return saved;}
 async function request(endpoint,{method='GET',body,token,headers={}}={}){
  const res=await fetch(base+endpoint,{method,headers:{apikey:anon,Authorization:`Bearer ${token||session?.access_token||anon}`,...headers},body:body===undefined?undefined:headers['Content-Type']==='application/json'?JSON.stringify(body):body});
@@ -15,8 +16,8 @@ async function request(endpoint,{method='GET',body,token,headers={}}={}){
  if(!res.ok){const msg=data?.msg||data?.message||data?.error_description||data?.error||`HTTP ${res.status}`;throw Error(String(msg));}
  return data;
 }
-export async function restoreSession(){if(!isConfigured)return null;let stored;try{stored=parseSession(JSON.parse(localStorage.getItem(sessionKey)||'null'));}catch{return null;}if(!stored)return null;session=stored;try{await ensureToken();return session;}catch{saveSession(null);return null;}}
-export async function signin(email,password){const result=await request('/auth/v1/token?grant_type=password',{method:'POST',body:{email,password},token:anon,headers:{'Content-Type':'application/json'}});saveSession(parseSession(result));return session;}
+export async function restoreSession(){if(!isConfigured)return null;let stored;try{stored=parseSession(JSON.parse(localStorage.getItem(sessionKey)||sessionStorage.getItem(sessionKey)||'null'));}catch{return null;}if(!stored)return null;rememberSession=Boolean(localStorage.getItem(sessionKey));session=stored;try{await ensureToken();return session;}catch{saveSession(null);return null;}}
+export async function signin(email,password,remember=true){rememberSession=Boolean(remember);const result=await request('/auth/v1/token?grant_type=password',{method:'POST',body:{email,password},token:anon,headers:{'Content-Type':'application/json'}});saveSession(parseSession(result));return session;}
 export async function signout(){try{if(session)await request('/auth/v1/logout',{method:'POST'});}catch{}saveSession(null);}
 async function ensureToken(){if(!session)throw Error('Sessão expirada. Faça login novamente.');if(session.expires_at&&session.expires_at>Date.now()/1000+90)return; if(!session.refresh_token)throw Error('Sessão expirada.');const next=await request('/auth/v1/token?grant_type=refresh_token',{method:'POST',body:{refresh_token:session.refresh_token},token:anon,headers:{'Content-Type':'application/json'}});saveSession(parseSession(next));}
 async function rest(table,params='',method='GET',body){await ensureToken();return request(`/rest/v1/${table}${params}`,{method,body,headers:{'Content-Type':'application/json',Prefer:method==='POST'?'return=representation,resolution=merge-duplicates':'return=representation'}});}
