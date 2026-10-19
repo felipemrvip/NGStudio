@@ -519,3 +519,41 @@ body.ng-glance-modal-open{overflow:hidden}
 .ng-glance-autosave.is-saving{color:#ffce5e;background:#322a1b;border-color:#66502b}
 .ng-glance-autosave.is-error{color:#ff9ca4;background:#391e2c;border-color:#75404b}
 #ng-quick-stage:disabled{opacity:.6;cursor:wait}
+
+/* Editor rápido de OS — organização minimalista inspirada no design Apple */
+.ng-os-create .ng-os-page-head{margin-bottom:18px}
+.ng-os-brand-chip{display:flex;align-items:center;gap:10px;background:#10233d;border:1px solid #2c4867;border-radius:13px;padding:8px 13px;min-width:150px}
+.ng-os-brand-chip img{width:37px;height:37px;object-fit:contain;border-radius:10px}
+.ng-os-brand-chip b{display:block;font-size:12px;color:#f2f6ff}
+.ng-os-brand-chip small{display:block;margin-top:3px;font-size:9px;color:#91a7c1}
+.os-editor-page .os-form{gap:12px}
+.os-editor-page .ng-os-quick-card{padding:17px 19px;gap:12px;border-radius:16px;background:linear-gradient(150deg,#10223a,#0b1b2f)}
+.ng-os-quick-card .ng-os-section-title{margin-bottom:1px}
+.os-editor-page .ng-os-quick-service{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(155px,1fr);gap:12px}
+.os-editor-page .ng-os-quick-stage{min-width:0}
+.os-editor-page .ng-os-quick-stage .ng-os-stage-select{width:100%}
+.os-editor-page .ng-os-notes-card .textarea{min-height:59px;max-height:170px}
+.os-editor-page .ng-os-quick-card .input::placeholder,.os-editor-page .ng-os-quick-card .textarea::placeholder{color:#7f92ad;opacity:1}
+.os-editor-page .ng-os-quick-card .input:focus,.os-editor-page .ng-os-quick-card .select:focus,.os-editor-page .ng-os-quick-card .textarea:focus{border-color:#5098f5;box-shadow:0 0 0 3px #368cff1c}
+.os-editor-page .ng-os-quick-card .payment-simple-grid{gap:12px}
+.os-editor-page .ng-os-quick-card .payment-remaining{min-height:46px;display:flex;align-items:center;padding:0 12px}
+.ng-os-extras{border:1px solid #294360;background:#0d1e33;border-radius:15px;overflow:hidden}
+.ng-os-extras summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;color:#d7e7fc;padding:15px 18px;font-size:12px;font-weight:650;user-select:none}
+.ng-os-extras summary::-webkit-details-marker{display:none}
+.ng-os-extras summary>.ico:first-child{color:#76b4ff}
+.ng-os-extras summary span{margin-left:auto;color:#8198b6;font-size:10px;font-weight:500}
+.ng-os-extras summary>.ico:last-child{width:15px;height:15px;transition:transform .28s cubic-bezier(.2,.8,.2,1)}
+.ng-os-extras[open] summary>.ico:last-child{transform:rotate(180deg)}
+.ng-os-extras-body{padding:0 18px 17px;display:grid;gap:18px;animation:ng-extras-in .28s ease}
+.ng-os-extra-controls{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.ng-os-extra-controls .ng-os-responsible{width:100%}
+.ng-os-extra-controls .payment-status-group{margin-top:0}
+.ng-os-attachment-controls{border-top:1px solid #294360;padding-top:16px}
+.ng-os-attachment-controls .ng-os-section-title{margin-bottom:12px}
+.ng-os-quick-card,.ng-os-extras{animation:ng-editor-arrive .38s cubic-bezier(.2,.8,.2,1) both}
+.ng-os-quick-card:nth-of-type(2){animation-delay:45ms}.ng-os-quick-card:nth-of-type(3){animation-delay:85ms}.ng-os-quick-card:nth-of-type(4){animation-delay:120ms}
+@keyframes ng-editor-arrive{from{opacity:.25;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes ng-extras-in{from{opacity:.3;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:1050px){.os-editor-page .ng-os-quick-service{grid-template-columns:minmax(0,1.4fr) minmax(140px,1fr)}}
+@media(max-width:700px){.ng-os-brand-chip{min-width:auto;padding:7px}.ng-os-brand-chip img{width:31px;height:31px}.ng-os-brand-chip small{display:none}.os-editor-page .ng-os-quick-service{grid-template-columns:1fr}.ng-os-extra-controls{grid-template-columns:1fr}.os-editor-page .ng-os-quick-card{padding:14px}.ng-os-extras summary{padding:14px}.ng-os-extras-body{padding:0 14px 14px}}
+@media(prefers-reduced-motion:reduce){.ng-os-quick-card,.ng-os-extras,.ng-os-extras-body{animation:none}.ng-os-extras summary>.ico:last-child{transition:none}}
