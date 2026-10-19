@@ -10,8 +10,8 @@ export function seedDemo(){
  ['FEL-1478','3 CAMISAS PRETAS','Academia Fit','21983319604','entregue',165,165,6],
  ['FEL-1479','CARTÃO — MELKIN','Honey','21966875007','producao',110,110,1],
  ['FEL-1480','ADESIVO UV','Loja Estilo','21969994546','pronto',50,20,2],
- ['FEL-1481','UNICESSUMAR','Unicesumar','21965555555','analise',0,0,5],
- ['FEL-1482','100 COPOS LONGDRINK','Restaurante Sabor','21960183661','analise',460,260,6],
+ ['FEL-1481','UNICESSUMAR','Unicesumar','21965555555','andamento',0,0,5],
+ ['FEL-1482','100 COPOS LONGDRINK','Restaurante Sabor','21960183661','andamento',460,260,6],
  ['FEL-1483','DTF — FLAMENGO','Clínica Vida','21975441108','entregue',252,252,7],
  ['FEL-1484','5 CAMISAS PERSONALIZADAS','Studio Pixel','21979661896','producao',365,200,0]
  ];
