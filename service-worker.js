@@ -1,6 +1,6 @@
 /* NG Studio: cache SOMENTE arquivos estáticos. Nunca armazena dados privados do Supabase. */
-const CACHE='ng-studio-static-v3';
-const CORE=['./','./index.html','./assets/app.js','./assets/styles.css','./assets/theme.css','./assets/redesign.css','./assets/brand.svg','./assets/logic.mjs','./assets/print.js','./assets/pdf.js','./assets/supabase.js','./manifest.webmanifest'];
+const CACHE='ng-studio-static-v4-studio';
+const CORE=['./','./index.html','./assets/app.js','./assets/styles.css','./assets/theme.css','./assets/redesign.css','./assets/studio.css','./assets/brand.svg','./assets/logic.mjs','./assets/print.js','./assets/pdf.js','./assets/supabase.js','./manifest.webmanifest'];
 self.addEventListener('install',event=>{
  event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(CORE)).then(()=>self.skipWaiting()).catch(()=>{}));
 });

@@ -1,0 +1,250 @@
+/* NG Studio — workspace premium. Presentation only; business data stays in app.js. */
+html[data-theme=light]{
+ --studio-bg:#f5f6f8;--studio-surface:#fff;--studio-raised:#fff;--studio-sidebar:#edf0f5;
+ --studio-line:#e3e7ee;--studio-text:#172239;--studio-muted:#647188;--studio-soft:#f0f3f8;
+ --studio-blue:#123a73;--studio-gold:#c19020;--studio-tint:#e8eef8;--studio-shadow:0 4px 24px #172a4806;
+ --studio-sidebar-glass:#edf0f5ed;--studio-active:#123a73;--studio-active-text:#fff;
+ color-scheme:light;
+}
+html[data-theme=dark]{
+ --studio-bg:#090f1a;--studio-surface:#101a29;--studio-raised:#152133;--studio-sidebar:#0c1421;
+ --studio-line:#233044;--studio-text:#ecf1fa;--studio-muted:#9baac0;--studio-soft:#192538;
+ --studio-blue:#89b6ff;--studio-gold:#e9bd58;--studio-tint:#1a2d49;--studio-shadow:0 5px 28px #00000015;
+ --studio-sidebar-glass:#0c1421ed;--studio-active:#20395e;--studio-active-text:#f5f8ff;
+ color-scheme:dark;
+}
+html[data-theme]{
+ --ng-body:var(--studio-bg);--ng-surface:var(--studio-surface);--ng-card:var(--studio-surface);
+ --ng-border:var(--studio-line);--ng-soft:var(--studio-soft);--ng-hover:var(--studio-tint);
+ --ng-text:var(--studio-text);--ng-secondary:var(--studio-muted);--ng-shadow:var(--studio-shadow);
+ --bg:var(--studio-bg);--panel:var(--studio-surface);--panel2:var(--studio-raised);--txt:var(--studio-text);
+ --muted:var(--studio-muted);--border:var(--studio-line);--subtle:var(--studio-muted);
+ --studio-ease:cubic-bezier(.22,1,.36,1);
+ font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sans-serif;
+}
+html[data-theme] body{background:var(--studio-bg)!important;color:var(--studio-text);letter-spacing:-.015em}
+html[data-theme] .studio-shell{display:flex;align-items:flex-start;gap:0;padding:0;max-width:none;min-height:100vh;overflow:visible}
+html[data-theme] .studio-shell .ng-design-sidebar{
+ width:224px;flex:0 0 224px;position:sticky;top:0;height:100dvh;min-height:100vh;max-height:100dvh;
+ padding:28px 16px 18px;border:0;border-right:1px solid var(--studio-line);border-radius:0;
+ background:var(--studio-sidebar-glass)!important;box-shadow:none;backdrop-filter:blur(24px);
+ display:flex;flex-direction:column;overflow-y:auto;scrollbar-width:thin;
+}
+html[data-theme] .studio-shell .ng-v2-main{
+ width:calc(100% - 224px);max-width:none;flex:1;min-width:0;padding:28px clamp(20px,3vw,48px) 48px;
+ border-radius:0;background:var(--studio-bg)!important;box-shadow:none;
+}
+html[data-theme] .studio-shell .sidebar-brand-row{padding:0 0 28px;margin:0;border:0;gap:8px}
+html[data-theme] .studio-shell .sidebar-brand-logo{width:35px;height:35px;border-radius:9px}
+html[data-theme] .studio-shell .sidebar-brand-label h2{font-size:17px;font-weight:700;letter-spacing:-.6px;color:var(--studio-text)}
+html[data-theme] .studio-shell .sidebar-brand-label p{font-size:9px;color:var(--studio-muted);letter-spacing:.02em}
+html[data-theme] .studio-shell .sidebar-collapse{background:transparent;color:var(--studio-muted);width:24px;height:28px}
+html[data-theme] .studio-shell .sidebar-navigation{gap:4px}
+html[data-theme] .studio-shell .ng-sidebar-caption{font-size:9px;font-weight:650;letter-spacing:.1em;color:var(--studio-muted);margin:12px 0 7px 12px}
+html[data-theme] .studio-shell .ng-sidebar-caption-later{margin-top:24px}
+html[data-theme] .studio-shell .sidebar .navbtn{
+ min-height:40px;padding:10px 12px;gap:11px;font-size:12px;font-weight:500;
+ color:var(--studio-muted);background:transparent;border:0;border-radius:10px;box-shadow:none;
+ transition:background .2s ease,color .2s ease;transform:none;
+}
+html[data-theme] .studio-shell .sidebar .navbtn .ico{width:17px;height:17px;color:inherit;stroke-width:1.7}
+html[data-theme] .studio-shell .sidebar .navbtn.active{background:var(--studio-active)!important;color:var(--studio-active-text)!important;box-shadow:0 3px 10px #00173512;transform:none;border:0}
+html[data-theme] .studio-shell .sidebar .navbtn.active .ico{color:#edc565}
+html[data-theme] .studio-shell .sidebar .navbtn:not(.active):hover{background:var(--studio-soft);color:var(--studio-text);transform:none}
+html[data-theme] .studio-shell .sidebar-bottom{margin-top:auto;padding-top:32px;gap:18px}
+html[data-theme] .studio-shell .sidebar-create{background:var(--studio-surface);border:1px solid var(--studio-line);border-radius:11px;color:var(--studio-text);font-size:11px;padding:12px 9px;box-shadow:none}
+html[data-theme] .studio-shell .sidebar-create .ico{color:var(--studio-gold)}
+html[data-theme] .studio-shell .ng-sidebar-person{display:flex;flex-direction:row;align-items:center;gap:10px;padding:16px 0 0;margin:0;border:0;border-top:1px solid var(--studio-line);text-align:left;color:var(--studio-text)}
+html[data-theme] .studio-shell .ng-sidebar-avatar{width:34px;height:34px;flex:none;margin:0;border:1px solid var(--studio-line);border-radius:11px;box-shadow:none;background:var(--studio-tint);color:var(--studio-blue);font-size:11px;font-weight:700;letter-spacing:0}
+html[data-theme] .studio-shell .ng-person-copy{min-width:0;flex:1;display:grid;gap:3px}
+html[data-theme] .studio-shell .ng-person-copy strong{font-size:11px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+html[data-theme] .studio-shell .ng-person-copy small{font-size:10px;margin:0;color:var(--studio-muted)}
+html[data-theme] .studio-shell .ng-sidebar-person>.ico{width:13px;height:13px;color:var(--studio-muted)}
+html[data-theme] .studio-shell.sidebar-collapsed .ng-design-sidebar{width:76px;flex-basis:76px;padding-inline:12px}
+html[data-theme] .studio-shell.sidebar-collapsed .ng-v2-main{width:calc(100% - 76px)}
+html[data-theme] .studio-shell.sidebar-collapsed .ng-sidebar-person{justify-content:center}
+html[data-theme] .studio-shell.sidebar-collapsed .ng-person-copy,html[data-theme] .studio-shell.sidebar-collapsed .ng-sidebar-person>.ico{display:none}
+/* Compact toolbar; the dashboard greeting belongs to the page, not the chrome. */
+html[data-theme] .studio-shell .ng-design-topbar{gap:20px;padding:0 0 24px;margin:0 0 30px;border-bottom:1px solid var(--studio-line);align-items:center}
+html[data-theme] .studio-shell .ng-heading-eyebrow{font-size:8px;font-weight:600;letter-spacing:.14em;color:var(--studio-muted);margin-bottom:7px}
+html[data-theme] .studio-shell .heading h1{font-size:23px;letter-spacing:-.8px;font-weight:650;margin:0;line-height:1.2;color:var(--studio-text)}
+html[data-theme] .studio-shell .heading p{display:none}
+html[data-theme] .studio-shell .tools{gap:8px;flex-wrap:wrap}
+html[data-theme] .studio-shell .search{min-width:180px;width:clamp(180px,22vw,320px);height:38px;border:1px solid var(--studio-line);background:var(--studio-surface);border-radius:11px}
+html[data-theme] .studio-shell .search input{font-size:11px;color:var(--studio-text)}
+html[data-theme] .studio-shell .search .shortcut{background:var(--studio-soft);color:var(--studio-muted);font-size:9px;border:0;border-radius:5px}
+html[data-theme] .studio-shell .theme-toggle,html[data-theme] .studio-shell .ng-refresh-btn,html[data-theme] .studio-shell .ng-topbar-logout{width:36px;height:36px;background:transparent;border:0;border-radius:10px;color:var(--studio-muted)}
+html[data-theme] .studio-shell .theme-toggle:hover,html[data-theme] .studio-shell .ng-refresh-btn:hover{transform:none;background:var(--studio-soft);color:var(--studio-text)}
+html[data-theme] .studio-shell .ng-topbar-profile{padding:0;background:transparent;border:0;gap:6px;color:var(--studio-muted)}
+html[data-theme] .studio-shell .ng-topbar-profile span{width:33px;height:33px;background:var(--studio-tint);color:var(--studio-blue);border:1px solid var(--studio-line);border-radius:10px}
+.studio-welcome{display:flex;align-items:center;justify-content:space-between;gap:24px;margin:0 0 26px}
+.studio-overline{display:block;color:var(--studio-muted);font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px}
+.studio-welcome h2{font-size:clamp(25px,2.5vw,36px);line-height:1.15;letter-spacing:-1.3px;font-weight:650;color:var(--studio-text);margin:0 0 10px}
+.studio-welcome p{font-size:12px;color:var(--studio-muted);line-height:1.5;margin:0}
+.studio-welcome-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.studio-segment{display:flex;gap:3px;padding:4px;background:var(--studio-soft);border:1px solid var(--studio-line);border-radius:11px}
+.studio-segment button{border:0;background:transparent;color:var(--studio-muted);border-radius:7px;padding:8px 12px;font-size:10px;font-weight:600;white-space:nowrap;transition:background .2s ease,box-shadow .2s ease}
+.studio-segment button[aria-pressed=true]{background:var(--studio-surface);color:var(--studio-text);box-shadow:0 2px 5px #0000000c}
+/* Full-width metrics replace the colored towers. All values share one font size. */
+html[data-theme] .studio-shell .ng-v2-main .studio-dashboard .ng-new-kpis{display:grid;grid-template-columns:repeat(5,minmax(154px,1fr));gap:12px;padding:3px 2px 10px;margin:0 0 22px;overflow-x:auto;container-type:inline-size;scrollbar-width:thin;scrollbar-color:var(--studio-line) transparent}
+html[data-theme] .studio-shell .ng-v2-main .studio-dashboard .ng-new-kpis>.kpi{
+ --kpi-ink:var(--studio-text);--kpi-accent:var(--studio-blue);
+ display:grid;grid-template-columns:1fr 28px;grid-template-rows:30px auto auto;align-content:start;gap:9px 6px;
+ min-height:144px;min-width:0;padding:18px 16px!important;grid-column:auto!important;
+ border:1px solid var(--studio-line)!important;border-radius:18px;background:var(--studio-surface)!important;
+ color:var(--studio-text)!important;box-shadow:var(--studio-shadow)!important;container-type:normal;
+ transition:transform .25s var(--studio-ease),border-color .25s ease,box-shadow .25s ease;
+}
+html[data-theme] .studio-shell .ng-v2-main .studio-dashboard .ng-new-kpis>.kpi:nth-child(4){--kpi-accent:var(--studio-gold)}
+html[data-theme] .studio-shell .ng-v2-main .studio-dashboard .ng-new-kpis>.kpi:nth-child(5){--kpi-accent:#3caa8c}
+html[data-theme] .studio-shell .ng-v2-main .studio-dashboard .ng-new-kpis>.kpi>.badge-icon{grid-column:2;grid-row:1;width:28px!important;height:28px!important;min-width:28px;margin:0!important;border-radius:9px!important;border:0!important;background:var(--studio-soft)!important;color:var(--kpi-accent)!important;box-shadow:none}
+html[data-theme] .studio-shell .ng-v2-main .studio-dashboard .ng-new-kpis>.kpi>.badge-icon .ico{width:16px;height:16px}
+html[data-theme] .studio-shell .ng-v2-main .studio-dashboard .ng-new-kpis>.kpi>.kpi-label{grid-column:1;grid-row:1;min-height:0;font-size:10px!important;font-weight:550;line-height:1.4;color:var(--studio-muted)!important;opacity:1!important}
+html[data-theme] .studio-shell .ng-v2-main .studio-dashboard .ng-new-kpis>.kpi>strong{grid-column:1/-1;grid-row:2;font-size:clamp(18px,2.05cqi,25px)!important;font-weight:650!important;letter-spacing:-.8px;line-height:1.2;margin:5px 0 0!important;color:var(--studio-text)!important;white-space:nowrap;overflow-wrap:normal;font-variant-numeric:tabular-nums}
+html[data-theme] .studio-shell .ng-v2-main .studio-dashboard .ng-new-kpis>.kpi>small{grid-column:1/-1;grid-row:3;min-height:0;font-size:9px!important;color:var(--studio-muted)!important;opacity:1!important;line-height:1.45;margin:0}
+html[data-theme] .studio-shell .ng-v2-main .studio-dashboard .ng-new-kpis>.kpi:hover{transform:translateY(-2px);border-color:var(--kpi-accent)!important;box-shadow:0 6px 22px #10253f12!important}
+html[data-theme] .studio-shell .ng-v2-main .studio-dashboard .ng-new-kpis>.kpi:active{transform:scale(.985)}
+/* The analytics and orders now have independent sections. */
+html[data-theme] .studio-shell .ng-v2-main .studio-dashboard .ng-dash-columns{grid-template-columns:minmax(0,1fr) 286px;gap:22px;align-items:start}
+html[data-theme] .studio-shell .ng-v2-main .studio-dashboard .ng-dash-primary,
+html[data-theme] .studio-shell .ng-v2-main .studio-dashboard .ng-dash-aside{display:flex;flex-direction:column;gap:22px}
+html[data-theme] .studio-shell .ng-v2-main .studio-dashboard>.ng-design-recent{margin-top:24px}
+.studio-period{background:var(--studio-soft);border:1px solid var(--studio-line);color:var(--studio-muted);font-size:10px;padding:6px 10px;border-radius:8px;white-space:nowrap}
+html[data-theme] .studio-shell .ng-v2-main :is(.panel,.client-card,.mini-stat,.ng-os-card,.ng-glance-main,.ng-glance-attachments,.ng-glance-actions,.ng-glance-history,.ng-glance-finance,.ng-os-extras,.ng-os-summary){background:var(--studio-surface);border:1px solid var(--studio-line);color:var(--studio-text);border-radius:18px;box-shadow:var(--studio-shadow)}
+html[data-theme] .studio-shell .ng-v2-main .panel-head{padding:22px 22px 0;align-items:center;gap:14px}
+html[data-theme] .studio-shell .ng-v2-main .panel-head h3{font-size:14px;font-weight:650;letter-spacing:-.35px;line-height:1.4;color:var(--studio-text)}
+html[data-theme] .studio-shell .ng-v2-main .panel-head p{font-size:10px;line-height:1.5;margin-top:4px;color:var(--studio-muted)}
+html[data-theme] .studio-shell .ng-design-donut-layout{padding:24px 22px;gap:20px;flex-direction:column}
+html[data-theme] .studio-shell .ng-design-donut{width:138px;height:138px;box-shadow:none;animation:none}
+html[data-theme] .studio-shell .ng-design-donut>div{width:108px;height:108px;background:var(--studio-surface);color:var(--studio-text)}
+html[data-theme] .studio-shell .ng-design-donut strong{font-size:28px;font-weight:650}
+html[data-theme] .studio-shell .ng-design-status-list>div{font-size:11px;gap:8px;grid-template-columns:6px minmax(0,1fr) 24px 32px}
+html[data-theme] .studio-shell .ng-design-status-list i{width:6px;height:6px}
+html[data-theme] .studio-shell .ng-activity-list{padding:8px 22px 18px}
+html[data-theme] .studio-shell .ng-activity-item{gap:10px;padding:14px 0;border-color:var(--studio-line);animation:none}
+html[data-theme] .studio-shell .ng-activity-icon{background:var(--studio-soft);color:var(--studio-blue);border-radius:10px}
+html[data-theme] .studio-shell .ng-activity-item b{font-size:10px;font-weight:550}
+html[data-theme] .studio-shell .ng-activity-item small,html[data-theme] .studio-shell .ng-activity-item time{color:var(--studio-muted)}
+html[data-theme] .studio-shell .ng-revenue-chart-wrap{background:transparent}
+html[data-theme] .studio-shell .ng-revenue-chart{border-color:var(--studio-line);background:repeating-linear-gradient(to top,var(--studio-line) 0 1px,transparent 1px 25%)}
+html[data-theme] .studio-shell .ng-revenue-billed{background:linear-gradient(0deg,#214a80,#4d86c9)}
+html[data-theme] .studio-shell .ng-revenue-received{background:linear-gradient(0deg,#c49a3b,#edc870)}
+html[data-theme] .studio-shell .ng-revenue-bar{border-radius:5px 5px 0 0;animation:none}
+html[data-theme] .studio-shell .chart{padding:26px 22px 20px}
+/* Buttons, filters, forms and lists share the same material language. */
+html[data-theme] .studio-shell .ng-v2-main .btn,#modal-root .btn{font-size:11px;border-radius:10px;padding:10px 14px;min-height:36px;font-weight:600;transition:background .2s ease,transform .2s var(--studio-ease),box-shadow .2s ease}
+html[data-theme] .studio-shell .ng-v2-main .btn-primary,html[data-theme] #modal-root .btn-primary{background:#ebc565;color:#17263d;border:1px solid #d5b057;box-shadow:0 3px 9px #9b701014}
+html[data-theme] .studio-shell .ng-v2-main .btn-primary:hover{background:#f2cf77;box-shadow:0 4px 12px #9b701020;transform:translateY(-1px)}
+html[data-theme] .studio-shell .ng-v2-main .btn-sm{font-size:10px;padding:7px 10px;min-height:30px}
+html[data-theme] .studio-shell .ng-v2-main .btn:not(.btn-primary):not(.btn-danger):not(.btn-blue){background:var(--studio-surface);border-color:var(--studio-line);color:var(--studio-text)}
+html[data-theme] .studio-shell .ng-v2-main .btn:disabled{transform:none;opacity:.5;box-shadow:none}
+html[data-theme] .studio-shell .ng-v2-main .filter-pills{display:flex;flex-wrap:wrap;background:var(--studio-soft);border:1px solid var(--studio-line);border-radius:11px;padding:4px;gap:3px}
+html[data-theme] .studio-shell .ng-v2-main .filter-pill{font-size:11px;padding:8px 12px;background:transparent;color:var(--studio-muted);border-radius:7px}
+html[data-theme] .studio-shell .ng-v2-main .filter-pill.active{background:var(--studio-surface);color:var(--studio-text);box-shadow:0 2px 6px #0000000a}
+html[data-theme] .studio-shell .ng-v2-main .toolbar-line{margin-bottom:22px;gap:18px}
+html[data-theme] .studio-shell .ng-v2-main .toolbar-line h2{font-size:23px;letter-spacing:-.7px;font-weight:650}
+html[data-theme] .studio-shell .ng-v2-main .toolbar-line p{font-size:12px;color:var(--studio-muted)}
+html[data-theme] .studio-shell .ng-v2-main .table-scroll{padding:16px 10px 10px;background:transparent}
+html[data-theme] .studio-shell .ng-v2-main .data-table{font-size:11px;border-collapse:separate;border-spacing:0}
+html[data-theme] .studio-shell .ng-v2-main .data-table th{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.055em;background:var(--studio-soft);color:var(--studio-muted);padding:12px}
+html[data-theme] .studio-shell .ng-v2-main .data-table th:first-child{border-radius:8px 0 0 8px}
+html[data-theme] .studio-shell .ng-v2-main .data-table th:last-child{border-radius:0 8px 8px 0}
+html[data-theme] .studio-shell .ng-v2-main .data-table td{font-size:11px;padding:16px 12px;background:transparent;color:var(--studio-text);border-color:var(--studio-line);line-height:1.4}
+html[data-theme] .studio-shell .ng-v2-main .data-table tbody tr:hover td{background:var(--studio-soft)}
+html[data-theme] .studio-shell .ng-v2-main .data-table .table-link{color:var(--studio-blue);font-weight:600}
+html[data-theme] .studio-shell .ng-v2-main .ng-table-stage-wrap{border-radius:7px;box-shadow:none}
+html[data-theme] .studio-shell .ng-v2-main .ng-table-stage-select{font-size:10px}
+html[data-theme] .studio-shell .ng-v2-main .ng-payment-badge{padding:5px 8px;border-radius:7px;font-size:10px;font-weight:550}
+html[data-theme] .studio-shell .ng-v2-main .ng-pagination{padding:16px 20px;border-color:var(--studio-line);font-size:11px;color:var(--studio-muted)}
+html[data-theme] .studio-shell .ng-v2-main :is(.input,.select,.textarea),html[data-theme] #modal-root :is(.input,.select,.textarea){background:var(--studio-soft);color:var(--studio-text);border:1px solid var(--studio-line);border-radius:10px;font-size:12px;padding:11px 12px;box-shadow:none}
+html[data-theme] .studio-shell .ng-v2-main :is(.input,.select,.textarea):focus,html[data-theme] #modal-root :is(.input,.select,.textarea):focus{border-color:#5684c1;box-shadow:0 0 0 3px #5684c11a}
+html[data-theme] .studio-shell .ng-v2-main .form-field label{color:var(--studio-muted);font-weight:550;font-size:11px}
+html[data-theme] .studio-shell .ng-v2-main :is(.kan-col,.ng-glance-notes,.ng-glance-preview-column,.ng-glance-fact-icon,.ng-os-summary-pills>div,.ng-month-card,.ng-month-section){background:var(--studio-soft);border-color:var(--studio-line);color:var(--studio-text)}
+html[data-theme] .studio-shell .ng-v2-main .kanban{gap:16px}
+html[data-theme] .studio-shell .ng-v2-main .kan-col{border-radius:16px;padding:12px}
+html[data-theme] .studio-shell .ng-v2-main .kan-card{border:1px solid var(--studio-line);background:var(--studio-surface);border-radius:12px;box-shadow:0 2px 8px #00000006;padding:16px;transition:box-shadow .2s ease,transform .2s var(--studio-ease)}
+html[data-theme] .studio-shell .ng-v2-main .kan-card:hover{box-shadow:0 6px 18px #00000010;transform:translateY(-2px)}
+html[data-theme] .studio-shell .ng-v2-main .kan-card h4{font-size:13px;font-weight:600;color:var(--studio-text)}
+html[data-theme] .studio-shell .ng-v2-main .client-card{padding:22px}
+html[data-theme] .studio-shell .ng-v2-main .client-avatar{background:var(--studio-tint);color:var(--studio-blue);border-radius:14px}
+html[data-theme] .studio-shell .ng-v2-main .mini-stat{padding:22px}
+html[data-theme] .studio-shell .ng-v2-main .mini-stat strong{font-size:27px;font-weight:650;letter-spacing:-.8px;color:var(--studio-text)!important}
+html[data-theme] .studio-shell .ng-v2-main .ng-os-summary{padding:22px;scrollbar-color:var(--studio-line) transparent}
+html[data-theme] .studio-shell .ng-v2-main :is(.ng-os-summary-pills strong,.ng-os-summary-info strong,.ng-os-summary-finance b,.ng-glance-heading h1,.ng-glance-facts strong,.ng-glance-notes p){color:var(--studio-text)}
+html[data-theme] .studio-shell .ng-v2-main :is(.ng-os-summary-header p,.ng-os-summary-pills small,.ng-os-summary-info span,.ng-os-summary-finance span){color:var(--studio-muted)}
+html[data-theme] .studio-shell .ng-v2-main :is(.ng-os-summary-finance,.ng-os-summary-balance,.ng-os-mini-preview,.payment-remaining,.ng-glance-remaining){background:var(--studio-soft);border-color:var(--studio-line)}
+html[data-theme] .studio-shell .ng-v2-main .ng-os-card{padding:22px}
+html[data-theme] .studio-shell .ng-v2-main .payment-choice{background:var(--studio-soft);color:var(--studio-text);border-color:var(--studio-line)}
+html[data-theme] .studio-shell .ng-v2-main .payment-choice:has(input:checked){background:var(--studio-tint);border-color:var(--studio-blue)}
+html[data-theme] .studio-shell .ng-v2-main .dropzone{background:var(--studio-soft);border-color:var(--studio-line);color:var(--studio-muted);border-radius:12px}
+html[data-theme] #modal-root .drawer{background:var(--studio-surface);color:var(--studio-text);border-color:var(--studio-line);box-shadow:-16px 0 60px #00000020}
+html[data-theme] #modal-root .drawer-head,html[data-theme] #modal-root .drawer-footer{background:var(--studio-surface);border-color:var(--studio-line);padding:22px}
+html[data-theme] #modal-root .drawer-body{padding:22px;gap:20px}
+html[data-theme] .profile-screen{background:var(--studio-bg)}
+html[data-theme] .profile-panel{background:var(--studio-surface);border:1px solid var(--studio-line);border-radius:24px;box-shadow:var(--studio-shadow);color:var(--studio-text)}
+html[data-theme] .profile-choice{background:var(--studio-soft);border-color:var(--studio-line);border-radius:16px;color:var(--studio-text)}
+html[data-theme] .profile-choice:hover{border-color:var(--studio-blue);background:var(--studio-tint)}
+html[data-theme] .profile-panel h1{color:var(--studio-text);font-weight:650;letter-spacing:-1px}
+html[data-theme] .profile-panel>p{color:var(--studio-muted)}
+html[data-theme] .auth-screen,html[data-theme] .auth-right{background:var(--studio-bg);color:var(--studio-text)}
+html[data-theme] .auth-left{background:linear-gradient(155deg,#102e59,#081b36);color:#f3f6ff}
+html[data-theme] .auth-left h1{font-weight:650;letter-spacing:-2px}
+html[data-theme] .auth-left h1 span{color:#edc565}
+html[data-theme] .auth-card{background:var(--studio-surface);border:1px solid var(--studio-line);box-shadow:var(--studio-shadow);border-radius:22px}
+html[data-theme] .auth-card :is(.input,.select){background:var(--studio-soft);color:var(--studio-text);border-color:var(--studio-line);border-radius:10px}
+html[data-theme] .auth-card .form-field label,html[data-theme] .auth-card .checklabel{color:var(--studio-muted)}
+html[data-theme] .studio-shell .ng-v2-main :is(.attach-item,.attach-controls select,.attach-controls button,.ng-month-order-row,.ng-usage-stats>div,.ng-detail-finance,.ng-detail-history){background:var(--studio-soft);border-color:var(--studio-line);color:var(--studio-text)}
+html[data-theme] .studio-shell .ng-v2-main :is(.ng-os-mini-title,.ng-os-section-title h3,.ng-os-summary-header h2,.ng-os-summary-finance h3,.ng-os-summary-pills strong,.payment-status-title,.checklabel){color:var(--studio-text)}
+html[data-theme] .studio-shell .ng-v2-main .ng-os-summary-info #os-summary-stage{color:var(--studio-blue)}
+html[data-theme] .studio-shell .ng-v2-main .ng-glance-remaining strong{color:var(--studio-gold)}
+html[data-theme=light] .studio-shell .ng-v2-main .text-green{color:#18795b!important}
+html[data-theme=light] .studio-shell .ng-v2-main .overdue{color:#ac3c50!important}
+html[data-theme] .notify{background:var(--studio-raised);color:var(--studio-text);border-color:var(--studio-line);box-shadow:0 8px 28px #00000022}
+html[data-theme=light] .notify.err{background:#fff0f1;color:#9f3148;border-color:#ecc5ce}
+html[data-theme] .profile-avatar{background:var(--studio-tint);color:var(--studio-blue);border-color:var(--studio-line)}
+html[data-theme] .studio-shell :is(button,a,input,select,textarea):focus-visible,html[data-theme] #modal-root :is(button,a,input,select,textarea):focus-visible{outline:2px solid #5a8ed2;outline-offset:3px}
+html[data-theme] .studio-dashboard{animation:studio-arrive .4s var(--studio-ease) both}
+@keyframes studio-arrive{from{opacity:.5;transform:translateY(7px)}to{opacity:1;transform:none}}
+@media(min-width:1700px){html[data-theme] .studio-shell .ng-v2-main{padding-inline:56px}html[data-theme] .studio-shell .ng-v2-main .studio-dashboard .ng-dash-columns{grid-template-columns:minmax(0,1fr) 330px}}
+@media(max-width:1200px){
+ html[data-theme] .studio-shell .ng-design-sidebar{width:204px;flex-basis:204px;padding-inline:12px}
+ html[data-theme] .studio-shell .ng-v2-main{width:calc(100% - 204px);padding:24px}
+ .studio-welcome{align-items:flex-start;flex-direction:column;gap:18px}.studio-welcome-actions{width:100%;justify-content:space-between}
+ html[data-theme] .studio-shell .ng-v2-main .studio-dashboard .ng-dash-columns{grid-template-columns:minmax(0,1fr) 252px;gap:16px}
+ html[data-theme] .studio-shell .ng-v2-main .studio-dashboard .ng-dash-primary,html[data-theme] .studio-shell .ng-v2-main .studio-dashboard .ng-dash-aside{gap:16px}
+ html[data-theme] .studio-shell .ng-design-topbar{flex-wrap:wrap}
+}
+@media(max-width:1000px){
+ html[data-theme] .studio-shell .ng-v2-main .studio-dashboard .ng-dash-columns{grid-template-columns:1fr}
+ html[data-theme] .studio-shell .ng-v2-main .studio-dashboard .ng-dash-aside{display:grid;grid-template-columns:1fr 1fr;align-items:start}
+}
+@media(max-width:700px){
+ html[data-theme] .studio-shell{display:block}
+ html[data-theme] .studio-shell .ng-design-sidebar,html[data-theme] .studio-shell.sidebar-collapsed .ng-design-sidebar{
+  position:fixed!important;top:auto!important;bottom:0;left:0;right:0;width:100%!important;height:calc(66px + env(safe-area-inset-bottom))!important;
+  min-height:0!important;max-height:none;flex-basis:auto;padding:5px 8px calc(5px + env(safe-area-inset-bottom));
+  border:0;border-top:1px solid var(--studio-line);border-radius:0;background:var(--studio-sidebar-glass)!important;overflow:visible;z-index:60;
+ }
+ html[data-theme] .studio-shell .ng-v2-main,html[data-theme] .studio-shell.sidebar-collapsed .ng-v2-main{width:100%;max-width:none;padding:20px 16px calc(90px + env(safe-area-inset-bottom))}
+ html[data-theme] .studio-shell .sidebar-bottom,html[data-theme] .studio-shell .sidebar-brand-row,html[data-theme] .studio-shell .sidebar-navigation{display:none!important}
+ html[data-theme] .studio-shell .ng-design-sidebar .mobile-quick-nav .navbtn.active{background:var(--studio-tint)!important;color:var(--studio-blue)!important;border:0;box-shadow:none}
+ html[data-theme] .studio-shell .ng-design-sidebar .mobile-quick-nav .navbtn.active .ico{color:var(--studio-blue)}
+ html[data-theme] .studio-shell .mobile-more{color:var(--studio-muted)}
+ html[data-theme] .studio-shell .mobile-menu-overlay{bottom:calc(66px + env(safe-area-inset-bottom));background:var(--studio-surface);color:var(--studio-text);border-color:var(--studio-line);border-radius:20px 20px 0 0}
+ html[data-theme] .studio-shell .ng-design-topbar{margin-bottom:24px;padding-bottom:18px;gap:16px}
+ html[data-theme] .studio-shell .heading h1{font-size:21px}
+ html[data-theme] .studio-shell .tools{width:100%;flex-wrap:nowrap;gap:8px}
+ html[data-theme] .studio-shell .search{width:auto;flex:1;min-width:0}
+ .studio-welcome{margin-bottom:20px}.studio-welcome h2{font-size:28px}.studio-welcome p{font-size:11px}
+ .studio-welcome-actions{gap:8px}.studio-segment button{padding:8px 10px}
+ html[data-theme] .studio-shell .ng-v2-main .studio-dashboard .ng-new-kpis{grid-template-columns:repeat(5,158px);gap:10px;scroll-snap-type:x proximity;margin-bottom:18px}
+ html[data-theme] .studio-shell .ng-v2-main .studio-dashboard .ng-new-kpis>.kpi{scroll-snap-align:start;min-height:138px;padding:16px 12px!important}
+ html[data-theme] .studio-shell .ng-v2-main .studio-dashboard .ng-new-kpis>.kpi>strong{font-size:20px!important}
+ html[data-theme] .studio-shell .ng-v2-main .studio-dashboard .ng-dash-aside{grid-template-columns:1fr}
+ html[data-theme] .studio-shell .ng-v2-main .panel-head{padding:18px 16px 0}
+ html[data-theme] .studio-shell .ng-v2-main .ng-os-card,html[data-theme] .studio-shell .ng-v2-main .ng-os-summary{padding:16px}
+ html[data-theme] .studio-shell .ng-v2-main .ng-pagination{padding:14px 12px;flex-wrap:wrap;gap:10px}
+}
+@media(prefers-reduced-motion:reduce){html[data-theme] .studio-shell *,html[data-theme] #modal-root *,html[data-theme] .profile-screen *{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+html[data-theme=dark] .notify.err{background:#39212d;color:#ffd6df;border-color:#704052}

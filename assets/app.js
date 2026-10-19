@@ -47,7 +47,7 @@ const PROFILE_KEY='ngstudio_selected_profile_v1';
 const SIDEBAR_KEY='ngstudio_sidebar_v1';
 const THEME_KEY='ngstudio_theme_v1';
 function savedTheme(){try{return localStorage.getItem(THEME_KEY)==='light'?'light':'dark';}catch{return 'dark';}}
-function applyTheme(theme){document.documentElement.dataset.theme=theme;document.querySelector('meta[name="theme-color"]')?.setAttribute('content',theme==='light'?'#f5f7fc':'#091653');}
+function applyTheme(theme){document.documentElement.dataset.theme=theme;document.querySelector('meta[name="theme-color"]')?.setAttribute('content',theme==='light'?'#f5f6f8':'#090f1a');}
 function toggleTheme(){state.theme=state.theme==='dark'?'light':'dark';try{localStorage.setItem(THEME_KEY,state.theme);}catch{}applyTheme(state.theme);const toggle=document.querySelector('[data-toggle-theme]');if(toggle){toggle.setAttribute('aria-label',state.theme==='light'?'Ativar modo escuro':'Ativar modo claro');toggle.setAttribute('title',state.theme==='light'?'Ativar modo escuro':'Ativar modo claro');toggle.innerHTML=ico(state.theme==='light'?'moon':'sun');} }
 
 function sidebarPrefs(){try{return JSON.parse(localStorage.getItem(SIDEBAR_KEY)||'null')||{};}catch{return {};}}
@@ -98,12 +98,6 @@ function nav(){
    </div>
    <button type="button" class="sidebar-collapse" data-collapse-sidebar title="${collapsed?'Expandir menu':'Recolher menu'}" aria-label="${collapsed?'Expandir menu':'Recolher menu'}">${ico('panel')}</button>
   </div>
-  <button type="button" class="ng-sidebar-person" data-switch-profile title="Trocar perfil">
-   <span class="ng-sidebar-avatar">${esc(initials)}</span>
-   <span class="ng-sidebar-welcome">Bem-vindo de volta,</span>
-   <strong>${esc(state.profile||'Selecione um perfil')}</strong>
-   <small>Trocar perfil ${ico('chevron')}</small>
-  </button>
   <nav class="nav-list sidebar-navigation ng-design-nav" aria-label="Menu principal">
    <span class="ng-sidebar-caption">VISÃO GERAL</span>
    ${links.slice(0,2).map(([id,icon,label])=>navItem(id,icon,label)).join('')}
@@ -113,8 +107,12 @@ function nav(){
    ${links.slice(7).map(([id,icon,label])=>navItem(id,icon,label)).join('')}
   </nav>
   <div class="sidebar-bottom">
-   <button type="button" class="sidebar-create" data-new title="Nova Ordem de Serviço">${ico('plus')}<span>Nova Ordem de Serviço</span></button>
-   <div class="ng-sidebar-signature"><img src="assets/brand-symbol.svg" alt=""/><div><b>NG PrintSign</b><small>Seu estúdio, sua gestão.</small></div></div>
+   <button type="button" class="sidebar-create" data-new title="Nova Ordem de Serviço">${ico('plus')}<span>Nova ordem de serviço</span></button>
+   <button type="button" class="ng-sidebar-person" data-switch-profile title="Trocar perfil">
+    <span class="ng-sidebar-avatar">${esc(initials)}</span>
+    <span class="ng-person-copy"><strong>${esc(state.profile||'Selecione um perfil')}</strong><small>Trocar perfil</small></span>
+    ${ico('chevron')}
+   </button>
   </div>
   <nav class="mobile-quick-nav" aria-label="Navegação rápida">
    ${navItem('dashboard','home','Início',true)}
@@ -149,7 +147,7 @@ function header(){
  const searchPlace=state.page==='equipe'?'Buscar funcionário...':state.page==='clientes'?'Buscar cliente ou telefone...':'Buscar OS, cliente ou serviço...';
  const initials=String(state.profile||'NG').trim().split(/\s+/).slice(0,2).map(n=>n[0]).join('').toUpperCase();
  return `<header class="topbar ng-design-topbar">
-  <div class="heading"><span class="ng-heading-eyebrow">NG PRINTSIGN · ESTÚDIO</span><h1>${esc(title)}</h1><p>${esc(subtitle)}</p></div>
+  <div class="heading"><span class="ng-heading-eyebrow">NG STUDIO / WORKSPACE</span><h1>${esc(title)}</h1><p>${esc(subtitle)}</p></div>
   <div class="tools">
    ${state.page==='configuracoes'||state.draft||state.viewingOrderId?'':`<label class="search">${ico('search')}<input id="global-search" type="search" autocomplete="off" spellcheck="false" aria-label="${esc(searchPlace)}" placeholder="${esc(searchPlace)}" value="${esc(state.search)}"/><span class="shortcut">⌘ K</span></label>`}
    <button type="button" class="iconbutton theme-toggle" data-toggle-theme title="${state.theme==='light'?'Ativar modo escuro':'Ativar modo claro'}" aria-label="${state.theme==='light'?'Ativar modo escuro':'Ativar modo claro'}">${ico(state.theme==='light'?'moon':'sun')}</button>
@@ -159,7 +157,7 @@ function header(){
   </div>
  </header>`;
 }
-function render(){applyTheme(state.theme);if(!state.profile){profileScreen();return;}const root=$('#app');root.innerHTML=`<div class="shell ng-v2-shell ${state.sidebarCollapsed?'sidebar-collapsed':''}">${nav()}<main class="main ng-v2-main ${(state.draft||state.viewingOrderId)?'os-editor-page':''}">${header()}${state.mode==='demo'?`<div class="demo-banner">${ico('alert')} <span><b>MODO DEMONSTRAÇÃO:</b> os dados ficam somente neste navegador. Configure o Supabase antes de cadastrar serviços reais ou compartilhar entre computadores.</span></div>`:''}<div id="view">${state.draft||state.viewingOrderId?'':pageView()}</div></main></div>`;renderModal();}
+function render(){applyTheme(state.theme);if(!state.profile){profileScreen();return;}const root=$('#app');root.innerHTML=`<div class="shell ng-v2-shell studio-shell ${state.sidebarCollapsed?'sidebar-collapsed':''}">${nav()}<main class="main ng-v2-main ${(state.draft||state.viewingOrderId)?'os-editor-page':''}">${header()}${state.mode==='demo'?`<div class="demo-banner">${ico('alert')} <span><b>MODO DEMONSTRAÇÃO:</b> os dados ficam somente neste navegador. Configure o Supabase antes de cadastrar serviços reais ou compartilhar entre computadores.</span></div>`:''}<div id="view">${state.draft||state.viewingOrderId?'':pageView()}</div></main></div>`;renderModal();}
 function refreshView(){const view=$('#view');if(view)view.innerHTML=pageView();}
 function pageView(){switch(state.page){case 'dashboard':return dashboard(true);case 'geral':return dashboard(false);case 'equipe':return teamPage();case 'ordens':return ordersPage();case 'producao':return kanbanPage();case 'clientes':return clientsPage();case 'financeiro':return financePage();case 'historico':return historyPage();case 'configuracoes':return settingsPage();return dashboard();}}
 function kpi(label,value,icon,tone,desc,action=""){return `<button type="button" class="kpi" data-dashboard-action="${action}" aria-label="${esc(label)}: ${esc(value)}. Ver ordens correspondentes"><div class="badge-icon ${tone}">${ico(icon)}</div><div class="kpi-label">${label}</div><strong>${esc(value)}</strong><small>${esc(desc)}</small></button>`;}
@@ -286,28 +284,33 @@ function dashboard(individual=false){
  const viewOrders=filteredOrders(individual?profileOrders():state.orders);
  const stat=stats(viewOrders);
  const recent=[...viewOrders].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).slice(0,6);
- return `<div class="ng-new-dashboard">
- <div class="page-actions ng-dash-topline"><span class="caption">${individual?'Meu desempenho • '+esc(state.profile):'Visão geral'} · ${new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'})}</span><div class="push"></div><button class="btn btn-primary" data-new>${ico('plus')} Nova OS</button></div>
- <div class="ng-dash-columns">
-  <div class="ng-dash-primary">
-   <div class="kpis ng-new-kpis">
-    ${kpi('OS Ativas',stat.active,'file','blue','Serviços em aberto','active')}
-    ${kpi('Em Produção',stat.production,'settings','yellow','Em produção agora','production')}
-    ${kpi('Prontas para Retirada',stat.ready,'check','green','Aguardando o cliente','ready')}
-    ${kpi('A Receber',money(stat.receivable),'wallet','yellow','Saldo pendente','receivable')}
-    ${kpi('Recebido no Mês',money(stat.receivedMonth),'chart','blue','Recebimentos do mês','received')}
-   </div>
-   ${revenuePanel(viewOrders,individual)}
-   <section class="panel ng-design-week-panel"><div class="panel-head"><div class="panel-title"><span class="badge-icon yellow">${ico('chart')}</span><div><h3>Fluxo de Produção</h3><p>Serviços iniciados e entregues nos últimos 7 dias</p></div></div><span class="caption">Últimos 7 dias</span></div><div class="chart">${chartMarkup(viewOrders)}</div></section>
-   <section class="panel table-panel ng-design-recent"><div class="panel-head"><div class="panel-title"><span class="badge-icon yellow">${ico('file')}</span><div><h3>Últimas Ordens de Serviço</h3><p>Acompanhe os pedidos mais recentes</p></div></div><button data-nav="ordens" class="btn btn-sm">Ver todas ${ico('arrow')}</button></div>${ordersTable(recent)}</section>
+ const date=new Date().toLocaleDateString('pt-BR',{day:'numeric',month:'long'});
+ return `<div class="ng-new-dashboard studio-dashboard">
+  <section class="studio-welcome">
+   <div><span class="studio-overline">NG PRINTSIGN · ${esc(date)}</span><h2>${individual?'Seu estúdio, em foco.':'Uma visão de tudo.'}</h2><p>${individual?'Olá, '+esc(state.profile)+'. Acompanhe seus serviços e resultados.':'Produção, pedidos e resultados da sua gráfica.'}</p></div>
+   <div class="studio-welcome-actions"><div class="studio-segment" role="group" aria-label="Visão do dashboard"><button type="button" data-nav="dashboard" aria-pressed="${individual}">Meu painel</button><button type="button" data-nav="geral" aria-pressed="${!individual}">Visão geral</button></div><button class="btn btn-primary" data-new>${ico('plus')} Nova OS</button></div>
+  </section>
+  <div class="kpis ng-new-kpis">
+   ${kpi('OS Ativas',stat.active,'file','blue','Serviços em aberto','active')}
+   ${kpi('Em Produção',stat.production,'settings','yellow','Em produção agora','production')}
+   ${kpi('Prontas para Retirada',stat.ready,'check','green','Aguardando o cliente','ready')}
+   ${kpi('A Receber',money(stat.receivable),'wallet','yellow','Saldo pendente','receivable')}
+   ${kpi('Recebido no Mês',money(stat.receivedMonth),'chart','blue','Recebimentos do mês','received')}
   </div>
-  <aside class="ng-dash-aside">
-   <section class="panel ng-design-side-panel"><div class="panel-head"><div><h3>Status das Ordens de Serviço</h3><p>Distribuição atual</p></div><button data-nav="producao" class="iconbutton" title="Ver produção" aria-label="Ver produção">${ico('arrow')}</button></div>${dashboardStatus(viewOrders)}</section>
-   <section class="panel ng-design-side-panel ng-design-activity"><div class="panel-head"><div><h3>Atividades Recentes</h3><p>Últimas movimentações registradas</p></div><button data-nav="historico" class="btn btn-sm">Ver todas</button></div><div class="ng-activity-list">${dashboardActivity(viewOrders)}</div></section>
-   <section class="ng-brand-panel"><img src="assets/brand.svg" alt="NG PrintSign Gráfica"/><div><h3>NG PrintSign</h3><p>Gestão completa da sua gráfica em um só lugar.</p><button data-new>${ico('plus')} Criar ordem de serviço ${ico('arrow')}</button></div></section>
-  </aside>
- </div></div>`;
+  <div class="ng-dash-columns">
+   <div class="ng-dash-primary">
+    ${revenuePanel(viewOrders,individual)}
+    <section class="panel ng-design-week-panel"><div class="panel-head"><div><h3>Ritmo da produção</h3><p>Serviços iniciados e entregues nos últimos 7 dias</p></div><span class="studio-period">7 dias</span></div><div class="chart">${chartMarkup(viewOrders)}</div></section>
+   </div>
+   <aside class="ng-dash-aside">
+    <section class="panel ng-design-side-panel"><div class="panel-head"><div><h3>Etapas dos pedidos</h3><p>Distribuição por etapa</p></div><button data-nav="producao" class="iconbutton" title="Ver produção" aria-label="Ver produção">${ico('arrow')}</button></div>${dashboardStatus(viewOrders)}</section>
+    <section class="panel ng-design-side-panel ng-design-activity"><div class="panel-head"><div><h3>Atividade recente</h3><p>Últimas movimentações</p></div><button data-nav="historico" class="btn btn-sm">Ver tudo</button></div><div class="ng-activity-list">${dashboardActivity(viewOrders)}</div></section>
+   </aside>
+  </div>
+  <section class="panel table-panel ng-design-recent"><div class="panel-head"><div><h3>Últimas ordens de serviço</h3><p>Do primeiro atendimento à entrega.</p></div><button data-nav="ordens" class="btn btn-sm">Todas as ordens ${ico('arrow')}</button></div>${ordersTable(recent)}</section>
+ </div>`;
 }
+
 function ordersPage(){
  let orders=ordered().filter(o=>state.orderScope!=='profile'||String(o.attendant||'').trim().toLocaleLowerCase('pt-BR')===String(state.profile||'').toLocaleLowerCase('pt-BR'));
  if(state.actionFilter)orders=orders.filter(o=>actionMatches(o,state.actionFilter));
@@ -835,3 +838,4 @@ if(state.mode==='cloud')setInterval(()=>{if(document.visibilityState==='visible'
 boot();
 
 document.addEventListener('change',e=>{if(e.target.id==='payment-filter'){state.paymentFilter=e.target.value;state.ordersPage=1;refreshView();}});
+
