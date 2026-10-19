@@ -304,3 +304,8 @@
 .splash-brand{width:104px;height:104px;margin:0 auto 14px;display:block;border-radius:22px}
 @media(max-width:1300px) and (min-width:701px){.sidebar-brand-row .logo{padding-left:0;gap:6px}.sidebar-brand-logo{width:51px;height:51px}.sidebar-brand-label h2{font-size:14px}.sidebar-brand-label p{font-size:9px}}
 @media(max-width:700px){.auth-card-brand{display:block}.profile-brand{gap:9px;font-size:21px}.profile-brand img{width:65px;height:65px}}
+
+/* Alterna entre marca completa e monograma fiel ao PDF */
+.sidebar-brand-logo.sidebar-brand-symbol{display:none}
+.sidebar.is-collapsed .sidebar-brand-logo.sidebar-brand-full{display:none}
+.sidebar.is-collapsed .sidebar-brand-logo.sidebar-brand-symbol{display:block}
