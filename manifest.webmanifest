@@ -1,0 +1,26 @@
+{
+  "name": "NG Studio — NG PrintSign Gráfica",
+  "short_name": "NG Studio",
+  "description": "Gestão de ordens de serviço, produção, clientes e finanças da NG PrintSign.",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#091653",
+  "theme_color": "#091653",
+  "icons": [
+    {
+      "src": "assets/brand.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/brand.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "lang": "pt-BR"
+}
