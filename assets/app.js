@@ -301,13 +301,13 @@ function dashboard(individual=false){
    <div class="ng-dash-primary">
     ${revenuePanel(viewOrders,individual)}
     <section class="panel ng-design-week-panel"><div class="panel-head"><div><h3>Ritmo da produção</h3><p>Serviços iniciados e entregues nos últimos 7 dias</p></div><span class="studio-period">7 dias</span></div><div class="chart">${chartMarkup(viewOrders)}</div></section>
+    <section class="panel table-panel ng-design-recent"><div class="panel-head"><div><h3>Últimas ordens de serviço</h3><p>Do primeiro atendimento à entrega.</p></div><button data-nav="ordens" class="btn btn-sm">Todas as ordens ${ico('arrow')}</button></div>${ordersTable(recent)}</section>
    </div>
    <aside class="ng-dash-aside">
     <section class="panel ng-design-side-panel"><div class="panel-head"><div><h3>Etapas dos pedidos</h3><p>Distribuição por etapa</p></div><button data-nav="producao" class="iconbutton" title="Ver produção" aria-label="Ver produção">${ico('arrow')}</button></div>${dashboardStatus(viewOrders)}</section>
     <section class="panel ng-design-side-panel ng-design-activity"><div class="panel-head"><div><h3>Atividade recente</h3><p>Últimas movimentações</p></div><button data-nav="historico" class="btn btn-sm">Ver tudo</button></div><div class="ng-activity-list">${dashboardActivity(viewOrders)}</div></section>
    </aside>
   </div>
-  <section class="panel table-panel ng-design-recent"><div class="panel-head"><div><h3>Últimas ordens de serviço</h3><p>Do primeiro atendimento à entrega.</p></div><button data-nav="ordens" class="btn btn-sm">Todas as ordens ${ico('arrow')}</button></div>${ordersTable(recent)}</section>
  </div>`;
 }
 
