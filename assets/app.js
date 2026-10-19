@@ -371,6 +371,71 @@ function renderOrderDetail(){
  if(fullFrame)fullFrame.srcdoc=docHtml;
  void ensureDetailImages(order.id,attachments);
 }
+function setQuickPayment(mode){
+ const order=state.orders.find(o=>o.id===state.viewingOrderId);
+ if(!order||Number(order.total||0)<=0)return;
+ const buttons=document.querySelectorAll('[data-quick-payment]');
+ buttons.forEach(button=>{
+  const checked=button.dataset.quickPayment===mode;
+  button.classList.toggle('is-active',checked);
+  button.classList.toggle('is-paid',checked&&mode==='paid');
+  button.setAttribute('aria-pressed',String(checked));
+ });
+ const hint=$('#ng-quick-payment-hint');
+ if(hint)hint.textContent=mode==='paid'?(remaining(order)>0?'Ao salvar, será registrado '+money(remaining(order))+' como recebido hoje.':'Esta OS já está totalmente paga.'):(remaining(order)<=.001?'Para reabrir uma OS já paga, use Editar OS para ajustar os recebimentos.':'O valor pendente continuará em aberto.');
+}
+async function saveQuickOrder(id){
+ const order=state.orders.find(o=>o.id===id);
+ const control=$('#ng-quick-stage'),paidButton=document.querySelector('[data-quick-payment="paid"]');
+ if(!order||!control||state.busy)return;
+ const stage=control.value;
+ if(!STAGES.some(s=>s.id===stage)){toast('Status inválido.',true);return;}
+ const shouldPay=paidButton?.getAttribute('aria-pressed')==='true';
+ if(!shouldPay&&remaining(order)<=.001&&order.total>0){toast('Para reabrir pagamento já quitado, use Editar OS.',true);return;}
+ const copy=structuredClone(order),now=new Date().toISOString();
+ if(stage!==copy.stage){
+  const previous=stageLabel(copy.stage);
+  copy.stage=stage;
+  copy.delivered_at=stage==='entregue'?now:null;
+  copy.history=[...(copy.history||[]),{action:'Status alterado: '+previous+' → '+stageLabel(stage),date:now}];
+ }
+ const due=remaining(copy);
+ if(shouldPay&&due>.001){
+  copy.payments=[...(copy.payments||[]),{id:uid(),amount:Math.round(due*100)/100,method:copy.method||'PIX',date:now,note:'Quitação automática'}];
+  copy.history=[...(copy.history||[]),{action:'Pagamento concluído: '+money(due),date:now}];
+ }
+ if(stage===order.stage&&!(shouldPay&&due>.001)){toast('Nenhuma alteração para salvar.');return;}
+ const btn=document.querySelector('[data-quick-save]');
+ state.busy=true;
+ if(btn){btn.disabled=true;btn.textContent='Salvando...';}
+ try{
+  const saved=state.mode==='cloud'?await cloud.persistOrder(copy,true):copy;
+  state.orders=state.orders.map(o=>o.id===id?saved:o);
+  if(state.mode==='demo')persistDemo();
+  renderOrderDetail();
+  toast('Alterações salvas com sucesso.');
+ }catch(e){
+  toast('Não foi possível salvar as alterações: '+e.message,true);
+  if(btn?.isConnected){btn.disabled=false;btn.innerHTML=ico('check')+' Salvar alterações';}
+ }finally{state.busy=false;}
+}
+function updateFullOrderPreviewScale(){
+ const viewport=$('#os-preview-viewport-full');
+ if(!viewport)return;
+ const width=viewport.parentElement?.clientWidth||794;
+ const scale=Math.min(1,Math.max(.32,width/794));
+ viewport.style.setProperty('--os-preview-scale',String(scale));
+ viewport.style.height=Math.ceil(1120*scale)+'px';
+}
+function toggleFullOrderPreview(){
+ const modal=$('#ng-glance-preview-modal');
+ if(!modal)return;
+ const willOpen=modal.hidden;
+ modal.hidden=!willOpen;
+ document.body.classList.toggle('ng-glance-modal-open',willOpen);
+ if(willOpen)updateFullOrderPreviewScale();
+}
+window.addEventListener('resize',updateFullOrderPreviewScale);
 async function ensureDetailImages(id,attachments){
  for(const img of attachments){
   if(state.viewingOrderId!==id)return;
@@ -381,7 +446,7 @@ async function ensureDetailImages(id,attachments){
   if(el)el.src=state.signCache.get(img.storage_path)||'';
   const order=state.orders.find(o=>o.id===id);
   const frame=$('#os-preview-frame');
-  if(frame&&order){frame.srcdoc=buildPrintHtml(order,state.settings,order.attachments.map(a=>({id:a.id,src:a.dataUrl||state.signCache.get(a.storage_path)||''}))).replace('</style>','body{background:#fff!important}.printbar{display:none!important}main{margin:0!important;box-shadow:none!important;min-height:0!important}</style>');}
+  if(frame&&order){frame.srcdoc=buildPrintHtml(order,state.settings,order.attachments.map(a=>({id:a.id,src:a.dataUrl||state.signCache.get(a.storage_path)||''}))).replace('</style>','body{background:#fff!important}.printbar{display:none!important}main{margin:0!important;box-shadow:none!important;min-height:0!important}</style>');const full=$('#os-preview-frame-full');if(full)full.srcdoc=frame.srcdoc;}
  }
 }
 function updateDraft(){if(!state.draft)return;const fields=$('#order-form');if(!fields)return;const data=new FormData(fields);for(const key of ['title','client_name','client_phone','attendant','stage','notes'])state.draft[key]=String(data.get(key)||'');state.draft.total=Math.max(0,Number(data.get('total')||0));state.draft.items=[{description:state.draft.title,quantity:1,unit_price:state.draft.total}];}
@@ -451,7 +516,7 @@ function scheduleOrderPreview(){
 window.addEventListener('resize',updateOrderPreviewScale);
 function renderClientModal(){const c=state.clientDraft;if(!c)return;$('#modal-root').innerHTML=`<div class="overlay" id="drawer-overlay"><div class="drawer" role="dialog" aria-modal="true" aria-label="Cadastro de cliente"><div class="drawer-head"><div><h2>${state.clients.some(x=>x.id===c.id)?'Editar cliente':'Novo cliente'}</h2><p>Dados para vincular às ordens de serviço</p></div><button class="iconbutton" data-close>${ico('close')}</button></div><form class="drawer-body" id="client-form"><div class="form-field"><label>Nome *</label><input class="input" name="name" required value="${esc(c.name||'')}"/></div><div class="form-field"><label>WhatsApp / telefone</label><input class="input" name="phone" value="${esc(c.phone||'')}"/></div><button type="submit" class="btn btn-primary">${ico('check')} Salvar cliente</button></form></div></div>`;}
 async function ensurePreviews(attachments){for(const a of attachments||[]){if(a.storage_path&&!state.signCache.has(a.storage_path)){try{const signed=await cloud.signImage(a.storage_path);state.signCache.set(a.storage_path,signed);}catch{}const img=document.querySelector(`[data-img-preview="${CSS.escape(a.id)}"]`);if(img)img.src=state.signCache.get(a.storage_path)||'';scheduleOrderPreview();}}}
-function closeModal(){state.viewingOrderId=null;clearTimeout(state.orderPreviewTimer);state.editorPayment=null;state.draft=null;state.clientDraft=null;state.pendingFiles.clear();$('#modal-root').innerHTML='';}
+function closeModal(){document.body.classList.remove('ng-glance-modal-open');state.viewingOrderId=null;clearTimeout(state.orderPreviewTimer);state.editorPayment=null;state.draft=null;state.clientDraft=null;state.pendingFiles.clear();$('#modal-root').innerHTML='';}
 async function resizedDataUrl(file,max=1100,quality=.82){return new Promise((resolve,reject)=>{const image=new Image();const tmp=URL.createObjectURL(file);image.onload=()=>{const ratio=Math.min(1,max/Math.max(image.naturalWidth,image.naturalHeight));const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(image.naturalWidth*ratio));canvas.height=Math.max(1,Math.round(image.naturalHeight*ratio));canvas.getContext('2d').drawImage(image,0,0,canvas.width,canvas.height);URL.revokeObjectURL(tmp);resolve(canvas.toDataURL('image/jpeg',quality));};image.onerror=()=>{URL.revokeObjectURL(tmp);reject(Error('Imagem inválida.'));};image.src=tmp;});}
 async function addImages(files){if(!state.draft)return;updateDraft();for(const file of Array.from(files||[])){if(!['image/jpeg','image/png','image/webp'].includes(file.type)){toast('Use PNG, JPG ou WEBP.',true);continue;}if(file.size>12*1024*1024){toast('Imagem acima de 12 MB. Reduza o arquivo.',true);continue;}try{const dataUrl=await resizedDataUrl(file,state.mode==='demo'?900:1100);const id=uid();state.pendingFiles.set(id,file);state.draft.attachments.push({id,name:file.name||'Print do serviço',dataUrl,caption:'',include_pdf:true,size:'medium',rotation:0,storage_path:null});}catch(e){toast(e.message,true);}}renderModal();}
 async function deleteOrder(id){
@@ -582,6 +647,11 @@ document.addEventListener('click',async e=>{
  if(target.matches('[data-filter]')){state.filter=target.dataset.filter;state.ordersPage=1;refreshView();return;}
  if(target.matches('[data-orders-page]')){const page=Number(target.dataset.ordersPage);if(Number.isInteger(page)&&page>0){state.ordersPage=page;refreshView();}return;}
  if(target.matches('[data-close]')){if(state.clientDraft&&state.draft){state.clientDraft=null;$('#modal-root').innerHTML='';return;}if(state.draft&&state.orders.some(o=>o.id===state.draft.id)){const id=state.draft.id;closeModal();state.viewingOrderId=id;}else closeModal();render();return;}
+ if(target.matches('[data-quick-payment]')){setQuickPayment(target.dataset.quickPayment);return;}
+ if(target.matches('[data-quick-save]')){await saveQuickOrder(target.dataset.quickSave);return;}
+ if(target.matches('[data-detail-preview-expand]')){toggleFullOrderPreview();return;}
+ if(target.matches('[data-history-expand]')){const list=$('#ng-glance-timeline');if(list){const expanded=list.classList.toggle('is-expanded');target.setAttribute('aria-expanded',String(expanded));target.textContent=expanded?'Ver menos':'Ver tudo';}return;}
+ if(target.matches('[data-order-add-images]')){openEditor(target.dataset.orderAddImages);setTimeout(()=>document.querySelector('[data-pick-images]')?.scrollIntoView({behavior:'smooth',block:'center'}),60);return;}
  if(target.matches('[data-order-edit]')){openEditor(target.dataset.orderEdit);return;}
  if(target.matches('[data-order-back]')){closeModal();render();return;}
  if(target.matches('[data-preview-expand]')){document.querySelector('.ng-os-mini-preview')?.classList.toggle('is-expanded');updateOrderPreviewScale();return;}
