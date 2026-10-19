@@ -58,3 +58,83 @@
 .os-editor-footer .btn-primary{min-width:185px}
 @media(max-width:1050px){.os-editor-overlay{padding:8px}.os-editor{border-radius:14px}.os-editor-main{grid-template-columns:1fr;overflow:auto;display:block}.os-form{overflow:visible;padding:0;display:grid}.os-preview-panel{margin-top:16px;min-height:480px;height:600px}.os-preview-scroll{min-height:380px}.os-editor-head{padding:13px 18px}.os-editor-footer{padding:12px 16px}}
 @media(max-width:700px){.os-editor-overlay{padding:0}.os-editor{border:0;border-radius:0;width:100%;height:100%;max-height:100%}.os-editor-main{padding:12px}.os-form .drawer-section{padding:13px}.os-editor-head h2{font-size:17px}.os-editor-symbol{width:36px;height:36px}.os-preview-panel{height:520px;min-height:520px}.os-editor-footer{gap:7px;flex-wrap:wrap;justify-content:flex-end}.os-editor-footer .btn{padding:9px 10px}.os-editor-footer .btn-primary{min-width:0}.os-editor-footer .btn-danger{margin-right:auto}}
+
+/* NG Studio — editor compacto baseado na referência 2 */
+.os-editor-page{max-width:calc(100% - 245px)}
+.os-editor-page>.topbar{display:none}
+.ng-os-create{width:100%;padding:0 0 36px}
+.ng-os-page-head{display:flex;align-items:center;gap:16px;margin:0 0 22px;min-width:0}
+.ng-os-back{height:46px;width:46px;flex-shrink:0;display:grid;place-items:center;background:#11223a;border:1px solid #263e5c;border-radius:11px;color:#c7ddf6;cursor:pointer}
+.ng-os-back .ico{transform:rotate(180deg);width:20px;height:20px}
+.ng-os-back:hover{border-color:#d4a923;color:#ffd15b}
+.ng-os-title{flex:1;min-width:0}
+.ng-os-title h1{font-size:27px;margin:0;letter-spacing:-.7px;line-height:1.2}
+.ng-os-title p{color:#94a9c3;margin:6px 0 0;font-size:12px}
+.ng-os-number{display:flex;gap:11px;align-items:center;border:1px solid #273d59;background:#101f35;border-radius:12px;padding:11px 16px;min-width:150px}
+.ng-os-number>span{background:#182f53;border-radius:9px;color:#54a1ff;padding:9px;display:grid;place-items:center}
+.ng-os-number .ico{width:20px;height:20px}
+.ng-os-number small{display:block;font-size:10px;color:#9cacc4;margin-bottom:4px}
+.ng-os-number strong{display:block;font-size:14px;color:white}
+.os-editor-page .os-editor-main{display:grid;grid-template-columns:minmax(0,1.85fr) minmax(300px,1fr);gap:20px;padding:0;overflow:visible;align-items:start}
+.os-editor-page .os-form{display:grid;gap:13px;min-width:0;min-height:0;overflow:visible;padding:0;align-content:start}
+.os-editor-page .ng-os-card{min-width:0;display:grid;gap:13px;background:linear-gradient(150deg,#0d1d32,#0a182a);padding:18px 19px;border:1px solid #243d5b;border-radius:14px}
+.ng-os-section-title{display:flex;align-items:center;gap:12px;min-width:0;margin-bottom:2px}
+.ng-os-section-title>div{min-width:0;flex:1}
+.ng-os-section-title h3{font-size:15px!important;margin:0!important}
+.ng-os-section-title p{margin:5px 0 0;color:#92a9c4;font-size:11px}
+.ng-os-section-title .btn{font-size:11px;color:#74b6ff;border-color:#284c76;background:#102544}
+.ng-os-section-icon{flex-shrink:0;width:42px;height:42px;background:#173864;border-radius:11px;display:grid;place-items:center;color:#69a9fc}
+.ng-os-section-icon.payment{background:#3b321c;color:#ffd04c}
+.ng-os-section-icon.attachment{background:#26224d;color:#aa90ff}
+.os-editor-page .ng-os-card .input,.os-editor-page .ng-os-card .select,.os-editor-page .ng-os-card .textarea{background:#0e1f35;border:1px solid #2b4361;border-radius:9px;min-width:0}
+.os-editor-page .ng-os-card .form-field{min-width:0}
+.ng-os-responsible{width:min(55%,420px)}
+.ng-os-service-fields{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(145px,1fr);gap:12px}
+.ng-os-stage-select{width:min(55%,420px)}
+.os-editor-page .ng-os-card .textarea{min-height:77px;resize:vertical}
+.os-editor-page .payment-simple-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.os-editor-page .payment-remaining{background:#192d48;border:1px solid #315779;color:#ffd047;border-radius:9px}
+.os-editor-page .payment-status-group{gap:8px}
+.os-editor-page .payment-choice{padding:9px 12px;border-radius:8px}
+.os-editor-page .dropzone{padding:14px;border-color:#3b6594;background:#0e213a;border-radius:9px}
+.os-editor-page .dropzone .ico{width:20px;height:20px;margin:0 auto 8px}
+.os-editor-page #attachments-list{display:grid;gap:7px}
+.ng-os-summary{min-width:0;display:grid;gap:16px;position:sticky;top:14px;max-height:calc(100vh - 35px);overflow:auto;scrollbar-width:thin;scrollbar-color:#294364 transparent;background:linear-gradient(155deg,#101f35,#09192d);border:1px solid #263e5c;border-radius:15px;padding:17px}
+.ng-os-summary-header{display:flex;gap:12px;align-items:center}
+.ng-os-summary-header h2{font-size:16px;margin:0 0 5px;letter-spacing:-.4px}
+.ng-os-summary-header p{font-size:11px;color:#95aac3;margin:0}
+.ng-os-summary-emblem{width:40px;height:40px;display:grid;place-items:center;border-radius:10px;color:#ffca2e;background:#423519;flex-shrink:0}
+.ng-os-summary-pills{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.ng-os-summary-pills>div{background:#10233b;border:1px solid #294160;border-radius:10px;padding:11px;min-width:0}
+.ng-os-summary-pills small{display:block;color:#9cafc7;font-size:10px;margin-bottom:5px}
+.ng-os-summary-pills strong{color:#f5f8fd;font-size:13px;word-break:break-word}
+.ng-os-summary-info{display:grid;gap:12px;padding:5px 0;border-bottom:1px solid #263c56;padding-bottom:16px}
+.ng-os-summary-info>div{display:flex;align-items:start;justify-content:space-between;gap:13px;font-size:11px}
+.ng-os-summary-info span{color:#b8c7df;flex:0 0 46%}
+.ng-os-summary-info strong{font-weight:600;color:#eef5ff;text-align:right;overflow-wrap:anywhere;min-width:0}
+.ng-os-summary-info #os-summary-stage{color:#ffd144}
+.ng-os-summary-finance{display:grid;gap:11px;border-bottom:1px solid #263c56;padding-bottom:14px}
+.ng-os-summary-finance h3{display:flex;align-items:center;gap:8px;font-size:13px;margin:0 0 3px}
+.ng-os-summary-finance h3 .ico{color:#4e9cff;width:20px;height:20px}
+.ng-os-summary-finance>div{display:flex;justify-content:space-between;gap:13px;font-size:12px}
+.ng-os-summary-finance>div span{color:#afc1d9}
+.ng-os-summary-finance>div b{white-space:nowrap}
+.ng-os-summary-finance .ng-os-summary-balance b{color:#ffcd36;font-size:15px}
+.ng-os-mini-preview{display:grid;gap:0;background:#0d1c31;border:1px solid #2a4363;border-radius:11px;min-width:0;overflow:hidden}
+.ng-os-mini-title{padding:10px 10px 8px;display:flex;justify-content:space-between;gap:8px;align-items:center}
+.ng-os-mini-title span{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:650;min-width:0}
+.ng-os-mini-title .ico{width:15px;height:15px}
+.ng-os-mini-title .btn{font-size:10px;padding:6px 8px}
+.ng-os-mini-canvas{height:205px;overflow:hidden;background:#e8edf5;padding:8px 8px 0}
+.ng-os-mini-preview.is-expanded .ng-os-mini-canvas{height:min(65vh,670px);overflow:auto}
+.ng-os-mini-canvas .os-preview-viewport{width:100%;max-width:794px;background:#fff}
+.ng-os-side-actions{display:grid;gap:10px}
+.ng-os-save{width:100%;padding:14px!important;font-size:13px!important}
+.ng-os-export{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.ng-os-export .btn{padding:12px 8px}
+.ng-os-delete{width:100%;padding:9px}
+.ng-os-cancel{width:100%;padding:5px;border:none;background:none;color:#92a9c6;font-size:11px;cursor:pointer}
+.ng-os-cancel:hover{color:#fff}
+@media(max-width:1300px){.os-editor-page{max-width:calc(100% - 205px)}.os-editor-page .os-editor-main{grid-template-columns:minmax(0,1.4fr) minmax(290px,1fr);gap:13px}.ng-os-summary{padding:13px}.os-editor-page .ng-os-card{padding:15px}}
+@media(max-width:1100px){.os-editor-page .os-editor-main{grid-template-columns:minmax(0,1fr)}.ng-os-summary{position:static;max-height:none}.ng-os-mini-canvas{height:230px}.ng-os-responsible,.ng-os-stage-select{width:100%}}
+@media(max-width:700px){.os-editor-page{max-width:none}.ng-os-page-head{gap:10px;align-items:flex-start}.ng-os-title h1{font-size:20px}.ng-os-title p{font-size:11px}.ng-os-number{padding:8px;min-width:105px}.ng-os-number>span{display:none}.os-editor-page .ng-os-card{padding:13px}.ng-os-section-title{flex-wrap:wrap}.ng-os-section-title .btn{margin-left:auto}.ng-os-service-fields{grid-template-columns:1fr}.os-editor-page .payment-simple-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.os-editor-page .payment-simple-grid>.form-field:last-child{grid-column:1/-1}.os-editor-page .ng-os-card .form-row{grid-template-columns:1fr}.ng-os-summary{margin-bottom:30px}}
