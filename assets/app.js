@@ -347,7 +347,7 @@ function renderOrderDetail(){
     <section class="panel ng-glance-actions" id="ng-glance-actions">
      <div class="ng-glance-section-heading"><span class="ng-glance-icon gold">${ico('dollar')}</span><div><h2>Ações rápidas</h2><p>Altere o status e o pagamento desta OS.</p></div></div>
      <div class="ng-glance-action-field"><label for="ng-quick-stage">Status da OS</label><select id="ng-quick-stage" class="select" aria-label="Alterar status da OS">${stageOptions}</select></div>
-     <div class="ng-glance-action-field"><span class="ng-glance-action-label">Status do pagamento</span><div class="ng-glance-payment-toggle" role="group" aria-label="Status do pagamento"><button type="button" data-quick-payment="pending" aria-pressed="${!fullyPaid}" class="${!fullyPaid?'is-active':''}" ${total<=0?'disabled':''}>Falta pagar</button><button type="button" data-quick-payment="paid" aria-pressed="${fullyPaid}" class="${fullyPaid?'is-active is-paid':''}" ${total<=0?'disabled':''}>${ico('check')} Pago</button></div></div>
+     <div class="ng-glance-action-field"><span class="ng-glance-action-label">Status do pagamento</span><div class="ng-glance-payment-toggle ng-glance-payment-single"><button type="button" data-quick-payment="paid" aria-pressed="${fullyPaid}" class="${fullyPaid?'is-active is-paid':''}" ${total<=0||fullyPaid?'disabled':''}>${ico('check')} ${fullyPaid?'Pagamento concluído':'Marcar como pago'}</button></div></div>
      <p class="ng-glance-pay-hint" id="ng-quick-payment-hint">${total<=0?'Sem valor a receber nesta ordem.':fullyPaid?'Pagamento integral já registrado.':`Ao marcar Pago, serão registrados ${money(due)} como recebidos agora.`}</p>
      <button type="button" class="btn btn-primary ng-glance-save" data-quick-save="${esc(order.id)}">${ico('check')} Salvar alterações</button>
      <button type="button" class="btn ng-glance-edit" data-order-edit="${esc(order.id)}">${ico('edit')} Editar OS</button>
@@ -391,7 +391,6 @@ async function saveQuickOrder(id){
  const stage=control.value;
  if(!STAGES.some(s=>s.id===stage)){toast('Status inválido.',true);return;}
  const shouldPay=paidButton?.getAttribute('aria-pressed')==='true';
- if(!shouldPay&&remaining(order)<=.001&&order.total>0){toast('Para reabrir pagamento já quitado, use Editar OS.',true);return;}
  const copy=structuredClone(order),now=new Date().toISOString();
  if(stage!==copy.stage){
   const previous=stageLabel(copy.stage);
