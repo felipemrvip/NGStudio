@@ -75,7 +75,22 @@ export async function storageUsage(){
  return {bytes,files,unknownSize,folders,updatedAt:new Date().toISOString()};
 }
 
-export async function persistOrder(order,exists){const fields={...order};delete fields._temporary;delete fields._preview;fields.due_date=fields.due_date||null;fields.owner_id=authUserId();if(!fields.owner_id)throw Error('Usuário não autenticado');const data=exists?await rest('ng_orders',`?id=eq.${encodeURIComponent(order.id)}`,'PATCH',fields):await rest('ng_orders','','POST',fields);return data[0];}
+export async function persistOrder(order,exists){
+ const fields={...order};
+ delete fields._temporary;
+ delete fields._preview;
+ fields.due_date=fields.due_date||null;
+ const owner=authUserId();
+ if(!owner)throw Error('Usuário não autenticado. Entre novamente no NG Studio.');
+ // O dono de uma OS existente nunca deve ser modificado pelo cliente.
+ if(exists)delete fields.owner_id;
+ else fields.owner_id=owner;
+ const data=exists
+  ?await rest('ng_orders',`?id=eq.${encodeURIComponent(order.id)}&owner_id=eq.${encodeURIComponent(owner)}`,'PATCH',fields)
+  :await rest('ng_orders','','POST',fields);
+ if(!Array.isArray(data)||data.length!==1)throw Error('OS não encontrada na conta atual. Atualize a página e entre novamente.');
+ return data[0];
+}
 /** Exclui apenas uma OS pertencente ao usuário autenticado (RLS reforça a restrição). */
 export async function deleteOrder(orderId){
  const owner=authUserId();
@@ -100,7 +115,26 @@ export async function deleteOrderAttachments(order){
 }
 export async function persistClient(client,exists){const fields={...client,owner_id:authUserId()};const data=exists?await rest('ng_clients',`?id=eq.${encodeURIComponent(client.id)}`,'PATCH',fields):await rest('ng_clients','','POST',fields);return data[0];}
 export async function persistSettings(settings){const data=await rest('ng_settings','?on_conflict=owner_id','POST',{...settings,owner_id:authUserId()});return data[0];}
-export async function uploadImage(orderId,file){await ensureToken();const ext=(file.name?.split('.').pop()||'png').replace(/[^a-z0-9]/gi,'').toLowerCase()||'png';const path=`${authUserId()}/${orderId}/${crypto.randomUUID()}.${ext}`;await request(`/storage/v1/object/ng-anexos/${path}`,{method:'POST',body:file,headers:{'Content-Type':file.type||'image/png','x-upsert':'false'}});return path;}
+export async function uploadImage(orderId,file){
+ await ensureToken();
+ const userId=authUserId();
+ if(!userId)throw Error('Sessão sem identificação de usuário. Entre novamente.');
+ const ext=(file.name?.split('.').pop()||'png').replace(/[^a-z0-9]/gi,'').toLowerCase()||'png';
+ const path=`${userId}/${orderId}/${crypto.randomUUID()}.${ext}`;
+ try{
+  await request(`/storage/v1/object/ng-anexos/${path}`,{
+   method:'POST',
+   body:file,
+   headers:{'Content-Type':file.type||'image/png','x-upsert':'false'}
+  });
+ }catch(e){
+  const detail=/row-level security policy/i.test(e.message)
+   ?'O Supabase recusou a gravação no bucket ng-anexos (política RLS).'
+   :e.message;
+  throw Error(detail);
+ }
+ return path;
+}
 export async function signImage(path){await ensureToken();const data=await request(`/storage/v1/object/sign/ng-anexos/${path}`,{method:'POST',body:{expiresIn:3600},headers:{'Content-Type':'application/json'}});const signed=data?.signedURL||data?.signedUrl;if(!signed)throw Error('URL de imagem indisponível');return signed.startsWith('http')?signed:`${base}/storage/v1${signed.startsWith('/')?'':'/'}${signed}`;}
 
 export async function issueNumber(prefix){await ensureToken();return request('/rest/v1/rpc/ng_next_number',{method:'POST',body:{p_prefix:prefix},headers:{'Content-Type':'application/json'}});}
