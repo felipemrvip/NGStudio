@@ -193,7 +193,7 @@ function backupExport(){
   note:'Backup dos dados JSON. Arquivos físicos dos anexos não são incluídos: guarde também uma cópia deles no Supabase Storage.',
   company:state.settings.company,
   settings:state.settings,
-  orders:state.orders.map(order=>{const {dataUrl,...rest}=order;return rest;}),
+  orders:state.orders.map(order=>({...order,attachments:(order.attachments||[]).map(({dataUrl,...attachment})=>attachment)})),
   clients:state.clients
  };
  const json=JSON.stringify(payload,null,2);
@@ -360,7 +360,7 @@ async function exportOrderPdf(id,button){
  }catch(error){toast('Não foi possível exportar o PDF: '+error.message,true);}
  finally{if(button?.isConnected){button.disabled=false;button.innerHTML=label;}}
 }
-function switchPage(page){state.page=page;state.filter='todos';state.search='';state.ordersPage=1;state.mobileMenuOpen=false;const group=NAV_GROUPS.find(g=>g.items.some(([id])=>id===page));if(group)state.sidebarGroups[group.id]=true;persistSidebar();closeModal();render();window.scrollTo({top:0,behavior:'instant'});}
+function switchPage(page){state.page=page;state.filter='todos';state.search='';state.ordersPage=1;state.mobileMenuOpen=false;const group=NAV_GROUPS.find(g=>g.items.some(([id])=>id===page));if(group)state.sidebarGroups[group.id]=true;persistSidebar();closeModal();render();window.scrollTo({top:0,behavior:'instant'});if(page==='configuracoes'&&state.mode==='cloud'&&!state.storageUsage&&!state.storageLoading)void refreshStorageUsage();}
 async function saveSettings(form){const data=Object.fromEntries(new FormData(form).entries());const s={...state.settings,...data,prefix:String(data.prefix||'FEL').replace(/[^A-Za-z0-9_-]/g,'').slice(0,12).toUpperCase()};try{state.settings=state.mode==='cloud'?{...defaultSettings,...await cloud.persistSettings(s)}:s;if(state.mode==='demo')persistDemo();refreshView();toast('Configurações salvas.');}catch(e){toast('Falha ao salvar configurações: '+e.message,true);}}
 async function saveClient(form){const c=state.clientDraft,fields=Object.fromEntries(new FormData(form).entries());if(!fields.name?.trim()){toast('Informe o nome do cliente.',true);return;}const exists=state.clients.some(x=>x.id===c.id);const object={...c,name:fields.name.trim(),phone:fields.phone?.trim()||''};try{const saved=state.mode==='cloud'?await cloud.persistClient(object,exists):object;state.clients=exists?state.clients.map(x=>x.id===c.id?saved:x):[saved,...state.clients];if(state.mode==='demo')persistDemo();if(state.draft){updateDraft();const clientField=$('#order-form [name=client_name]');const phoneField=$('#order-form [name=client_phone]');if(clientField)clientField.value=saved.name;if(phoneField)phoneField.value=saved.phone||'';state.draft.client_name=saved.name;state.draft.client_phone=saved.phone||'';state.clientDraft=null;$('#modal-root').innerHTML='';renderModal();}else{closeModal();refreshView();}toast('Cliente salvo.');}catch(e){toast(e.message,true);}}
 function moveImage(id,direction){if(!state.draft)return;updateDraft();const a=state.draft.attachments,i=a.findIndex(x=>x.id===id),j=i+direction;if(i<0||j<0||j>=a.length)return;[a[i],a[j]]=[a[j],a[i]];renderModal();}
