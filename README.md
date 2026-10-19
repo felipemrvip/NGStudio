@@ -116,3 +116,13 @@ ng-studio/
 - Servidor local respondeu HTTP 200 para `index.html`.
 - **Ainda falta validação visual manual em navegador**, pois o Chromium deste ambiente tem política administrativa que bloqueia a abertura de páginas locais. Portanto, não considere a UI testada de ponta a ponta até executar os passos de verificação após baixar o pacote.
 - A conexão real ao Supabase e o deploy na Vercel **ainda não foram realizados**, porque exigem o projeto/credenciais da empresa e um repositório no GitHub.
+## Marca e instalação como aplicativo (PWA)
+
+- `assets/brand.svg`: logotipo vetorial original extraído do PDF fornecido pela gráfica.
+- `assets/brand-symbol.svg`: monograma NG, recortado do mesmo desenho para barra lateral compacta e favicon.
+- `manifest.webmanifest`: nome, tela inicial, cores e ícones de instalação do NG Studio.
+- `service-worker.js`: mantém cache apenas do HTML/CSS/JS estático, sem guardar informações privadas do Supabase.
+- iPhone/iPad (Safari): abrir o site, tocar em **Compartilhar → Adicionar à Tela de Início**.
+- Mac (Safari): usar **Arquivo → Adicionar ao Dock** em versões compatíveis; no Chrome/Edge, procurar **Instalar aplicativo** na barra de endereço.
+
+**Nota de compatibilidade:** o ícone é fornecido em SVG vetorial. Alguns navegadores, especialmente versões do Safari/iOS, podem exigir um PNG `apple-touch-icon` para exibir o ícone personalizado no atalho. Se o iPhone mostrar uma captura da página em vez da marca, será necessário publicar uma versão PNG para esse navegador. Não confunda instalar o atalho web com um app nativo na App Store.
