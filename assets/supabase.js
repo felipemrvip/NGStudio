@@ -21,7 +21,60 @@ export async function signin(email,password,remember=true){rememberSession=Boole
 export async function signout(){try{if(session)await request('/auth/v1/logout',{method:'POST'});}catch{}saveSession(null);}
 async function ensureToken(){if(!session)throw Error('Sessão expirada. Faça login novamente.');if(session.expires_at&&session.expires_at>Date.now()/1000+90)return; if(!session.refresh_token)throw Error('Sessão expirada.');const next=await request('/auth/v1/token?grant_type=refresh_token',{method:'POST',body:{refresh_token:session.refresh_token},token:anon,headers:{'Content-Type':'application/json'}});saveSession(parseSession(next));}
 async function rest(table,params='',method='GET',body){await ensureToken();return request(`/rest/v1/${table}${params}`,{method,body,headers:{'Content-Type':'application/json',Prefer:method==='POST'?'return=representation,resolution=merge-duplicates':'return=representation'}});}
-export async function loadAll(){const [orders,clients,settings]=await Promise.all([rest('ng_orders','?select=*&order=created_at.desc&limit=2000'),rest('ng_clients','?select=*&order=created_at.desc&limit=2000'),rest('ng_settings','?select=*&limit=1')]);return {orders,clients,settings:settings[0]||null};}
+/** Pagina a leitura do Supabase para não truncar silenciosamente a lista em 2.000 registros. */
+async function fetchAllRows(table){
+ const pageSize=1000,all=[];
+ for(let offset=0;;offset+=pageSize){
+  const rows=await rest(table,`?select=*&order=created_at.desc,id.desc&limit=${pageSize}&offset=${offset}`);
+  all.push(...rows);
+  if(rows.length<pageSize)break;
+ }
+ return all;
+}
+export async function loadAll(){
+ const [orders,clients,settings]=await Promise.all([
+  fetchAllRows('ng_orders'),fetchAllRows('ng_clients'),rest('ng_settings','?select=*&limit=1')
+ ]);
+ return {orders,clients,settings:settings[0]||null};
+}
+/** Soma os metadados dos arquivos realmente armazenados no bucket privado ng-anexos.
+ * Usa somente a sessão autenticada; inclui arquivos órfãos que ainda estejam no bucket.
+ */
+export async function storageUsage(){
+ await ensureToken();
+ const userId=authUserId();
+ if(!userId)throw Error('Usuário não autenticado');
+ const queue=[userId];
+ const limit=1000;
+ let bytes=0,files=0,unknownSize=0,folders=0;
+ while(queue.length){
+  const prefix=queue.shift();
+  folders++;
+  for(let offset=0;;offset+=limit){
+   const entries=await request('/storage/v1/object/list/ng-anexos',{
+    method:'POST',
+    body:{prefix,limit,offset,sortBy:{column:'name',order:'asc'}},
+    headers:{'Content-Type':'application/json'}
+   });
+   if(!Array.isArray(entries))throw Error('Resposta inesperada ao consultar os anexos.');
+   for(const item of entries){
+    if(!item?.name)continue;
+    // O Storage API lista diretórios virtuais com id/metadata nulos.
+    if(item.id==null&&item.metadata==null){
+     queue.push(prefix+'/'+item.name);
+     continue;
+    }
+    files++;
+    const size=Number(item.metadata?.size);
+    if(Number.isFinite(size)&&size>=0)bytes+=size;
+    else unknownSize++;
+   }
+   if(entries.length<limit)break;
+  }
+ }
+ return {bytes,files,unknownSize,folders,updatedAt:new Date().toISOString()};
+}
+
 export async function persistOrder(order,exists){const fields={...order};delete fields._temporary;delete fields._preview;fields.due_date=fields.due_date||null;fields.owner_id=authUserId();if(!fields.owner_id)throw Error('Usuário não autenticado');const data=exists?await rest('ng_orders',`?id=eq.${encodeURIComponent(order.id)}`,'PATCH',fields):await rest('ng_orders','','POST',fields);return data[0];}
 /** Exclui apenas uma OS pertencente ao usuário autenticado (RLS reforça a restrição). */
 export async function deleteOrder(orderId){
