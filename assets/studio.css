@@ -351,3 +351,31 @@ html[data-theme] .studio-shell .ng-v2-main .studio-dashboard .ng-new-kpis>.kpi{
   scroll-padding-inline:12px;
  }
 }
+
+/* Seletor premium de status: paleta semântica nos temas claro e escuro. */
+html[data-theme] .ng-os-stage-select .form-field{position:relative}
+html[data-theme] .ng-stage-picker{position:relative;width:100%;min-width:0;z-index:3}
+html[data-theme] .ng-stage-picker.is-open{z-index:40}
+html[data-theme] .ng-stage-native{position:absolute!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none!important}
+html[data-theme] .ng-stage-trigger{display:flex;align-items:center;gap:10px;width:100%;min-height:44px;padding:9px 12px;border:1px solid var(--stage-line);border-radius:12px;background:var(--stage-bg);color:var(--stage-ink);font:inherit;font-size:13px;font-weight:700;cursor:pointer;text-align:left;transition:background .22s,border-color .22s,box-shadow .22s,transform .22s}
+html[data-theme] .ng-stage-trigger>.ico{width:16px;height:16px;margin-left:auto;transition:transform .22s}
+html[data-theme] .ng-stage-picker.is-open .ng-stage-trigger>.ico{transform:rotate(180deg)}
+html[data-theme] .ng-stage-trigger:hover{box-shadow:0 3px 12px #00000012}
+html[data-theme] .ng-stage-trigger:focus-visible,html[data-theme] .ng-stage-option:focus-visible{outline:2px solid var(--studio-blue);outline-offset:2px}
+html[data-theme] .ng-stage-dot{flex:none;width:9px;height:9px;border-radius:50%;background:var(--stage-ink);box-shadow:0 0 0 3px var(--stage-bg)}
+html[data-theme] .ng-stage-options{display:none;position:absolute;top:calc(100% + 8px);left:0;right:0;min-width:205px;padding:6px;border:1px solid var(--studio-line);border-radius:15px;background:var(--studio-surface);box-shadow:0 16px 45px #00000030;z-index:50}
+html[data-theme] .ng-stage-picker.is-open .ng-stage-options{display:grid;gap:3px;animation:ng-stage-open .2s cubic-bezier(.2,.8,.2,1) both}
+@keyframes ng-stage-open{from{opacity:0;transform:translateY(-6px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+html[data-theme] .ng-stage-option{display:flex;align-items:center;gap:11px;width:100%;padding:11px 12px;border:1px solid transparent;border-radius:10px;background:transparent;color:var(--studio-text);font:inherit;font-size:13px;font-weight:600;text-align:left;cursor:pointer;transition:background .18s,border-color .18s}
+html[data-theme] .ng-stage-option>.ico,html[data-theme] .ng-stage-check{width:15px;height:15px;margin-left:auto}
+html[data-theme] .ng-stage-option>.ico{color:var(--stage-ink)}
+html[data-theme] .ng-stage-option:hover,html[data-theme] .ng-stage-option[aria-selected=true]{background:var(--stage-bg);color:var(--stage-ink);border-color:var(--stage-line)}
+html[data-theme] .ng-stage-picker .stage-andamento{--stage-bg:#eaf2ff;--stage-ink:#1462d3;--stage-line:#b9d2fc}
+html[data-theme] .ng-stage-picker .stage-producao{--stage-bg:#fff3d8;--stage-ink:#a56600;--stage-line:#f3d28d}
+html[data-theme] .ng-stage-picker .stage-pronto{--stage-bg:#dff7ee;--stage-ink:#07845b;--stage-line:#a4e3cc}
+html[data-theme] .ng-stage-picker .stage-entregue{--stage-bg:#efe9ff;--stage-ink:#7450c9;--stage-line:#d5c5ff}
+html[data-theme=dark] .ng-stage-picker .stage-andamento{--stage-bg:#132b4c;--stage-ink:#83b8ff;--stage-line:#2b5081}
+html[data-theme=dark] .ng-stage-picker .stage-producao{--stage-bg:#3a2b14;--stage-ink:#f3c66d;--stage-line:#725522}
+html[data-theme=dark] .ng-stage-picker .stage-pronto{--stage-bg:#12382e;--stage-ink:#6de2b5;--stage-line:#27654f}
+html[data-theme=dark] .ng-stage-picker .stage-entregue{--stage-bg:#2b2247;--stage-ink:#c5aeff;--stage-line:#594587}
+@media(prefers-reduced-motion:reduce){html[data-theme] .ng-stage-options{animation:none!important}}
