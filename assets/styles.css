@@ -309,3 +309,39 @@
 .sidebar-brand-logo.sidebar-brand-symbol{display:none}
 .sidebar.is-collapsed .sidebar-brand-logo.sidebar-brand-full{display:none}
 .sidebar.is-collapsed .sidebar-brand-logo.sidebar-brand-symbol{display:block}
+
+/* Dashboard financeiro mensal interativo */
+.ng-revenue-panel{margin:0 0 18px;padding-bottom:18px;overflow:hidden}
+.ng-revenue-heading{align-items:center;padding-bottom:17px}
+.ng-revenue-tools{display:flex;align-items:center;gap:9px;color:#9dafc8;font-size:11px}
+.ng-revenue-tools .select{width:96px;padding:9px 12px}
+.ng-revenue-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px;padding:0 22px 18px}
+.ng-revenue-kpis>div{border-radius:11px;background:#102039;border:1px solid #29405e;padding:16px;min-width:0}
+.ng-revenue-kpis small{display:block;color:#a6b9d1;font-size:11px}
+.ng-revenue-kpis strong{display:block;font-size:clamp(16px,1.55vw,24px);margin:8px 0;color:#f7faff;letter-spacing:-.5px;overflow-wrap:anywhere}
+.ng-revenue-kpis .ng-revenue-green{color:#40ddb0}
+.ng-revenue-kpis .ng-revenue-yellow{color:#ffcf40}
+.ng-revenue-kpis span{font-size:10px;color:#8298b5}
+.ng-revenue-chart-wrap{padding:9px 22px 3px}
+.ng-revenue-chart{height:247px;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:10px;padding:16px 6px 0;border-bottom:1px solid #3b506b;background:repeating-linear-gradient(to top,#2a3e5833 0 1px,transparent 1px 25%)}
+.ng-revenue-month{background:transparent;border:0;display:flex;flex-direction:column;gap:0;padding:0;align-items:center;justify-content:flex-end;min-width:0;cursor:pointer;color:#9aafca;position:relative}
+.ng-revenue-month:focus-visible{outline:2px solid #ffcf40;outline-offset:4px}
+.ng-revenue-columns{width:100%;height:205px;display:flex;justify-content:center;gap:4px;align-items:flex-end}
+.ng-revenue-bar{display:block;width:min(23px,37%);height:max(3px,var(--bar-height));border-radius:5px 5px 0 0;transform-origin:bottom;animation:ng-revenue-rise .85s cubic-bezier(.18,.73,.22,1) both;animation-delay:calc(var(--bar-index)*42ms);transition:filter .2s ease,opacity .2s ease}
+.ng-revenue-billed{background:linear-gradient(0deg,#1c508d,#499cff);box-shadow:0 -3px 17px #3287f52a}
+.ng-revenue-received{background:linear-gradient(0deg,#826218,#ffce3d);box-shadow:0 -3px 17px #ffc92e20}
+.ng-revenue-month:hover .ng-revenue-bar,.ng-revenue-month.is-selected .ng-revenue-bar{filter:brightness(1.25)}
+.ng-revenue-month.is-selected .ng-revenue-month-label{color:#ffd24f;font-weight:800}
+.ng-revenue-month-label{font-size:11px;height:24px;padding-top:8px;white-space:nowrap}
+.ng-revenue-bottom{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding:14px 25px 0}
+.ng-revenue-legend{display:flex;flex-wrap:wrap;gap:18px;color:#b7c7dc;font-size:11px}
+.ng-revenue-legend span{display:flex;align-items:center;gap:7px}
+.ng-revenue-legend i{width:9px;height:9px;border-radius:3px;background:#499cff}
+.ng-revenue-legend span:nth-child(2) i{background:#ffcf3d}
+.ng-revenue-month-detail{font-size:11px;color:#acc0da}
+.ng-revenue-month-detail strong{color:white}
+.ng-revenue-footnote{padding:9px 25px 0;color:#8398b2;font-size:10px;line-height:1.6;margin:0}
+@keyframes ng-revenue-rise{from{transform:scaleY(.035);opacity:.25}to{transform:scaleY(1);opacity:1}}
+@media(max-width:1050px){.ng-revenue-chart{gap:4px}.ng-revenue-columns{gap:2px}}
+@media(max-width:700px){.ng-revenue-heading{padding:16px 13px;gap:8px}.ng-revenue-heading h3{font-size:16px}.ng-revenue-heading p{font-size:10px}.ng-revenue-kpis{grid-template-columns:1fr;gap:7px;padding:0 13px 10px}.ng-revenue-kpis>div{padding:11px 13px}.ng-revenue-kpis strong{font-size:20px}.ng-revenue-chart-wrap{padding:4px 12px 0}.ng-revenue-chart{height:190px;gap:2px;padding:10px 0 0}.ng-revenue-columns{height:157px;gap:2px}.ng-revenue-bar{width:min(16px,37%)}.ng-revenue-month-label{font-size:9px}.ng-revenue-bottom{padding:12px 14px 0}.ng-revenue-footnote{padding:10px 14px 0}}
+@media(prefers-reduced-motion:reduce){.ng-revenue-bar{animation:none;transition:none}}
