@@ -77,28 +77,44 @@ function navItem(id,icon,label,mobile=false){
 }
 function nav(){
  const collapsed=state.sidebarCollapsed;
- const sidebarGroups=NAV_GROUPS.map(group=>{
-  const open=Boolean(state.sidebarGroups[group.id]);
-  const active=group.items.some(([id])=>state.page===id);
-  return `<div class="sidebar-group ${open?'is-open':''} ${active?'has-active':''}">
-    <button type="button" class="sidebar-group-toggle ${active?'has-active':''}" data-toggle-group="${group.id}" aria-expanded="${open&&!collapsed}" title="${esc(group.title)}">${ico(group.icon)}<span class="sidebar-text">${esc(group.title)}</span>${ico('chevron')}</button>
-    <div class="sidebar-group-items" ${open&&!collapsed?'':'hidden'}>${group.items.map(([id,icon,label])=>navItem(id,icon,label)).join('')}</div>
-   </div>`;
- }).join('');
- const mobileMenu=NAV_GROUPS.map(group=>`<div class="mobile-menu-category"><span>${esc(group.title)}</span>${group.items.map(([id,icon,label])=>navItem(id,icon,label,true)).join('')}</div>`).join('');
- return `<aside class="sidebar ${collapsed?'is-collapsed':''}" aria-label="Navegação">
+ const links=[
+  ['dashboard','home','Meu Dashboard'],
+  ['geral','chart','Dashboard Geral'],
+  ['ordens','file','Ordens de Serviço'],
+  ['producao','layers','Produção'],
+  ['clientes','users','Clientes'],
+  ['financeiro','wallet','Financeiro'],
+  ['historico','clock','Histórico'],
+  ['equipe','users','Equipe'],
+  ['configuracoes','settings','Configurações']
+ ];
+ const initials=String(state.profile||'NG').trim().split(/\s+/).slice(0,2).map(n=>n[0]).join('').toUpperCase();
+ return `<aside class="sidebar ng-design-sidebar ${collapsed?'is-collapsed':''}" aria-label="Navegação">
   <div class="sidebar-brand-row">
-   <div class="logo"><img class="sidebar-brand-logo sidebar-brand-full" src="assets/brand.svg" alt="NG PrintSign Gráfica"/><img class="sidebar-brand-logo sidebar-brand-symbol" src="assets/brand-symbol.svg" alt="NG"/><div class="sidebar-brand-label"><h2>NG Studio</h2><p>Gestão da gráfica</p></div></div>
+   <div class="logo">
+    <img class="sidebar-brand-logo sidebar-brand-full" src="assets/brand-symbol.svg" alt="NG PrintSign"/>
+    <img class="sidebar-brand-logo sidebar-brand-symbol" src="assets/brand-symbol.svg" alt="NG"/>
+    <div class="sidebar-brand-label"><h2>NG Studio</h2><p>NG PrintSign Gráfica</p></div>
+   </div>
    <button type="button" class="sidebar-collapse" data-collapse-sidebar title="${collapsed?'Expandir menu':'Recolher menu'}" aria-label="${collapsed?'Expandir menu':'Recolher menu'}">${ico('panel')}</button>
   </div>
-  <nav class="nav-list sidebar-navigation" aria-label="Menu principal">
-   ${navItem('dashboard','home','Meu Dashboard')}
-   <div class="sidebar-section-caption">ÁREA DE TRABALHO</div>
-   ${sidebarGroups}
+  <button type="button" class="ng-sidebar-person" data-switch-profile title="Trocar perfil">
+   <span class="ng-sidebar-avatar">${esc(initials)}</span>
+   <span class="ng-sidebar-welcome">Bem-vindo de volta,</span>
+   <strong>${esc(state.profile||'Selecione um perfil')}</strong>
+   <small>Trocar perfil ${ico('chevron')}</small>
+  </button>
+  <nav class="nav-list sidebar-navigation ng-design-nav" aria-label="Menu principal">
+   <span class="ng-sidebar-caption">VISÃO GERAL</span>
+   ${links.slice(0,2).map(([id,icon,label])=>navItem(id,icon,label)).join('')}
+   <span class="ng-sidebar-caption ng-sidebar-caption-later">GESTÃO</span>
+   ${links.slice(2,7).map(([id,icon,label])=>navItem(id,icon,label)).join('')}
+   <span class="ng-sidebar-caption ng-sidebar-caption-later">PREFERÊNCIAS</span>
+   ${links.slice(7).map(([id,icon,label])=>navItem(id,icon,label)).join('')}
   </nav>
   <div class="sidebar-bottom">
-   <button class="sidebar-create" data-new title="Nova Ordem de Serviço">${ico('plus')}<span>Nova Ordem de Serviço</span></button>
-   <button class="sidebar-profile" data-switch-profile title="Trocar perfil"><span class="sidebar-profile-avatar">${esc((state.profile||'NG').slice(0,2).toUpperCase())}</span><span class="sidebar-profile-info"><b>${esc(state.profile||'Selecionar perfil')}</b><small>Trocar perfil</small></span>${ico('chevron')}</button>
+   <button type="button" class="sidebar-create" data-new title="Nova Ordem de Serviço">${ico('plus')}<span>Nova Ordem de Serviço</span></button>
+   <div class="ng-sidebar-signature"><img src="assets/brand-symbol.svg" alt=""/><div><b>NG PrintSign</b><small>Seu estúdio, sua gestão.</small></div></div>
   </div>
   <nav class="mobile-quick-nav" aria-label="Navegação rápida">
    ${navItem('dashboard','home','Início',true)}
@@ -109,8 +125,10 @@ function nav(){
   </nav>
   <div class="mobile-menu-overlay ${state.mobileMenuOpen?'is-open':''}" ${state.mobileMenuOpen?'':'hidden'}>
    <div class="mobile-menu-heading"><div><b>NG Studio</b><small>Todas as páginas</small></div><button type="button" class="iconbutton" data-mobile-more aria-label="Fechar menu">${ico('close')}</button></div>
-   <nav class="mobile-menu-links" aria-label="Todas as páginas">${navItem('dashboard','home','Meu Dashboard',true)}${mobileMenu}</nav>
-   <button class="sidebar-create mobile-create" data-new>${ico('plus')} Nova Ordem de Serviço</button>
+   <nav class="mobile-menu-links" aria-label="Todas as páginas">
+    ${links.map(([id,icon,label])=>navItem(id,icon,label,true)).join('')}
+   </nav>
+   <button type="button" class="sidebar-create mobile-create" data-new>${ico('plus')} Nova Ordem de Serviço</button>
   </div>
  </aside>`;
 }
@@ -126,8 +144,22 @@ async function persistTeam(names){const updated={...state.settings,attendants:na
 async function addProfile(raw){const name=String(raw||'').trim().replace(/\\s+/g,' ');if(!name||name.includes(',')||name.length>60){toast('Digite um nome válido, sem vírgulas.',true);return;}if(team().some(n=>n.toLocaleLowerCase('pt-BR')===name.toLocaleLowerCase('pt-BR'))){toast('Funcionário já cadastrado.',true);return;}if(await persistTeam([...team(),name]))toast('Funcionário adicionado.');}
 async function removeProfile(name){if(team().length<=1)return;if(profileOrdersFor(name).length){toast('Reatribua os serviços deste funcionário antes de removê-lo.',true);return;}if(!window.confirm('Remover o perfil '+name+'?'))return;if(await persistTeam(team().filter(n=>n!==name)))toast('Perfil removido.');}
 function pageTitle(){return {geral:['Dashboard Geral','Indicadores de toda a gráfica.'],equipe:['Equipe','Gerencie os perfis de funcionários.'],dashboard:['Meu Dashboard','Seus serviços e indicadores individuais.'],ordens:['Ordens de Serviço','Cadastre, consulte e organize os pedidos da sua gráfica.'],producao:['Produção','Mova os serviços entre as etapas arrastando os cartões.'],clientes:['Clientes','Contatos e histórico de serviços em um único lugar.'],financeiro:['Financeiro','Pagamentos recebidos e valores ainda pendentes.'],historico:['Histórico','Serviços entregues e últimas movimentações.'],configuracoes:['Configurações','Personalize os dados que aparecem nos documentos da NG.']}[state.page];}
-function header(){const [title,subtitle]=pageTitle();return `<div class="topbar"><div class="heading"><h1>${esc(title)}</h1><p>${esc(subtitle)}</p></div><div class="tools">${state.page==='configuracoes'||state.draft||state.viewingOrderId?'':`<label class="search">${ico('search')}<input id="global-search" type="search" autocomplete="off" spellcheck="false" aria-label="${state.page==='equipe'?'Buscar funcionário':state.page==='clientes'?'Buscar cliente ou telefone':'Buscar OS, cliente ou serviço'}" placeholder="${state.page==='equipe'?'Buscar funcionário...':state.page==='clientes'?'Buscar cliente ou telefone...':'Buscar OS, cliente ou serviço...'}" value="${esc(state.search)}"/><span class="shortcut">⌘ K</span></label>`}<button type="button" class="iconbutton theme-toggle" data-toggle-theme title="${state.theme==='light'?'Ativar modo escuro':'Ativar modo claro'}" aria-label="${state.theme==='light'?'Ativar modo escuro':'Ativar modo claro'}">${ico(state.theme==='light'?'moon':'sun')}</button>${state.mode==='cloud'?`<button class="iconbutton" title="Atualizar dados" data-refresh>${ico('refresh')}</button>`:''}<div class="userchip"><div class="avatar">NG</div><div><b>${esc(state.profile||'Selecionar perfil')}</b><small>${state.mode==='cloud'?'Equipe NG Studio':'Demonstração'}</small></div></div><button class="btn btn-sm" data-switch-profile>Trocar perfil</button>${state.mode==='cloud'?`<button class="iconbutton" title="Sair" data-logout>${ico('logout')}</button>`:''}</div></div>`;}
-function render(){applyTheme(state.theme);if(!state.profile){profileScreen();return;}const root=$('#app');root.innerHTML=`<div class="shell ${state.sidebarCollapsed?'sidebar-collapsed':''}">${nav()}<main class="main ${(state.draft||state.viewingOrderId)?'os-editor-page':''}">${header()}${state.mode==='demo'?`<div class="demo-banner">${ico('alert')} <span><b>MODO DEMONSTRAÇÃO:</b> os dados ficam somente neste navegador. Configure o Supabase antes de cadastrar serviços reais ou compartilhar entre computadores.</span></div>`:''}<div id="view">${state.draft||state.viewingOrderId?'':pageView()}</div></main></div>`;renderModal();}
+function header(){
+ const [title,subtitle]=pageTitle();
+ const searchPlace=state.page==='equipe'?'Buscar funcionário...':state.page==='clientes'?'Buscar cliente ou telefone...':'Buscar OS, cliente ou serviço...';
+ const initials=String(state.profile||'NG').trim().split(/\s+/).slice(0,2).map(n=>n[0]).join('').toUpperCase();
+ return `<header class="topbar ng-design-topbar">
+  <div class="heading"><span class="ng-heading-eyebrow">NG PRINTSIGN · ESTÚDIO</span><h1>${esc(title)}</h1><p>${esc(subtitle)}</p></div>
+  <div class="tools">
+   ${state.page==='configuracoes'||state.draft||state.viewingOrderId?'':`<label class="search">${ico('search')}<input id="global-search" type="search" autocomplete="off" spellcheck="false" aria-label="${esc(searchPlace)}" placeholder="${esc(searchPlace)}" value="${esc(state.search)}"/><span class="shortcut">⌘ K</span></label>`}
+   <button type="button" class="iconbutton theme-toggle" data-toggle-theme title="${state.theme==='light'?'Ativar modo escuro':'Ativar modo claro'}" aria-label="${state.theme==='light'?'Ativar modo escuro':'Ativar modo claro'}">${ico(state.theme==='light'?'moon':'sun')}</button>
+   ${state.mode==='cloud'?`<button type="button" class="iconbutton ng-refresh-btn" title="Atualizar dados" aria-label="Atualizar dados" data-refresh>${ico('refresh')}</button>`:''}
+   <button type="button" class="ng-topbar-profile" data-switch-profile title="Trocar perfil" aria-label="Trocar perfil de funcionário"><span>${esc(initials)}</span>${ico('chevron')}</button>
+   ${state.mode==='cloud'?`<button type="button" class="iconbutton ng-topbar-logout" title="Sair" aria-label="Sair" data-logout>${ico('logout')}</button>`:''}
+  </div>
+ </header>`;
+}
+function render(){applyTheme(state.theme);if(!state.profile){profileScreen();return;}const root=$('#app');root.innerHTML=`<div class="shell ng-v2-shell ${state.sidebarCollapsed?'sidebar-collapsed':''}">${nav()}<main class="main ng-v2-main ${(state.draft||state.viewingOrderId)?'os-editor-page':''}">${header()}${state.mode==='demo'?`<div class="demo-banner">${ico('alert')} <span><b>MODO DEMONSTRAÇÃO:</b> os dados ficam somente neste navegador. Configure o Supabase antes de cadastrar serviços reais ou compartilhar entre computadores.</span></div>`:''}<div id="view">${state.draft||state.viewingOrderId?'':pageView()}</div></main></div>`;renderModal();}
 function refreshView(){const view=$('#view');if(view)view.innerHTML=pageView();}
 function pageView(){switch(state.page){case 'dashboard':return dashboard(true);case 'geral':return dashboard(false);case 'equipe':return teamPage();case 'ordens':return ordersPage();case 'producao':return kanbanPage();case 'clientes':return clientsPage();case 'financeiro':return financePage();case 'historico':return historyPage();case 'configuracoes':return settingsPage();return dashboard();}}
 function kpi(label,value,icon,tone,desc){return `<div class="kpi"><div class="badge-icon ${tone}">${ico(icon)}</div><div class="kpi-label">${label}</div><strong>${esc(value)}</strong><small>${esc(desc)}</small></div>`;}
