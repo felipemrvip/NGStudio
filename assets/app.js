@@ -1,4 +1,4 @@
-import {STAGES,defaultSettings,money,paid,remaining,paymentStatus,stageLabel,fmtDate,currentMonth,esc,uid,nextNumber,stats,monthlyRevenue,revenueYears} from './logic.mjs';
+import {STAGES,defaultSettings,money,paid,remaining,paymentStatus,stageLabel,fmtDate,currentMonth,esc,uid,nextNumber,stats,monthlyRevenue,revenueYears,monthlyPerformance} from './logic.mjs';
 import {seedDemo} from './demo.js';
 import {buildPrintHtml} from './print.js';
 import {downloadOrderPdf,printOrderDocument} from './pdf.js';
@@ -137,6 +137,45 @@ function ordered(){return [...filteredOrders()].sort((a,b)=>new Date(b.created_a
 function chartMarkup(source=state.orders){const days=[];for(let i=6;i>=0;i--){const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-i);days.push(d);}const bars=days.map(d=>{const next=new Date(d);next.setDate(next.getDate()+1);const count=source.filter(o=>new Date(o.created_at)>=d&&new Date(o.created_at)<next).length;const end=source.filter(o=>o.delivered_at&&new Date(o.delivered_at)>=d&&new Date(o.delivered_at)<next).length;return {label:d.toLocaleDateString('pt-BR',{weekday:'short'}).replace('.',''),count,end};});const max=Math.max(5,...bars.flatMap(b=>[b.count,b.end]));return `<div class="bars">${bars.map(b=>`<div class="bar-group" title="${b.count} novas OS / ${b.end} entregues"><div class="bar" style="height:${Math.max(2,b.count/max*94)}%"></div><div class="bar gold" style="height:${Math.max(2,b.end/max*94)}%"></div><span class="bar-label">${esc(b.label)}</span></div>`).join('')}</div><div class="chart-legend"><span><i class="dot"></i>Entradas de OS</span><span><i class="dot gold"></i>Entregues</span></div>`;}
 function donutMarkup(source=state.orders){const colors={'analise':'#ffcc30','andamento':'#2d7fe8','producao':'#9d57ee','pronto':'#24bf87','entregue':'#91accd'};const total=source.length||1;let start=0;const parts=STAGES.map(s=>{const n=source.filter(o=>o.stage===s.id).length;const from=start;start+=n/total*100;return {stage:s,n,from,to:start,color:colors[s.id]};});const gradient=parts.map(p=>`${p.color} ${p.from}% ${p.to}%`).join(',');return `<div class="donut-wrap"><div class="donut" style="background:conic-gradient(${gradient||'#26354d 0% 100%'})"><div class="donut-inner"><small>Total</small><strong>${source.length}</strong><span>ordens de serviço</span></div></div><div class="legend">${parts.map(p=>`<div class="legend-row"><i class="dot" style="background:${p.color}"></i><span>${esc(p.stage.label)}</span><strong>${p.n}</strong><small style="color:var(--muted)">${Math.round(p.n/total*100)}%</small></div>`).join('')}</div></div>`;}
 const MONTH_LABELS=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+function monthlyPerformanceMarkup(detail){
+ const short=MONTH_LABELS[detail.month];
+ const monthName=new Date(detail.year,detail.month,1).toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+ const labels=[
+  ['analise','Análise'],['andamento','Em andamento'],['producao','Produção'],
+  ['pronto','Pronto'],['entregue','Entregue']
+ ];
+ const max=Math.max(1,...labels.map(([id])=>detail.stages[id]||0));
+ const staged=labels.map(([id,label],index)=>`<div class="ng-month-stage"><div><span>${label}</span><b>${detail.stages[id]||0}</b></div><div class="ng-month-stage-track"><span class="ng-month-stage-bar ng-stage-${id}" style="--stage-width:${((detail.stages[id]||0)/max*100).toFixed(1)}%;--stage-index:${index}"></span></div></div>`).join('');
+ const orderRows=detail.ordersCreated.slice(0,8).map(o=>`<button type="button" class="ng-month-order-row" data-open-order="${esc(o.id)}"><strong>${esc(o.number)}</strong><span>${esc(o.title||'Serviço sem descrição')}</span><small>${money(o.total)}</small>${ico('arrow')}</button>`).join('');
+ return `<div class="ng-month-report" aria-label="Desempenho do mês ${esc(monthName)}">
+ <div class="ng-month-report-heading"><div><span class="ng-month-eyebrow">RELATÓRIO MENSAL</span><h3>Desempenho de ${esc(monthName)}</h3><p>Valores e movimentações da produção no período selecionado.</p></div><span class="ng-month-report-pill">${short} / ${detail.year}</span></div>
+ <div class="ng-month-cards">
+  <div class="ng-month-card"><span>${ico('file')} OS criadas</span><strong>${detail.orders}</strong><small>Novos serviços no mês</small></div>
+  <div class="ng-month-card"><span>${ico('layers')} OS entregues</span><strong>${detail.delivered}</strong><small>Entregas ocorridas no mês</small></div>
+  <div class="ng-month-card"><span>${ico('wallet')} Valor dos serviços</span><strong>${money(detail.billed)}</strong><small>OS criadas no período</small></div>
+  <div class="ng-month-card"><span>${ico('check')} Recebimentos</span><strong class="text-green">${money(detail.received)}</strong><small>${detail.payments} pagamento(s) no mês</small></div>
+  <div class="ng-month-card"><span>${ico('clock')} Saldo a receber</span><strong class="ng-revenue-yellow">${money(detail.outstanding)}</strong><small>Saldo atual das OS do mês</small></div>
+  <div class="ng-month-card"><span>${ico('chart')} Ticket médio</span><strong>${money(detail.averageTicket)}</strong><small>Valor médio por serviço</small></div>
+ </div>
+ <div class="ng-month-lower">
+  <section class="ng-month-section"><div class="ng-month-section-header"><h4>${ico('layers')} Produção do mês</h4><p>Situação <b>atual</b> das OS criadas em ${short}</p></div><div class="ng-month-stages">${staged}</div><p class="ng-month-disclaimer">As entregas são contadas pela data de entrega. As etapas acima mostram o status atual das ordens iniciadas no mês, não uma fotografia histórica.</p></section>
+  <section class="ng-month-section"><div class="ng-month-section-header"><h4>${ico('file')} Serviços registrados</h4><p>${detail.orders} ordem(ns) criadas em ${short}</p></div><div class="ng-month-orders">${orderRows||'<div class="ng-month-empty">Nenhuma ordem cadastrada neste mês.</div>'}</div>${detail.orders>8?`<p class="ng-month-more">Exibindo as 8 OS mais recentes do mês.</p>`:''}</section>
+ </div>
+ </div>`;
+}
+function updateMonthlySelection(month){
+ if(!Number.isInteger(month)||month<0||month>11)return;
+ state.revenueHoverMonth=month;
+ const panel=$('#ng-revenue-panel');if(!panel)return;
+ panel.querySelectorAll('[data-revenue-month]').forEach(button=>button.classList.toggle('is-selected',Number(button.dataset.revenueMonth)===month));
+ const select=$('#ng-revenue-month-select');if(select)select.value=String(month);
+ const source=filteredOrders(state.page==='dashboard'?profileOrders():state.orders);
+ const value=monthlyRevenue(source,state.revenueYear)[month];
+ const info=$('#ng-revenue-month-detail');
+ if(info)info.innerHTML=MONTH_LABELS[month]+': <strong>'+money(value.billed)+'</strong> em '+value.orders+' OS · <strong>'+money(value.received)+'</strong> recebidos';
+ const report=$('#ng-monthly-performance');
+ if(report){report.innerHTML=monthlyPerformanceMarkup(monthlyPerformance(source,state.revenueYear,month));report.classList.remove('ng-report-enter');void report.offsetWidth;report.classList.add('ng-report-enter');}
+}
 function revenuePanel(source,individual){
  const years=revenueYears(source);
  if(!years.includes(Number(state.revenueYear)))state.revenueYear=years[0];
@@ -149,14 +188,17 @@ function revenuePanel(source,individual){
  const monthNow=new Date().getMonth();
  const selected=state.revenueHoverMonth!=null?data[state.revenueHoverMonth]:null;
  const initial=selected||data[state.revenueYear===currentYear?monthNow:Math.max(0,data.findLastIndex(m=>m.orders||m.received))];
+ const monthIndex=initial?.month??monthNow;
+ const detail=monthlyPerformance(source,state.revenueYear,monthIndex);
  return `<section class="panel ng-revenue-panel" id="ng-revenue-panel">
-  <div class="panel-head ng-revenue-heading"><div class="panel-title"><span class="badge-icon yellow">${ico('chart')}</span><div><h3>Resultados mês a mês</h3><p>${individual?'Meu desempenho':'Toda a equipe'} · Evolução dos serviços e recebimentos</p></div></div><div class="ng-revenue-tools"><label for="ng-revenue-year">Ano</label><select id="ng-revenue-year" class="select" aria-label="Selecionar ano">${years.map(year=>`<option value="${year}" ${year===state.revenueYear?'selected':''}>${year}</option>`).join('')}</select></div></div>
+  <div class="panel-head ng-revenue-heading"><div class="panel-title"><span class="badge-icon yellow">${ico('chart')}</span><div><h3>Resultados mês a mês</h3><p>${individual?'Meu desempenho':'Toda a equipe'} · Evolução dos serviços e recebimentos</p></div></div><div class="ng-revenue-tools"><label for="ng-revenue-year">Ano</label><select id="ng-revenue-year" class="select" aria-label="Selecionar ano">${years.map(year=>`<option value="${year}" ${year===state.revenueYear?'selected':''}>${year}</option>`).join('')}</select><label for="ng-revenue-month-select">Mês</label><select id="ng-revenue-month-select" class="select" aria-label="Selecionar mês">${MONTH_LABELS.map((label,index)=>`<option value="${index}" ${index===monthIndex?'selected':''}>${label}</option>`).join('')}</select></div></div>
   <div class="ng-revenue-kpis"><div><small>Serviços lançados no ano</small><strong>${money(billed)}</strong><span>Valor total das OS criadas</span></div><div><small>Recebido no ano</small><strong class="ng-revenue-green">${money(received)}</strong><span>Pagamentos recebidos no período</span></div><div><small>Saldo em aberto das OS do ano</small><strong class="ng-revenue-yellow">${money(balance)}</strong><span>Posição atual dessas ordens</span></div></div>
   <div class="ng-revenue-chart-wrap"><div class="ng-revenue-chart" role="group" aria-label="Gráfico mensal de serviços lançados e pagamentos recebidos em ${state.revenueYear}">
   ${data.map((month,index)=>`<button class="ng-revenue-month ${month.month===(initial?.month??0)?'is-selected':''}" type="button" data-revenue-month="${index}" aria-label="${MONTH_LABELS[index]}: serviços ${money(month.billed)}, recebimentos ${money(month.received)}, ${month.orders} ordens" title="${MONTH_LABELS[index]}: ${money(month.billed)} em serviços · ${money(month.received)} recebidos"><span class="ng-revenue-columns"><i class="ng-revenue-bar ng-revenue-billed" style="--bar-height:${Math.round(month.billed/max*100)}%;--bar-index:${index}"></i><i class="ng-revenue-bar ng-revenue-received" style="--bar-height:${Math.round(month.received/max*100)}%;--bar-index:${index}"></i></span><span class="ng-revenue-month-label">${MONTH_LABELS[index]}</span></button>`).join('')}
   </div></div>
   <div class="ng-revenue-bottom"><div class="ng-revenue-legend"><span><i></i> Serviços lançados</span><span><i></i> Recebido</span></div><div class="ng-revenue-month-detail" id="ng-revenue-month-detail">${initial?`${MONTH_LABELS[initial.month]}: <strong>${money(initial.billed)}</strong> em ${initial.orders} OS · <strong>${money(initial.received)}</strong> recebidos`:'Nenhuma movimentação'}</div></div>
-  <p class="ng-revenue-footnote">As colunas mostram o total das OS por data de criação e os pagamentos pela data em que foram recebidos. O saldo é o valor ainda pendente das OS criadas nesse ano.</p>
+  <p class="ng-revenue-footnote">As colunas mostram o valor das OS por data de criação e os pagamentos pela data em que foram recebidos. O saldo corresponde ao valor ainda pendente das OS criadas nesse ano.</p>
+  <div id="ng-monthly-performance">${monthlyPerformanceMarkup(detail)}</div>
  </section>`;
 }
 function dashboard(individual=false){const viewOrders=filteredOrders(individual?profileOrders():state.orders);const s=stats(viewOrders);return `<div class="page-actions"><span class="caption">${individual?'Meu desempenho • '+esc(state.profile):'Visão geral'} • ${new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'})}</span><div class="push"></div><button class="btn btn-primary" data-new>${ico('plus')} Nova OS</button></div>${revenuePanel(viewOrders,individual)}<div class="kpis">${kpi('OS Ativas',s.active,'file','','Exceto serviços entregues')}${kpi('Em Produção',s.production,'settings','','Trabalhos em produção')}${kpi('Prontas para Retirada',s.ready,'check','green','Aguardando cliente')}${kpi('A Receber',money(s.receivable),'wallet','yellow','Saldo das ordens de serviço')}${kpi('Recebido no Mês',money(s.receivedMonth),'chart','purple','Pagamentos deste mês')}</div><section class="grid-main"><div class="panel"><div class="panel-head"><div class="panel-title"><span class="badge-icon yellow">${ico('chart')}</span><div><h3>Fluxo de Produção</h3><p>Entradas e entregas dos últimos 7 dias</p></div></div><span class="caption">Últimos 7 dias</span></div><div class="chart">${chartMarkup(viewOrders)}</div></div><div class="panel"><div class="panel-head"><div class="panel-title"><span class="badge-icon yellow">${ico('layers')}</span><div><h3>Status das OS</h3><p>Distribuição atual das ordens</p></div></div><button data-nav="producao" class="btn btn-sm">Ver detalhes ${ico('arrow')}</button></div>${donutMarkup(viewOrders)}</div></section><section class="panel table-panel"><div class="panel-head"><div class="panel-title"><span class="badge-icon yellow">${ico('file')}</span><div><h3>Serviços recentes</h3><p>Acompanhe as ordens de serviço mais recentes</p></div></div><button data-nav="ordens" class="btn btn-sm">Ver todas ${ico('arrow')}</button></div>${ordersTable([...viewOrders].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).slice(0,8))}</section>`;}
@@ -480,7 +522,7 @@ document.addEventListener('click',async e=>{
  if(target.matches('[data-open-order]')){openOrderDetail(target.dataset.openOrder);return;}
  if(target.matches('[data-client-id]')){state.clientDraft=structuredClone(state.clients.find(c=>c.id===target.dataset.clientId));state.draft=null;renderModal();return;}
  if(target.matches('[data-new-client]')){state.clientDraft={id:uid(),name:'',phone:'',created_at:new Date().toISOString()};renderModal();return;}
- if(target.matches('[data-revenue-month]')){const month=Number(target.dataset.revenueMonth);if(month>=0&&month<12){state.revenueHoverMonth=month;const section=$('#ng-revenue-panel');if(section){section.querySelectorAll('[data-revenue-month]').forEach(button=>button.classList.toggle('is-selected',Number(button.dataset.revenueMonth)===month));const source=filteredOrders(state.page==='dashboard'?profileOrders():state.orders);const value=monthlyRevenue(source,state.revenueYear)[month];const info=$('#ng-revenue-month-detail');if(info)info.innerHTML=MONTH_LABELS[month]+': <strong>'+money(value.billed)+'</strong> em '+value.orders+' OS · <strong>'+money(value.received)+'</strong> recebidos';}}return;}
+ if(target.matches('[data-revenue-month]')){updateMonthlySelection(Number(target.dataset.revenueMonth));return;}
  if(target.matches('[data-filter]')){state.filter=target.dataset.filter;state.ordersPage=1;refreshView();return;}
  if(target.matches('[data-orders-page]')){const page=Number(target.dataset.ordersPage);if(Number.isInteger(page)&&page>0){state.ordersPage=page;refreshView();}return;}
  if(target.matches('[data-close]')){if(state.clientDraft&&state.draft){state.clientDraft=null;$('#modal-root').innerHTML='';return;}if(state.draft&&state.orders.some(o=>o.id===state.draft.id)){const id=state.draft.id;closeModal();state.viewingOrderId=id;}else closeModal();render();return;}
@@ -503,6 +545,7 @@ document.addEventListener('click',async e=>{
 });
 document.addEventListener('change',async e=>{const target=e.target;
  if(target.id==='ng-revenue-year'){state.revenueYear=Number(target.value);state.revenueHoverMonth=null;refreshView();return;}
+ if(target.id==='ng-revenue-month-select'){updateMonthlySelection(Number(target.value));return;}
  if(target.id==='orders-page-size'){state.ordersPerPage=Number(target.value)||15;state.ordersPage=1;refreshView();return;}
  if(target.id==='image-picker'){await addImages(target.files);target.value='';return;}
  if(target.matches('[data-img-enabled]')){updateAttachment(target.dataset.imgEnabled,'include_pdf',target.checked);scheduleOrderPreview();return;}
