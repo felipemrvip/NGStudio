@@ -125,7 +125,7 @@ export async function uploadImage(orderId,file){
   await request(`/storage/v1/object/ng-anexos/${path}`,{
    method:'POST',
    body:file,
-   headers:{'Content-Type':file.type||'image/png','x-upsert':'false'}
+   headers:{'Content-Type':file.type||'image/png'}
   });
  }catch(e){
   const detail=/row-level security policy/i.test(e.message)
