@@ -215,6 +215,7 @@ document.addEventListener('change',async e=>{const target=e.target;
  if(target.matches('[data-img-enabled]')){updateAttachment(target.dataset.imgEnabled,'include_pdf',target.checked);scheduleOrderPreview();return;}
  if(target.matches('[data-img-size]')){updateAttachment(target.dataset.imgSize,'size',target.value);scheduleOrderPreview();return;}
  if(target.matches('[name=payment_state]')&&state.draft){rerenderPaymentParts();return;}
+ if(state.draft&&target.closest('#order-form'))scheduleOrderPreview();
  if(target.matches('[name=client_name]')&&state.draft){const client=state.clients.find(c=>c.name.toLowerCase()===target.value.trim().toLowerCase());if(client){const phone=$('[name=client_phone]');if(phone&&!phone.value)phone.value=client.phone||'';}scheduleOrderPreview();}
 });
 document.addEventListener('input',e=>{const target=e.target;if(target.id==='global-search'){state.search=target.value;refreshView();return;}
