@@ -23,6 +23,28 @@ async function ensureToken(){if(!session)throw Error('Sessão expirada. Faça lo
 async function rest(table,params='',method='GET',body){await ensureToken();return request(`/rest/v1/${table}${params}`,{method,body,headers:{'Content-Type':'application/json',Prefer:method==='POST'?'return=representation,resolution=merge-duplicates':'return=representation'}});}
 export async function loadAll(){const [orders,clients,settings]=await Promise.all([rest('ng_orders','?select=*&order=created_at.desc&limit=2000'),rest('ng_clients','?select=*&order=created_at.desc&limit=2000'),rest('ng_settings','?select=*&limit=1')]);return {orders,clients,settings:settings[0]||null};}
 export async function persistOrder(order,exists){const fields={...order};delete fields._temporary;delete fields._preview;fields.owner_id=authUserId();if(!fields.owner_id)throw Error('Usuário não autenticado');const data=exists?await rest('ng_orders',`?id=eq.${encodeURIComponent(order.id)}`,'PATCH',fields):await rest('ng_orders','','POST',fields);return data[0];}
+/** Exclui apenas uma OS pertencente ao usuário autenticado (RLS reforça a restrição). */
+export async function deleteOrder(orderId){
+ const owner=authUserId();
+ if(!owner)throw Error('Usuário não autenticado');
+ const deleted=await rest('ng_orders',`?id=eq.${encodeURIComponent(orderId)}&owner_id=eq.${encodeURIComponent(owner)}`,'DELETE');
+ if(!Array.isArray(deleted)||deleted.length!==1)throw Error('Ordem não encontrada ou já excluída. Atualize a lista.');
+ return deleted[0];
+}
+/** Remove os anexos privados referenciados pela OS após sua exclusão. */
+export async function deleteOrderAttachments(order){
+ await ensureToken();
+ const owner=authUserId();
+ if(!owner)throw Error('Usuário não autenticado');
+ const prefix=`${owner}/${order.id}/`;
+ const paths=[...new Set((order.attachments||[])
+   .map(a=>a.storage_path)
+   .filter(path=>typeof path==='string'&&path.startsWith(prefix)&&path.length>prefix.length))];
+ if(!paths.length)return;
+ await request('/storage/v1/object/ng-anexos',{
+   method:'DELETE',body:{prefixes:paths},headers:{'Content-Type':'application/json'}
+ });
+}
 export async function persistClient(client,exists){const fields={...client,owner_id:authUserId()};const data=exists?await rest('ng_clients',`?id=eq.${encodeURIComponent(client.id)}`,'PATCH',fields):await rest('ng_clients','','POST',fields);return data[0];}
 export async function persistSettings(settings){const data=await rest('ng_settings','?on_conflict=owner_id','POST',{...settings,owner_id:authUserId()});return data[0];}
 export async function uploadImage(orderId,file){await ensureToken();const ext=(file.name?.split('.').pop()||'png').replace(/[^a-z0-9]/gi,'').toLowerCase()||'png';const path=`${authUserId()}/${orderId}/${crypto.randomUUID()}.${ext}`;await request(`/storage/v1/object/ng-anexos/${path}`,{method:'POST',body:file,headers:{'Content-Type':file.type||'image/png','x-upsert':'false'}});return path;}
