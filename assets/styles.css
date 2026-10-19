@@ -25,3 +25,36 @@
 .team-member b{flex:1}
 .team-member small{color:#9fb1c8}
 @media(max-width:560px){.team-member{flex-wrap:wrap}.team-member .btn{margin-left:auto}.profile-panel{padding:22px}}
+
+/* Editor de OS premium: formulário + prévia real do documento */
+.os-editor-overlay{justify-content:center;align-items:center;padding:18px;background:#020713d9;backdrop-filter:blur(9px)}
+.os-editor{width:min(1540px,100%);height:min(970px,100%);max-height:100%;display:flex;flex-direction:column;overflow:hidden;border:1px solid #29405d;border-radius:19px;background:#0a1729;box-shadow:0 34px 100px #000b}
+.os-editor-head{position:relative;flex-shrink:0;padding:17px 24px;background:linear-gradient(110deg,#11243d,#0b192c);border-bottom:1px solid #263d58}
+.os-editor-headline{display:flex;align-items:center;gap:14px}
+.os-editor-symbol{width:44px;height:44px;border-radius:12px;background:#403419;color:#ffd14c;display:grid;place-items:center}
+.os-editor-head h2{font-size:20px;letter-spacing:-.4px}
+.os-editor-head p{font-size:12px;margin-top:5px}
+.os-header-number{color:#ffd45e;margin-left:8px;font-weight:700}
+.os-editor-main{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1.22fr) minmax(0,1fr);gap:16px;padding:16px 18px;overflow:hidden}
+.os-form{min-height:0;overflow-y:auto;align-content:start;padding:0 7px 8px 0;gap:13px;scrollbar-color:#334963 transparent}
+.os-form .drawer-section{background:#0e1c30;border-color:#243a56;padding:17px 19px;gap:14px;border-radius:13px}
+.os-form .drawer-section h3{display:flex;align-items:center;gap:10px;font-size:14px;margin:0 0 2px}
+.os-section-index{width:25px;height:25px;display:inline-grid;place-items:center;background:#3c321b;border:1px solid #705724;border-radius:8px;color:#ffd35c;font-size:12px}
+.os-form .input,.os-form .select,.os-form .textarea{background:#101f34}
+.os-form .textarea{min-height:78px}
+.os-preview-panel{min-width:0;min-height:0;display:flex;flex-direction:column;overflow:hidden;background:linear-gradient(150deg,#0e1d31,#0a1627);border:1px solid #29405e;border-radius:14px}
+.os-preview-head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:17px;border-bottom:1px solid #243a55}
+.os-preview-heading{display:flex;align-items:center;gap:11px;min-width:0}
+.os-preview-heading h3{font-size:14px;margin:0}
+.os-preview-heading p{font-size:11px;color:#9dafc6;margin:5px 0 0}
+.os-preview-icon{width:37px;height:37px;border-radius:11px;background:#192d47;color:#bdd4ff;display:grid;place-items:center;flex-shrink:0}
+.os-preview-live{font-size:11px;color:#b4c8de;white-space:nowrap}
+.os-preview-live i{display:inline-block;width:7px;height:7px;border-radius:50%;background:#34d8a2;margin-right:5px}
+.os-preview-scroll{min-height:0;flex:1;overflow:auto;padding:17px;background:#071323;scrollbar-color:#344b68 transparent}
+.os-preview-viewport{--os-preview-scale:.65;position:relative;width:100%;max-width:794px;margin:0 auto;background:white;border-radius:7px;box-shadow:0 8px 30px #0005;overflow:hidden}
+.os-preview-viewport iframe{position:absolute;left:0;top:0;width:794px;height:1120px;border:0;transform:scale(var(--os-preview-scale));transform-origin:top left;pointer-events:none;background:#fff}
+.os-preview-note{padding:11px 17px;margin:0;color:#9daec5;font-size:10px;border-top:1px solid #263a55}
+.os-editor-footer{flex-shrink:0;position:relative;padding:13px 23px;background:#0d1a2d;gap:10px}
+.os-editor-footer .btn-primary{min-width:185px}
+@media(max-width:1050px){.os-editor-overlay{padding:8px}.os-editor{border-radius:14px}.os-editor-main{grid-template-columns:1fr;overflow:auto;display:block}.os-form{overflow:visible;padding:0;display:grid}.os-preview-panel{margin-top:16px;min-height:480px;height:600px}.os-preview-scroll{min-height:380px}.os-editor-head{padding:13px 18px}.os-editor-footer{padding:12px 16px}}
+@media(max-width:700px){.os-editor-overlay{padding:0}.os-editor{border:0;border-radius:0;width:100%;height:100%;max-height:100%}.os-editor-main{padding:12px}.os-form .drawer-section{padding:13px}.os-editor-head h2{font-size:17px}.os-editor-symbol{width:36px;height:36px}.os-preview-panel{height:520px;min-height:520px}.os-editor-footer{gap:7px;flex-wrap:wrap;justify-content:flex-end}.os-editor-footer .btn{padding:9px 10px}.os-editor-footer .btn-primary{min-width:0}.os-editor-footer .btn-danger{margin-right:auto}}
