@@ -512,3 +512,10 @@ body.ng-glance-modal-open{overflow:hidden}
 .ng-revenue-content{display:block;overflow:hidden;max-height:5000px;transition:max-height .45s cubic-bezier(.2,.8,.2,1),opacity .3s ease}
 .ng-revenue-panel.is-collapsed .ng-revenue-content{max-height:0;overflow:hidden}
 @media(prefers-reduced-motion:reduce){.ng-revenue-content{transition:none}}
+
+/* Confirmação discreta de salvamento automático */
+.ng-glance-autosave{display:flex;align-items:center;gap:7px;font-size:11px;color:#62d6ac;background:#10352e;border:1px solid #285e50;border-radius:9px;padding:10px 12px;margin:0 0 12px}
+.ng-glance-autosave .ico{width:15px;height:15px}
+.ng-glance-autosave.is-saving{color:#ffce5e;background:#322a1b;border-color:#66502b}
+.ng-glance-autosave.is-error{color:#ff9ca4;background:#391e2c;border-color:#75404b}
+#ng-quick-stage:disabled{opacity:.6;cursor:wait}
