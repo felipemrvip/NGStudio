@@ -232,7 +232,53 @@ function revenuePanel(source,individual){
   </div>
  </section>`;
 }
-function dashboard(individual=false){const viewOrders=filteredOrders(individual?profileOrders():state.orders);const s=stats(viewOrders);return `<div class="page-actions"><span class="caption">${individual?'Meu desempenho • '+esc(state.profile):'Visão geral'} • ${new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'})}</span><div class="push"></div><button class="btn btn-primary" data-new>${ico('plus')} Nova OS</button></div><div class="kpis">${kpi('OS Ativas',s.active,'file','','Exceto serviços entregues')}${kpi('Em Produção',s.production,'settings','','Trabalhos em produção')}${kpi('Prontas para Retirada',s.ready,'check','green','Aguardando cliente')}${kpi('A Receber',money(s.receivable),'wallet','yellow','Saldo das ordens de serviço')}${kpi('Recebido no Mês',money(s.receivedMonth),'chart','purple','Pagamentos deste mês')}</div>${revenuePanel(viewOrders,individual)}<section class="grid-main"><div class="panel"><div class="panel-head"><div class="panel-title"><span class="badge-icon yellow">${ico('chart')}</span><div><h3>Fluxo de Produção</h3><p>Entradas e entregas dos últimos 7 dias</p></div></div><span class="caption">Últimos 7 dias</span></div><div class="chart">${chartMarkup(viewOrders)}</div></div><div class="panel"><div class="panel-head"><div class="panel-title"><span class="badge-icon yellow">${ico('layers')}</span><div><h3>Status das OS</h3><p>Distribuição atual das ordens</p></div></div><button data-nav="producao" class="btn btn-sm">Ver detalhes ${ico('arrow')}</button></div>${donutMarkup(viewOrders)}</div></section><section class="panel table-panel"><div class="panel-head"><div class="panel-title"><span class="badge-icon yellow">${ico('file')}</span><div><h3>Serviços recentes</h3><p>Acompanhe as ordens de serviço mais recentes</p></div></div><button data-nav="ordens" class="btn btn-sm">Ver todas ${ico('arrow')}</button></div>${ordersTable([...viewOrders].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).slice(0,8))}</section>`;}
+function dashboardActivity(orders){
+ const events=[];
+ for(const o of orders){
+  if(o.created_at)events.push({when:o.created_at,icon:'file',text:'OS '+o.number+' criada',sub:o.client_name||o.title});
+  for(const item of (o.history||[])){
+   if(item.date&&!/^Ordem de serviço criada/i.test(item.action||''))events.push({when:item.date,icon:'clock',text:item.action||'Atualização da OS',sub:o.number+' · '+(o.client_name||'')});
+  }
+  for(const p of (o.payments||[]))if(p.date)events.push({when:p.date,icon:'wallet',text:'Pagamento recebido',sub:money(p.amount)+' · '+o.number});
+ }
+ const latest=events.sort((a,b)=>new Date(b.when)-new Date(a.when)).slice(0,5);
+ return latest.map(e=>`<div class="ng-activity-item"><span class="ng-activity-icon">${ico(e.icon)}</span><div><b>${esc(e.text)}</b><small>${esc(e.sub||'—')}</small></div><time>${fmtDate(e.when)}</time></div>`).join('')||'<p class="ng-empty-activity">Nenhuma atividade registrada.</p>';
+}
+function dashboardStatus(orders){
+ const valid=orders.filter(o=>o.stage!=='cancelado');
+ const total=valid.length;
+ const colors=['#1b75dc','#f5ba25','#22bb91','#8baff1'];
+ let sum=0;
+ const stops=STAGES.map((stage,i)=>{const count=valid.filter(o=>o.stage===stage.id).length;const from=sum;sum+=total?count/total*100:0;return `${colors[i]} ${from}% ${sum}%`;});
+ const gradient=total?'conic-gradient('+stops.join(',')+')':'conic-gradient(#b4c4d8 0% 100%)';
+ return `<div class="ng-design-donut-layout"><div class="ng-design-donut" style="background:${gradient}" role="img" aria-label="Distribuição de ${total} ordens por status"><div><small>Total</small><strong>${total}</strong><span>OS</span></div></div><div class="ng-design-status-list">${STAGES.map((stage,i)=>{const count=valid.filter(o=>o.stage===stage.id).length;return `<div><i style="background:${colors[i]}"></i><span>${esc(stage.label)}</span><strong>${count}</strong><small>${total?Math.round(count/total*100):0}%</small></div>`}).join('')}</div></div>`;
+}
+function dashboard(individual=false){
+ const viewOrders=filteredOrders(individual?profileOrders():state.orders);
+ const stat=stats(viewOrders);
+ const recent=[...viewOrders].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).slice(0,6);
+ return `<div class="ng-new-dashboard">
+ <div class="page-actions ng-dash-topline"><span class="caption">${individual?'Meu desempenho • '+esc(state.profile):'Visão geral'} · ${new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'})}</span><div class="push"></div><button class="btn btn-primary" data-new>${ico('plus')} Nova OS</button></div>
+ <div class="ng-dash-columns">
+  <div class="ng-dash-primary">
+   <div class="kpis ng-new-kpis">
+    ${kpi('OS Ativas',stat.active,'file','blue','Serviços em aberto')}
+    ${kpi('Em Produção',stat.production,'settings','yellow','Em produção agora')}
+    ${kpi('Prontas para Retirada',stat.ready,'check','green','Aguardando o cliente')}
+    ${kpi('A Receber',money(stat.receivable),'wallet','yellow','Saldo pendente')}
+    ${kpi('Recebido no Mês',money(stat.receivedMonth),'chart','blue','Recebimentos do mês')}
+   </div>
+   ${revenuePanel(viewOrders,individual)}
+   <section class="panel ng-design-week-panel"><div class="panel-head"><div class="panel-title"><span class="badge-icon yellow">${ico('chart')}</span><div><h3>Fluxo de Produção</h3><p>Serviços iniciados e entregues nos últimos 7 dias</p></div></div><span class="caption">Últimos 7 dias</span></div><div class="chart">${chartMarkup(viewOrders)}</div></section>
+   <section class="panel table-panel ng-design-recent"><div class="panel-head"><div class="panel-title"><span class="badge-icon yellow">${ico('file')}</span><div><h3>Últimas Ordens de Serviço</h3><p>Acompanhe os pedidos mais recentes</p></div></div><button data-nav="ordens" class="btn btn-sm">Ver todas ${ico('arrow')}</button></div>${ordersTable(recent)}</section>
+  </div>
+  <aside class="ng-dash-aside">
+   <section class="panel ng-design-side-panel"><div class="panel-head"><div><h3>Status das Ordens de Serviço</h3><p>Distribuição atual</p></div><button data-nav="producao" class="iconbutton" title="Ver produção" aria-label="Ver produção">${ico('arrow')}</button></div>${dashboardStatus(viewOrders)}</section>
+   <section class="panel ng-design-side-panel ng-design-activity"><div class="panel-head"><div><h3>Atividades Recentes</h3><p>Últimas movimentações registradas</p></div><button data-nav="historico" class="btn btn-sm">Ver todas</button></div><div class="ng-activity-list">${dashboardActivity(viewOrders)}</div></section>
+   <section class="ng-brand-panel"><img src="assets/brand.svg" alt="NG PrintSign Gráfica"/><div><h3>NG PrintSign</h3><p>Gestão completa da sua gráfica em um só lugar.</p><button data-new>${ico('plus')} Criar ordem de serviço ${ico('arrow')}</button></div></section>
+  </aside>
+ </div></div>`;
+}
 function ordersPage(){
  let orders=ordered();
  if(state.filter!=='todos')orders=orders.filter(o=>o.stage===state.filter);
