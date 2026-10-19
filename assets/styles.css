@@ -205,3 +205,6 @@
  .mobile-create{margin-top:8px}
  .shell.sidebar-collapsed>.main,.shell.sidebar-collapsed>.main.os-editor-page{max-width:none}
 }
+
+/* Controle de expansão permanece acessível no modo apenas ícones */
+@media(min-width:701px){.sidebar.is-collapsed .sidebar-collapse{display:grid!important;position:absolute;top:48px;left:calc(50% - 15px);width:30px;height:28px;margin:0;z-index:2}.sidebar.is-collapsed .sidebar-brand-row{min-height:95px;align-items:flex-start}.sidebar.is-collapsed .sidebar-brand-row .logo{margin:0 auto}}
