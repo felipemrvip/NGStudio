@@ -289,30 +289,87 @@ function openOrderDetail(id){
  render();
  window.scrollTo(0,0);
 }
+
 function renderOrderDetail(){
  const view=$('#view');
  const order=state.orders.find(o=>o.id===state.viewingOrderId);
  if(!view)return;
  if(!order){state.viewingOrderId=null;view.innerHTML=pageView();return;}
- const a=order.attachments||[];
- const items=a.map((img,i)=>`<div class="ng-detail-attachment"><div class="ng-detail-thumb"><img data-detail-image="${esc(img.id)}" src="${esc(img.dataUrl||state.signCache.get(img.storage_path)||'')}" alt="${esc(img.caption||img.name||'Anexo '+(i+1))}" loading="lazy"/></div><div><strong>${esc(img.caption||img.name||'Imagem '+(i+1))}</strong><small>${img.include_pdf===false?'Não incluída no PDF':'Incluída no PDF'}</small></div></div>`).join('');
- const history=(order.history||[]).slice().reverse().map(h=>`<div class="ng-detail-event"><span>${fmtDate(h.date)}</span><strong>${esc(h.action||'Atualização')}</strong></div>`).join('');
+ const attachments=order.attachments||[];
  const total=Number(order.total||0);
  const received=paid(order);
- view.innerHTML=`<div class="ng-order-detail">
- <div class="ng-detail-header"><button type="button" class="ng-os-back" data-order-back aria-label="Voltar">${ico('arrow')}</button><div><span class="ng-detail-eyebrow">ORDEM DE SERVIÇO · ${esc(order.number)}</span><h1>${esc(order.title)}</h1><p>Criada em ${fmtDate(order.created_at)} · Responsável: ${esc(order.attendant||'—')}</p></div><span class="status ${esc(order.stage)}">${esc(stageLabel(order.stage))}</span></div>
- <div class="ng-detail-layout"><div class="ng-detail-content">
- <section class="panel ng-detail-panel"><div class="ng-detail-panel-heading"><span class="ng-detail-heading-icon">${ico('file')}</span><div><h2>Documento da OS</h2><p>Nota gerada com os dados salvos. Use os botões para baixar ou imprimir.</p></div></div><div class="ng-detail-document"><div class="os-preview-viewport" id="os-preview-viewport"><iframe id="os-preview-frame" title="Nota de serviço ${esc(order.number)}" sandbox="" referrerpolicy="no-referrer"></iframe></div></div></section>
- <section class="panel ng-detail-panel"><div class="ng-detail-panel-heading"><span class="ng-detail-heading-icon">${ico('layers')}</span><div><h2>Informações do serviço</h2><p>Dados registrados nesta OS</p></div></div><div class="ng-detail-fields"><div><small>Cliente</small><strong>${esc(order.client_name||'—')}</strong></div><div><small>Telefone / WhatsApp</small><strong>${esc(order.client_phone||'Não informado')}</strong></div><div><small>Serviço</small><strong>${esc(order.title||'—')}</strong></div><div><small>Responsável</small><strong>${esc(order.attendant||'—')}</strong></div><div><small>Data de criação</small><strong>${fmtDate(order.created_at)}</strong></div><div><small>Status</small><strong>${esc(stageLabel(order.stage))}</strong></div></div>${order.notes?.trim()?`<div class="ng-detail-notes"><small>Observações / especificações</small><p>${esc(order.notes)}</p></div>`:''}</section>
- ${a.length?`<section class="panel ng-detail-panel"><div class="ng-detail-panel-heading"><span class="ng-detail-heading-icon">${ico('image')}</span><div><h2>Imagens do serviço</h2><p>${a.length} arquivo(s) anexado(s)</p></div></div><div class="ng-detail-gallery">${items}</div></section>`:''}
- </div>
- <aside class="ng-detail-aside"><section class="panel ng-detail-finance"><h2>${ico('wallet')} Resumo financeiro</h2><div><span>Valor total</span><strong>${money(total)}</strong></div><div><span>Sinal recebido</span><strong>${money(signalPaid(order))}</strong></div><div><span>Total pago</span><strong class="text-green">${money(received)}</strong></div><div class="ng-detail-due"><span>Restante</span><strong>${money(remaining(order))}</strong></div><p class="ng-detail-payment-status">${esc(paymentStatus(order))}</p></section>
- <div class="ng-detail-buttons"><button type="button" class="btn btn-primary" data-order-edit="${esc(order.id)}">${ico('edit')} Editar OS</button><button type="button" class="btn" data-export-pdf="${esc(order.id)}">${ico('download')} Baixar PDF</button><button type="button" class="btn" data-print="${esc(order.id)}">${ico('printer')} Imprimir</button><button type="button" class="btn btn-danger" data-delete-order="${esc(order.id)}">${ico('trash')} Excluir OS</button></div>
- ${history?`<section class="panel ng-detail-history"><h2>${ico('clock')} Histórico</h2>${history}</section>`:''}
- </aside></div></div>`;
+ const due=remaining(order);
+ const fullyPaid=total>0&&due<=.001;
+ const history=[...(order.history||[])].reverse();
+ const photoCards=attachments.map((attachment,i)=>`<div class="ng-glance-photo"><div class="ng-glance-photo-frame"><img data-detail-image="${esc(attachment.id)}" src="${esc(attachment.dataUrl||state.signCache.get(attachment.storage_path)||'')}" alt="${esc(attachment.caption||attachment.name||'Anexo '+(i+1))}" loading="lazy"></div><span title="${esc(attachment.caption||attachment.name||'Imagem '+(i+1))}">${esc(attachment.caption||attachment.name||'Imagem '+(i+1))}</span></div>`).join('');
+ const timeline=history.map((item,i)=>`<li class="ng-glance-history-item"><span class="ng-glance-timeline-dot"></span><div><time>${fmtDate(item.date)}</time><strong>${esc(item.action||'Atualização')}</strong></div></li>`).join('');
+ const stageOptions=STAGES.map(stage=>`<option value="${esc(stage.id)}" ${order.stage===stage.id?'selected':''}>${esc(stage.label)}</option>`).join('');
+ view.innerHTML=`<div class="ng-order-detail ng-order-glance">
+  <header class="ng-glance-header">
+   <button type="button" class="ng-os-back" data-order-back aria-label="Voltar às ordens de serviço">${ico('arrow')}</button>
+   <div class="ng-glance-order-number"><small>ORDEM DE SERVIÇO</small><strong>${esc(order.number)}</strong></div>
+   <div class="ng-glance-heading"><h1>${esc(order.title||'Serviço')}</h1><p>Criada em ${fmtDate(order.created_at)} <span aria-hidden="true">·</span> Responsável: ${esc(order.attendant||'—')}</p></div>
+   <span class="status ${esc(order.stage)} ng-glance-current-status">${esc(stageLabel(order.stage))}</span>
+  </header>
+  <div class="ng-glance-layout">
+   <div class="ng-glance-left">
+    <section class="panel ng-glance-main">
+     <div class="ng-glance-summary">
+      <div class="ng-glance-section-heading"><span class="ng-glance-icon">${ico('file')}</span><div><h2>Resumo da OS</h2><p>Informações principais da ordem de serviço.</p></div></div>
+      <div class="ng-glance-facts">
+       <div><span class="ng-glance-fact-icon">${ico('users')}</span><div><small>Cliente</small><strong>${esc(order.client_name||'Não informado')}</strong></div></div>
+       <div><span class="ng-glance-fact-icon">${ico('wallet')}</span><div><small>Contato</small><strong>${esc(order.client_phone||'—')}</strong></div></div>
+       <div><span class="ng-glance-fact-icon">${ico('calendar')}</span><div><small>Data de criação</small><strong>${fmtDate(order.created_at)}</strong></div></div>
+       <div><span class="ng-glance-fact-icon">${ico('users')}</span><div><small>Atendente</small><strong>${esc(order.attendant||'—')}</strong></div></div>
+       <div class="ng-glance-wide"><span class="ng-glance-fact-icon">${ico('layers')}</span><div><small>Serviço solicitado</small><strong>${esc(order.title||'—')}</strong></div></div>
+      </div>
+      <div class="ng-glance-notes"><span class="ng-glance-fact-icon">${ico('file')}</span><div><small>Observações</small><p>${esc(order.notes||'Sem observações adicionais.')}</p></div></div>
+     </div>
+     <div class="ng-glance-preview-column">
+      <div class="ng-glance-preview-heading"><span class="ng-glance-fact-icon">${ico('file')}</span><div><h3>Documento da OS</h3><p>Prévia da nota de serviço.</p></div></div>
+      <div class="ng-glance-preview-crop"><div class="os-preview-viewport" id="os-preview-viewport"><iframe id="os-preview-frame" title="Nota de serviço ${esc(order.number)}" sandbox="" referrerpolicy="no-referrer"></iframe></div></div>
+      <button type="button" class="ng-glance-preview-open" data-detail-preview-expand>${ico('file')} Visualizar nota completa ${ico('arrow')}</button>
+     </div>
+    </section>
+    <section class="panel ng-glance-attachments">
+     <div class="ng-glance-section-heading"><span class="ng-glance-icon secondary">${ico('image')}</span><div><h2>Anexos</h2><p>${attachments.length} arquivo(s) relacionado(s) a esta OS.</p></div><button type="button" class="btn btn-sm ng-glance-attach-button" data-order-add-images="${esc(order.id)}">${ico('plus')} Adicionar anexo</button></div>
+     <div class="ng-glance-gallery">${photoCards||'<p class="ng-glance-empty">Nenhum anexo cadastrado.</p>'}</div>
+    </section>
+   </div>
+   <aside class="ng-glance-right">
+    <section class="panel ng-glance-finance">
+     <h2>${ico('wallet')} Resumo financeiro</h2>
+     <div><span>Valor total</span><strong>${money(total)}</strong></div>
+     <div><span>Sinal recebido</span><strong>${money(signalPaid(order))}</strong></div>
+     <div><span>Total pago</span><strong class="text-green">${money(received)}</strong></div>
+     <div class="ng-glance-remaining"><span>Restante</span><strong>${money(due)}</strong></div>
+    </section>
+    <section class="panel ng-glance-actions" id="ng-glance-actions">
+     <div class="ng-glance-section-heading"><span class="ng-glance-icon gold">${ico('dollar')}</span><div><h2>Ações rápidas</h2><p>Altere o status e o pagamento desta OS.</p></div></div>
+     <div class="ng-glance-action-field"><label for="ng-quick-stage">Status da OS</label><select id="ng-quick-stage" class="select" aria-label="Alterar status da OS">${stageOptions}</select></div>
+     <div class="ng-glance-action-field"><span class="ng-glance-action-label">Status do pagamento</span><div class="ng-glance-payment-toggle" role="group" aria-label="Status do pagamento"><button type="button" data-quick-payment="pending" aria-pressed="${!fullyPaid}" class="${!fullyPaid?'is-active':''}" ${total<=0?'disabled':''}>Falta pagar</button><button type="button" data-quick-payment="paid" aria-pressed="${fullyPaid}" class="${fullyPaid?'is-active is-paid':''}" ${total<=0?'disabled':''}>${ico('check')} Pago</button></div></div>
+     <p class="ng-glance-pay-hint" id="ng-quick-payment-hint">${total<=0?'Sem valor a receber nesta ordem.':fullyPaid?'Pagamento integral já registrado.':`Ao marcar Pago, serão registrados ${money(due)} como recebidos agora.`}</p>
+     <button type="button" class="btn btn-primary ng-glance-save" data-quick-save="${esc(order.id)}">${ico('check')} Salvar alterações</button>
+     <button type="button" class="btn ng-glance-edit" data-order-edit="${esc(order.id)}">${ico('edit')} Editar OS</button>
+     <div class="ng-glance-action-row"><button type="button" class="btn" data-export-pdf="${esc(order.id)}">${ico('download')} Baixar PDF</button><button type="button" class="btn" data-print="${esc(order.id)}">${ico('printer')} Imprimir</button></div>
+     <button type="button" class="btn btn-danger ng-glance-delete" data-delete-order="${esc(order.id)}">${ico('trash')} Excluir OS</button>
+    </section>
+    <section class="panel ng-glance-history">
+     <div class="ng-glance-history-header"><h2>${ico('clock')} Histórico</h2><button type="button" class="ng-glance-history-toggle" data-history-expand aria-expanded="false">${history.length>3?'Ver tudo':'Mostrar detalhes'}</button></div>
+     <ol class="ng-glance-timeline" id="ng-glance-timeline">${timeline||'<li class="ng-glance-empty">Nenhuma alteração registrada.</li>'}</ol>
+    </section>
+   </aside>
+  </div>
+  <div class="ng-glance-preview-modal" id="ng-glance-preview-modal" hidden role="dialog" aria-modal="true" aria-label="Visualização ampliada da nota">
+   <div class="ng-glance-preview-modal-inner"><div class="ng-glance-modal-toolbar"><div><strong>Nota de serviço ${esc(order.number)}</strong><span>Visualização completa</span></div><button type="button" class="iconbutton" data-detail-preview-expand aria-label="Fechar visualização">${ico('close')}</button></div><div class="ng-glance-modal-scroll"><div class="os-preview-viewport" id="os-preview-viewport-full"><iframe id="os-preview-frame-full" title="Nota completa ${esc(order.number)}" sandbox="" referrerpolicy="no-referrer"></iframe></div></div></div>
+  </div>
+ </div>`;
+ const docHtml=buildPrintHtml(order,state.settings,attachments.map(img=>({id:img.id,src:img.dataUrl||state.signCache.get(img.storage_path)||''}))).replace('</style>','body{background:#fff!important}.printbar{display:none!important}main{margin:0!important;box-shadow:none!important;min-height:0!important}</style>');
  const frame=$('#os-preview-frame');
- if(frame){frame.srcdoc=buildPrintHtml(order,state.settings,a.map(img=>({id:img.id,src:img.dataUrl||state.signCache.get(img.storage_path)||''}))).replace('</style>','body{background:#fff!important}.printbar{display:none!important}main{margin:0!important;box-shadow:none!important;min-height:0!important}</style>');updateOrderPreviewScale();}
- void ensureDetailImages(order.id,a);
+ if(frame){frame.srcdoc=docHtml;updateOrderPreviewScale();}
+ const fullFrame=$('#os-preview-frame-full');
+ if(fullFrame)fullFrame.srcdoc=docHtml;
+ void ensureDetailImages(order.id,attachments);
 }
 async function ensureDetailImages(id,attachments){
  for(const img of attachments){
