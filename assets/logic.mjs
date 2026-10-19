@@ -15,5 +15,10 @@ export function fmtDate(value){if(!value)return '—';const d=new Date(value.len
 export function currentMonth(value){const a=new Date(value),b=new Date();return a.getMonth()===b.getMonth()&&a.getFullYear()===b.getFullYear();}
 export function esc(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 export function uid(){return typeof crypto!=='undefined'&&crypto.randomUUID?crypto.randomUUID():'id-'+Math.random().toString(36).slice(2)+Date.now();}
-export function nextNumber(orders,prefix='FEL') {const max=orders.reduce((m,o)=>{const found=String(o.number||'').match(new RegExp('^'+prefix.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'-(\\d+)$'));return found?Math.max(m,Number(found[1])):m;},1472);return `${prefix}-${max+1}`;}
+export function nextNumber(orders,prefix='FEL') {
+ const safe=String(prefix).replace(/[^A-Za-z]/g,'').toUpperCase()||'FEL';
+ const pattern=new RegExp('^'+safe+'-(\\d+)$');
+ const max=orders.reduce((m,o)=>{const found=String(o.number||'').match(pattern);return found?Math.max(m,Number(found[1])):m;},0);
+ return safe+'-'+String(max+1).padStart(2,'0');
+}
 export function stats(orders){const valid=orders.filter(o=>o.stage!=='cancelado');return {active:valid.filter(o=>o.stage!=='entregue').length,production:valid.filter(o=>o.stage==='producao').length,ready:valid.filter(o=>o.stage==='pronto').length,receivable:valid.reduce((s,o)=>s+remaining(o),0),receivedMonth:valid.reduce((s,o)=>s+(o.payments||[]).filter(p=>currentMonth(p.date)).reduce((a,p)=>a+Number(p.amount),0),0)};}
