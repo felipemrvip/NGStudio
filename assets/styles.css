@@ -557,3 +557,5 @@ body.ng-glance-modal-open{overflow:hidden}
 @media(max-width:1050px){.os-editor-page .ng-os-quick-service{grid-template-columns:minmax(0,1.4fr) minmax(140px,1fr)}}
 @media(max-width:700px){.ng-os-brand-chip{min-width:auto;padding:7px}.ng-os-brand-chip img{width:31px;height:31px}.ng-os-brand-chip small{display:none}.os-editor-page .ng-os-quick-service{grid-template-columns:1fr}.ng-os-extra-controls{grid-template-columns:1fr}.os-editor-page .ng-os-quick-card{padding:14px}.ng-os-extras summary{padding:14px}.ng-os-extras-body{padding:0 14px 14px}}
 @media(prefers-reduced-motion:reduce){.ng-os-quick-card,.ng-os-extras,.ng-os-extras-body{animation:none}.ng-os-extras summary>.ico:last-child{transition:none}}
+
+.os-editor-page .ng-os-quick-card .payment-remaining.is-placeholder{color:#8094af;font-size:11px;font-weight:500;background:#102038;border-color:#2a415f}
