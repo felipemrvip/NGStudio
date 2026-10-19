@@ -481,3 +481,67 @@ html[data-theme=light] .ng-v2-main .ng-new-dashboard .ng-new-kpis>.kpi:nth-child
  animation:none!important;transition:none!important;scroll-behavior:auto!important;
  }
 }
+
+
+/* Light mode coherence: unified neutral blue-gray surfaces and restrained accents.
+   Scoped to the light theme to preserve the approved dark design. */
+html[data-theme=light]{
+ --ng-body:#f1f4f8;
+ --ng-surface:#ffffff;
+ --ng-card:#ffffff;
+ --ng-border:#dce5ef;
+ --ng-soft:#f5f8fc;
+ --ng-hover:#edf3fa;
+ --ng-text:#172b45;
+ --ng-secondary:#64758b;
+ --ng-shadow:0 5px 20px #1c3b5b0b;
+}
+html[data-theme=light] .ng-v2-shell .ng-v2-main{
+ background:#ffffff!important;
+ color:var(--ng-text);
+}
+html[data-theme=light] .ng-v2-main :is(.panel,.client-card,.mini-stat,.kan-card,.ng-os-card,.ng-glance-main,.ng-glance-attachments,.ng-glance-actions,.ng-glance-history,.ng-glance-finance,.ng-os-extras,.ng-detail-finance,.ng-detail-history){
+ background:var(--ng-card);
+ border-color:var(--ng-border);
+ color:var(--ng-text);
+}
+html[data-theme=light] .ng-v2-main :is(.kan-col,.ng-glance-notes,.ng-glance-preview-column,.ng-glance-fact-icon,.filter-pills,.ng-revenue-toggle){
+ background:var(--ng-soft);
+ border-color:var(--ng-border);
+ color:var(--ng-text);
+}
+html[data-theme=light] .ng-design-topbar .search,
+html[data-theme=light] .ng-v2-main :is(.input,.select,.textarea),
+html[data-theme=light] #modal-root :is(.input,.select,.textarea){
+ background:#f7f9fd;
+ color:#172b45;
+ border-color:#dce5ef;
+}
+html[data-theme=light] .ng-v2-main .data-table th{
+ background:#f2f6fb;
+ color:#526780;
+}
+html[data-theme=light] .ng-v2-main .data-table td{
+ background:#fff;
+ color:#172b45;
+ border-color:#e6edf4;
+}
+html[data-theme=light] .ng-v2-main .data-table tbody tr:hover td{
+ background:#f5f9fe;
+}
+html[data-theme=light] .ng-v2-main .ng-new-dashboard .ng-new-kpis>.kpi{
+ border-color:color-mix(in srgb,var(--kpi-accent) 30%,#dce5ef)!important;
+ box-shadow:0 4px 15px #18395b0b!important;
+}
+html[data-theme=light] .ng-v2-main .ng-new-dashboard .ng-new-kpis>.kpi:hover{
+ box-shadow:0 9px 22px #18395b15!important;
+}
+html[data-theme=light] .ng-v2-main .ng-new-dashboard .ng-new-kpis>.kpi>.badge-icon{
+ background:color-mix(in srgb,var(--kpi-accent) 12%,#ffffff)!important;
+ border-color:color-mix(in srgb,var(--kpi-accent) 24%,#ffffff)!important;
+}
+html[data-theme=light] .ng-v2-main .ng-new-dashboard .ng-new-kpis>.kpi::before,
+html[data-theme=light] .ng-v2-main .ng-new-dashboard .ng-new-kpis>.kpi::after{
+ display:none!important;
+ content:none!important;
+}
