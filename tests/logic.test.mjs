@@ -51,3 +51,28 @@ test('painel de mês selecionado separa criação, entrega e recebimento',()=>{
  assert.equal(report.averageTicket,325);
  assert.equal(report.ordersCreated.length,2);
 });
+
+
+test('alertas respeitam prazo local e não incluem serviços entregues ou cancelados',async()=>{
+ const {actionMatches}=await import('../assets/logic.mjs');
+ const now=new Date(2026,9,19,14);
+ const base={stage:'producao',total:100,payments:[],due_date:'2026-10-18'};
+ assert.equal(actionMatches(base,'overdue',now),true);
+ assert.equal(actionMatches({...base,due_date:'2026-10-19'},'overdue',now),false);
+ for(const due_date of ['2026-10-19','2026-10-22'])assert.equal(actionMatches({...base,due_date},'upcoming',now),true);
+ for(const due_date of ['2026-10-23','',null])assert.equal(actionMatches({...base,due_date},'upcoming',now),false);
+ assert.equal(actionMatches({...base,stage:'entregue'},'overdue',now),false);
+ assert.equal(actionMatches({...base,stage:'cancelado'},'receivable',now),false);
+ assert.equal(actionMatches({...base,stage:'entregue'},'delivered-due',now),true);
+ assert.equal(actionMatches({...base,stage:'entregue',payments:[{amount:100}]},'delivered-due',now),false);
+});
+test('atalho de recebimentos inclui OS antigas e status financeiro independe da produção',async()=>{
+ const {actionMatches}=await import('../assets/logic.mjs');
+ const now=new Date(2026,9,19,14);
+ const base={stage:'entregue',total:100,created_at:'2025-01-01',payments:[{amount:40,date:'2026-10-02T12:00:00'}]};
+ assert.equal(actionMatches(base,'received',now),true);
+ assert.equal(actionMatches({...base,payments:[{amount:40,date:'2026-09-02T12:00:00'}]},'received',now),false);
+ assert.equal(paymentStatus(base),'Sinal');
+ assert.equal(paymentStatus({...base,payments:[]}),'Pendente');
+ assert.equal(paymentStatus({...base,stage:'producao',payments:[{amount:100}]}),'Pago');
+});

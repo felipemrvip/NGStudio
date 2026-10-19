@@ -114,3 +114,24 @@ export function monthlyPerformance(orders,year,month){
   ordersDelivered:[...delivered].sort((a,b)=>new Date(b.delivered_at)-new Date(a.delivered_at))
  };
 }
+
+
+/** Filtros do painel usam dias locais, sem converter prazos para UTC. */
+export function actionMatches(order,action,now=new Date()){
+ if(order.stage==='cancelado')return false;
+ const active=order.stage!=='entregue';
+ const today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+ const due=/^\d{4}-\d{2}-\d{2}$/.test(order.due_date||'')?new Date(order.due_date+'T00:00:00'):null;
+ const limit=new Date(today);limit.setDate(limit.getDate()+3);
+ switch(action){
+ case 'active':return active;
+ case 'production':return order.stage==='producao';
+ case 'ready':return order.stage==='pronto';
+ case 'receivable':return remaining(order)>0;
+ case 'received':return (order.payments||[]).some(p=>{const d=new Date(p.date);return Number(p.amount)>0&&d.getFullYear()===now.getFullYear()&&d.getMonth()===now.getMonth();});
+ case 'overdue':return active&&!!due&&due<today;
+ case 'upcoming':return active&&!!due&&due>=today&&due<=limit;
+ case 'delivered-due':return !active&&remaining(order)>0;
+ default:return true;
+ }
+}

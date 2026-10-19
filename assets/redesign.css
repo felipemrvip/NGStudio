@@ -318,3 +318,22 @@ html[data-theme=light] .ng-v2-main .ng-detail-notes p{color:#253d55}
 @media(prefers-reduced-motion:reduce){
  .ng-v2-main .ng-new-dashboard .ng-new-kpis>.kpi{transition:none!important}
 }
+
+
+/* Ações do painel mantêm a identidade premium nos dois temas. */
+.ng-new-kpis>button.kpi{font:inherit;text-align:left;cursor:pointer;width:100%}
+.ng-new-kpis>button.kpi:focus-visible,.ng-attention-grid button:focus-visible{outline:3px solid #4e9cff;outline-offset:4px}
+.ng-attention-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;padding:18px}
+.ng-attention-grid button{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;text-align:left;border:1px solid var(--ng-border);border-radius:13px;padding:16px;background:var(--ng-soft);color:var(--ng-text);cursor:pointer;transition:transform .25s var(--v2-ease),border-color .25s ease}
+.ng-attention-grid strong{font-size:25px;grid-column:1}
+.ng-attention-grid span{font-size:11px;grid-column:1}
+.ng-attention-grid .ico{grid-column:2;grid-row:1/3;width:17px;height:17px}
+.ng-attention-grid button:hover{transform:translateY(-2px);border-color:#4e9cff}
+.ng-order-filters{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.ng-order-filters label{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--ng-text)}
+.ng-order-filters .select{width:auto;min-width:155px}
+.ng-payment-badge.partial{background:#ebad2520;color:#d89b20;border:1px solid #d89b2040}
+html[data-theme=light] .ng-payment-badge.partial{background:#fff1cf;color:#906000}
+.ng-kan-payment{margin:12px 0}
+@media(max-width:750px){.ng-attention-grid{grid-template-columns:1fr}.ng-order-filters label{flex-wrap:wrap}}
+@media(prefers-reduced-motion:reduce){.ng-attention-grid button{transition:none!important}}
