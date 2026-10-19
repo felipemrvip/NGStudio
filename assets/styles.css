@@ -345,3 +345,48 @@
 @media(max-width:1050px){.ng-revenue-chart{gap:4px}.ng-revenue-columns{gap:2px}}
 @media(max-width:700px){.ng-revenue-heading{padding:16px 13px;gap:8px}.ng-revenue-heading h3{font-size:16px}.ng-revenue-heading p{font-size:10px}.ng-revenue-kpis{grid-template-columns:1fr;gap:7px;padding:0 13px 10px}.ng-revenue-kpis>div{padding:11px 13px}.ng-revenue-kpis strong{font-size:20px}.ng-revenue-chart-wrap{padding:4px 12px 0}.ng-revenue-chart{height:190px;gap:2px;padding:10px 0 0}.ng-revenue-columns{height:157px;gap:2px}.ng-revenue-bar{width:min(16px,37%)}.ng-revenue-month-label{font-size:9px}.ng-revenue-bottom{padding:12px 14px 0}.ng-revenue-footnote{padding:10px 14px 0}}
 @media(prefers-reduced-motion:reduce){.ng-revenue-bar{animation:none;transition:none}}
+
+/* Detalhamento mensal financeiro e operacional */
+.ng-revenue-tools{flex-wrap:wrap;justify-content:flex-end}
+#ng-revenue-month-select{min-width:82px;width:92px}
+.ng-month-report{margin:18px 22px 0;padding:19px;border:1px solid #294460;border-radius:14px;background:linear-gradient(140deg,#11263e,#0c1a2d)}
+.ng-month-report-heading{display:flex;align-items:start;justify-content:space-between;gap:12px;margin-bottom:15px}
+.ng-month-eyebrow{color:#ffcc45;font-size:9px;font-weight:800;letter-spacing:1.5px}
+.ng-month-report-heading h3{font-size:19px;margin:5px 0;letter-spacing:-.4px;text-transform:capitalize}
+.ng-month-report-heading p{font-size:11px;color:#9eb3cf;margin:0}
+.ng-month-report-pill{border:1px solid #524521;border-radius:20px;background:#392f18;color:#ffd34f;white-space:nowrap;padding:8px 12px;font-size:11px}
+.ng-month-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.ng-month-card{border-radius:11px;background:#0c1b30;border:1px solid #2b425f;padding:15px;min-width:0;animation:ng-month-card-in .5s ease both}
+.ng-month-card:nth-child(2){animation-delay:35ms}.ng-month-card:nth-child(3){animation-delay:70ms}.ng-month-card:nth-child(4){animation-delay:105ms}.ng-month-card:nth-child(5){animation-delay:140ms}.ng-month-card:nth-child(6){animation-delay:175ms}
+.ng-month-card>span{display:flex;align-items:center;gap:7px;color:#abbcd3;font-size:11px}
+.ng-month-card>span .ico{color:#70abff;width:16px;height:16px}
+.ng-month-card strong{display:block;font-size:clamp(17px,2vw,25px);color:#f6faff;letter-spacing:-.6px;margin:12px 0 7px;overflow-wrap:anywhere}
+.ng-month-card small{color:#8096b3;font-size:10px}
+.ng-month-lower{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-top:13px}
+.ng-month-section{border:1px solid #2b425e;border-radius:11px;padding:17px;min-width:0;background:#0b1a2d}
+.ng-month-section-header{display:flex;flex-direction:column;gap:5px;margin-bottom:17px}
+.ng-month-section-header h4{display:flex;align-items:center;gap:8px;font-size:14px;margin:0}
+.ng-month-section-header h4 .ico{color:#ffca36;width:17px;height:17px}
+.ng-month-section-header p{font-size:10px;color:#91a6c3;margin:0}
+.ng-month-stages{display:grid;gap:14px}
+.ng-month-stage>div:first-child{display:flex;justify-content:space-between;gap:8px;color:#aabdd5;font-size:11px;margin-bottom:7px}
+.ng-month-stage b{color:#f6f8fe}
+.ng-month-stage-track{height:7px;background:#21364f;border-radius:30px;overflow:hidden}
+.ng-month-stage-bar{display:block;width:var(--stage-width);height:100%;border-radius:30px;background:#8ba9d0;transform-origin:left;animation:ng-stage-fill .55s ease both;animation-delay:calc(var(--stage-index)*70ms)}
+.ng-stage-analise{background:#95a4b9}.ng-stage-andamento{background:#ffcb34}.ng-stage-producao{background:#b07df4}.ng-stage-pronto{background:#39d8a3}.ng-stage-entregue{background:#6cb5ff}
+.ng-month-disclaimer,.ng-month-more{font-size:10px;color:#7c91ad;line-height:1.6;margin:17px 0 0}
+.ng-month-orders{display:grid;gap:6px}
+.ng-month-order-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;gap:9px;align-items:center;width:100%;background:#12253d;border:1px solid #253c57;border-radius:8px;padding:11px;text-align:left;color:#f3f7ff}
+.ng-month-order-row:hover{background:#193554;border-color:#4a6b95}
+.ng-month-order-row strong{font-size:11px;color:#ffd248}
+.ng-month-order-row span{font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ng-month-order-row small{font-size:10px;color:#a9c2de;white-space:nowrap}
+.ng-month-order-row .ico{width:13px;height:13px}
+.ng-month-empty{color:#97abc6;font-size:11px;border:1px dashed #304863;border-radius:10px;padding:28px 12px;text-align:center}
+.ng-report-enter{animation:ng-month-report-in .4s ease both}
+@keyframes ng-month-report-in{from{opacity:.38;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes ng-month-card-in{from{opacity:.3;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}
+@keyframes ng-stage-fill{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@media(max-width:1100px){.ng-month-lower{grid-template-columns:1fr}}
+@media(max-width:700px){.ng-revenue-tools{gap:5px}.ng-revenue-tools .select{width:72px;min-width:72px;padding:7px}.ng-revenue-tools label{font-size:10px}.ng-month-report{margin:12px;padding:13px}.ng-month-report-heading h3{font-size:16px}.ng-month-cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.ng-month-card{padding:12px}.ng-month-card strong{font-size:19px}.ng-month-section{padding:13px}.ng-month-order-row{gap:6px;padding:9px}.ng-month-order-row small{font-size:9px}}
+@media(prefers-reduced-motion:reduce){.ng-month-card,.ng-report-enter,.ng-month-stage-bar{animation:none}}
