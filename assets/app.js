@@ -361,19 +361,45 @@ async function deleteOrder(id){
  }finally{state.busy=false;}
 }
 async function saveOrder(){if(!state.draft||state.busy)return;updateDraft();let o=state.draft;const exists=state.orders.some(x=>x.id===o.id);if(!o.title.trim()||!o.client_name.trim()){toast('Preencha o nome do serviço e o cliente.',true);return;}if(!Number.isFinite(o.total)||o.total<0){toast('Valor inválido.',true);return;}const signal=Number($('#initial-payment')?.value||0);const isPaid=$('[name=payment_state]:checked')?.value==='paid';if(!Number.isFinite(signal)||signal<0||signal>o.total+.001){toast('O sinal precisa estar entre zero e o valor total.',true);return;}if(!isPaid&&o.total>0&&signal>=o.total-.001){toast('O valor está totalmente recebido. Marque Pago ou reduza o sinal.',true);return;}const previousPayments=JSON.stringify(o.payments||[]);o.payments=reconcileSimplePayments(o,signal,isPaid);if(paid(o)>o.total+.001){toast('Os pagamentos não podem ultrapassar o valor total.',true);return;}state.busy=true;const saveButton=$('[data-save-order]');if(saveButton)saveButton.disabled=true;try{if(!exists){o.history=[...(o.history||[]),{action:'Ordem de serviço criada',date:new Date().toISOString()}];}else{const old=state.orders.find(x=>x.id===o.id);if(old.stage!==o.stage){o.history=[...(o.history||[]),{action:`Status alterado: ${stageLabel(old.stage)} → ${stageLabel(o.stage)}`,date:new Date().toISOString()}];if(o.stage==='entregue')o.delivered_at=new Date().toISOString();if(old.stage==='entregue'&&o.stage!=='entregue')o.delivered_at=null;}if(JSON.stringify(old.payments||[])!==JSON.stringify(o.payments||[]))o.history=[...(o.history||[]),{action:'Pagamentos atualizados',date:new Date().toISOString()}];}
+ let attachmentWarning='';
  if(state.mode==='cloud'){
-  if(!exists) o.number=await cloud.issueNumber(profilePrefix(state.profile||o.attendant));
-  const clean={...o,attachments:o.attachments.map(a=>{const {dataUrl,...rest}=a;return rest;})};
-  // Cria primeiro a OS; imagens serão enviadas ao bucket privado na sequência.
-  let saved=await cloud.persistOrder(clean,exists);
+  if(!exists){
+   try{o.number=await cloud.issueNumber(profilePrefix(state.profile||o.attendant));}
+   catch(e){throw Error('Etapa de numeração da OS: '+e.message);}
+  }
   const pending=o.attachments.filter(a=>state.pendingFiles.has(a.id));
-  if(pending.length){for(const a of pending){const path=await cloud.uploadImage(o.id,state.pendingFiles.get(a.id));a.storage_path=path;}saved=await cloud.persistOrder({...o,attachments:o.attachments.map(a=>{const {dataUrl,...rest}=a;return rest;})},true);}
+  const prepared=o.attachments.filter(a=>!state.pendingFiles.has(a.id)).map(a=>{const {dataUrl,...rest}=a;return rest;});
+  let saved;
+  try{saved=await cloud.persistOrder({...o,attachments:prepared},exists);}
+  catch(e){throw Error('Etapa de gravação da OS (ng_orders): '+e.message);}
+  // A OS já foi gravada. Falhas nos anexos não devem cancelar ou duplicar a OS.
+  state.orders=exists?state.orders.map(x=>x.id===o.id?saved:x):[saved,...state.orders];
+  if(pending.length){
+   let failed=0;
+   for(const a of pending){
+    try{
+     const path=await cloud.uploadImage(o.id,state.pendingFiles.get(a.id));
+     const {dataUrl,...rest}=a;
+     prepared.push({...rest,storage_path:path});
+     state.pendingFiles.delete(a.id);
+    }catch(e){
+     failed++;
+     attachmentWarning=e.message;
+    }
+   }
+   if(prepared.length!==saved.attachments.length){
+    try{saved=await cloud.persistOrder({...saved,attachments:prepared},true);}
+    catch(e){attachmentWarning='Falha ao atualizar os anexos na OS: '+e.message;}
+    state.orders=state.orders.map(x=>x.id===o.id?saved:x);
+   }
+   if(failed)attachmentWarning=`${failed} imagem(ns) não foram anexadas. ${attachmentWarning}`;
+  }
   o=saved;
  }else{const clean=structuredClone(o);state.orders=exists?state.orders.map(x=>x.id===o.id?clean:x):[clean,...state.orders];persistDemo();}
- if(state.mode==='cloud')state.orders=exists?state.orders.map(x=>x.id===o.id?o:x):[o,...state.orders];
+
  if(!state.clients.some(c=>c.name.toLowerCase()===o.client_name.toLowerCase())){const c={id:uid(),name:o.client_name,phone:o.client_phone||'',created_at:new Date().toISOString()};if(state.mode==='cloud'){try{const saved=await cloud.persistClient(c,false);state.clients.push(saved);}catch(e){toast('OS salva, mas não foi possível cadastrar o cliente: '+e.message,true);}}else{state.clients.push(c);persistDemo();}}
- closeModal();state.viewingOrderId=o.id;render();window.scrollTo(0,0);toast('Ordem de serviço salva com sucesso.');
- }catch(e){toast('Não foi possível salvar: '+e.message,true);if(state.mode==='cloud')await loadCloud();}finally{state.busy=false;}}
+ closeModal();state.viewingOrderId=o.id;render();window.scrollTo(0,0);toast(attachmentWarning?'OS salva, mas '+attachmentWarning:'Ordem de serviço salva com sucesso.',Boolean(attachmentWarning));
+ }catch(e){toast('Não foi possível salvar: '+e.message,true);if(state.mode==='cloud'){try{await loadCloud();}catch{}}}finally{state.busy=false;}}
 async function changeStage(orderId,stage){const o=state.orders.find(x=>x.id===orderId);if(!o||o.stage===stage)return;const copy=structuredClone(o);const before=stageLabel(copy.stage);copy.stage=stage;copy.delivered_at=stage==='entregue'?new Date().toISOString():null;copy.history=[...(copy.history||[]),{action:`Status alterado: ${before} → ${stageLabel(stage)}`,date:new Date().toISOString()}];try{const saved=state.mode==='cloud'?await cloud.persistOrder(copy,true):copy;state.orders=state.orders.map(x=>x.id===orderId?saved:x);if(state.mode==='demo')persistDemo();refreshView();toast(`${o.number}: movido para ${stageLabel(stage)}.`);}catch(e){toast('Falha ao mover OS: '+e.message,true);}}
 async function printOrder(id,button){
  const order=state.orders.find(o=>o.id===id);
