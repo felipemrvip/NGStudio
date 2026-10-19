@@ -157,7 +157,19 @@ function header(){
   </div>
  </header>`;
 }
-function render(){applyTheme(state.theme);if(!state.profile){profileScreen();return;}const root=$('#app');root.innerHTML=`<div class="shell ng-v2-shell studio-shell ${state.sidebarCollapsed?'sidebar-collapsed':''}">${nav()}<main class="main ng-v2-main ${(state.draft||state.viewingOrderId)?'os-editor-page':''}">${header()}${state.mode==='demo'?`<div class="demo-banner">${ico('alert')} <span><b>MODO DEMONSTRAÇÃO:</b> os dados ficam somente neste navegador. Configure o Supabase antes de cadastrar serviços reais ou compartilhar entre computadores.</span></div>`:''}<div id="view">${state.draft||state.viewingOrderId?'':pageView()}</div></main></div>`;renderModal();}
+let ngMotionScene='';
+function animateNgScene(){
+ const view=document.querySelector('#view');
+ if(!view||!view.firstElementChild)return;
+ const next=[state.page,state.profile||'',state.draft?'editor':state.viewingOrderId?'detail':'list'].join('|');
+ if(next===ngMotionScene)return;
+ ngMotionScene=next;
+ if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+ view.classList.remove('ng-scene-enter');
+ void view.offsetWidth;
+ view.classList.add('ng-scene-enter');
+}
+function render(){applyTheme(state.theme);if(!state.profile){profileScreen();return;}const root=$('#app');root.innerHTML=`<div class="shell ng-v2-shell studio-shell ${state.sidebarCollapsed?'sidebar-collapsed':''}">${nav()}<main class="main ng-v2-main ${(state.draft||state.viewingOrderId)?'os-editor-page':''}">${header()}${state.mode==='demo'?`<div class="demo-banner">${ico('alert')} <span><b>MODO DEMONSTRAÇÃO:</b> os dados ficam somente neste navegador. Configure o Supabase antes de cadastrar serviços reais ou compartilhar entre computadores.</span></div>`:''}<div id="view">${state.draft||state.viewingOrderId?'':pageView()}</div></main></div>`;renderModal();animateNgScene();}
 function refreshView(){const view=$('#view');if(view)view.innerHTML=pageView();}
 function pageView(){switch(state.page){case 'dashboard':return dashboard(true);case 'geral':return dashboard(false);case 'equipe':return teamPage();case 'ordens':return ordersPage();case 'producao':return kanbanPage();case 'clientes':return clientsPage();case 'financeiro':return financePage();case 'historico':return historyPage();case 'configuracoes':return settingsPage();return dashboard();}}
 function kpi(label,value,icon,tone,desc,action=""){return `<button type="button" class="kpi" data-dashboard-action="${action}" aria-label="${esc(label)}: ${esc(value)}. Ver ordens correspondentes"><div class="badge-icon ${tone}">${ico(icon)}</div><div class="kpi-label">${label}</div><strong>${esc(value)}</strong><small>${esc(desc)}</small></button>`;}
