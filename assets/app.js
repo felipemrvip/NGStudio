@@ -124,8 +124,31 @@ function render(){if(!state.profile){profileScreen();return;}const root=$('#app'
 function refreshView(){const view=$('#view');if(view)view.innerHTML=pageView();}
 function pageView(){switch(state.page){case 'dashboard':return dashboard(true);case 'geral':return dashboard(false);case 'equipe':return teamPage();case 'ordens':return ordersPage();case 'producao':return kanbanPage();case 'clientes':return clientsPage();case 'financeiro':return financePage();case 'historico':return historyPage();case 'configuracoes':return settingsPage();return dashboard();}}
 function kpi(label,value,icon,tone,desc){return `<div class="kpi"><div class="badge-icon ${tone}">${ico(icon)}</div><div class="kpi-label">${label}</div><strong>${esc(value)}</strong><small>${esc(desc)}</small></div>`;}
-function recentOrderRows(orders){return orders.map(o=>`<tr data-open-order="${esc(o.id)}"><td class="table-link">${esc(o.number)}</td><td>${esc(o.client_name||'—')}</td><td>${esc(o.title)}</td><td><span class="status ${esc(o.stage)}">${esc(stageLabel(o.stage))}</span></td><td>${money(o.total)}</td><td class="text-green">${money(signalPaid(o))}</td><td class="${remaining(o)>0?'overdue':'text-green'}">${money(remaining(o))}</td><td>${fmtDate(o.created_at)}</td><td>${ico('more')}</td></tr>`).join('');}
-function ordersTable(orders,cols='all'){return `<div class="table-scroll"><table class="data-table"><thead><tr><th>ID da OS</th><th>Cliente</th><th>Serviço</th><th>Status</th><th>Valor</th><th>Sinal</th><th>Restante</th><th>Data</th><th></th></tr></thead><tbody>${orders.length?recentOrderRows(orders):`<tr><td colspan="9" style="text-align:center;padding:45px;color:var(--muted)">Nenhuma ordem de serviço encontrada.</td></tr>`}</tbody></table></div>`;}
+function recentOrderRows(orders){
+ return orders.map(o=>{
+  const due=remaining(o);
+  const noCharge=Number(o.total||0)<=0;
+  const paidFull=!noCharge&&due<=.001;
+  const paymentText=noCharge?'Sem cobrança':paidFull?'Pago':'Falta pagar';
+  const paymentClass=noCharge?'no-charge':paidFull?'paid':'pending';
+  const stage=STAGES.some(s=>s.id===o.stage)?o.stage:'andamento';
+  return `<tr data-open-order="${esc(o.id)}">
+   <td class="table-link">${esc(o.number)}</td>
+   <td>${esc(o.client_name||'—')}</td>
+   <td>${esc(o.title)}</td>
+   <td class="ng-table-stage-cell"><div class="ng-table-stage-wrap ${esc(stage)}">
+    <select class="ng-table-stage-select" data-table-stage="${esc(o.id)}" aria-label="Alterar status da OS ${esc(o.number)}" title="Alterar status e salvar automaticamente">
+     ${STAGES.map(s=>`<option value="${esc(s.id)}" ${stage===s.id?'selected':''}>${esc(s.label)}</option>`).join('')}
+    </select>${ico('chevron')}</div></td>
+   <td><span class="ng-payment-badge ${paymentClass}">${paymentText}</span></td>
+   <td>${money(o.total)}</td>
+   <td class="text-green">${money(signalPaid(o))}</td>
+   <td class="${due>.001?'overdue':'text-green'}">${money(due)}</td>
+   <td>${fmtDate(o.created_at)}</td>
+  </tr>`;
+ }).join('');
+}
+function ordersTable(orders,cols='all'){return `<div class="table-scroll"><table class="data-table"><thead><tr><th>ID da OS</th><th>Cliente</th><th>Serviço</th><th>Status</th><th>Pagamento</th><th>Valor</th><th>Sinal</th><th>Restante</th><th>Data</th></tr></thead><tbody>${orders.length?recentOrderRows(orders):`<tr><td colspan="9" style="text-align:center;padding:45px;color:var(--muted)">Nenhuma ordem de serviço encontrada.</td></tr>`}</tbody></table></div>`;}
 function normalizedSearch(value){return String(value??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR');}
 function searchMatch(value,query){return normalizedSearch(value).includes(normalizedSearch(query));}
 function filteredOrders(orders=state.orders){
@@ -579,7 +602,35 @@ async function saveOrder(){if(!state.draft||state.busy)return;updateDraft();let 
  if(!state.clients.some(c=>c.name.toLowerCase()===o.client_name.toLowerCase())){const c={id:uid(),name:o.client_name,phone:o.client_phone||'',created_at:new Date().toISOString()};if(state.mode==='cloud'){try{const saved=await cloud.persistClient(c,false);state.clients.push(saved);}catch(e){toast('OS salva, mas não foi possível cadastrar o cliente: '+e.message,true);}}else{state.clients.push(c);persistDemo();}}
  closeModal();state.viewingOrderId=o.id;render();window.scrollTo(0,0);toast(attachmentWarning?'OS salva, mas '+attachmentWarning:'Ordem de serviço salva com sucesso.',Boolean(attachmentWarning));
  }catch(e){toast('Não foi possível salvar: '+e.message,true);if(state.mode==='cloud'){try{await loadCloud();}catch{}}}finally{state.busy=false;}}
-async function changeStage(orderId,stage){const o=state.orders.find(x=>x.id===orderId);if(!o||o.stage===stage)return;const copy=structuredClone(o);const before=stageLabel(copy.stage);copy.stage=stage;copy.delivered_at=stage==='entregue'?new Date().toISOString():null;copy.history=[...(copy.history||[]),{action:`Status alterado: ${before} → ${stageLabel(stage)}`,date:new Date().toISOString()}];try{const saved=state.mode==='cloud'?await cloud.persistOrder(copy,true):copy;state.orders=state.orders.map(x=>x.id===orderId?saved:x);if(state.mode==='demo')persistDemo();refreshView();toast(`${o.number}: movido para ${stageLabel(stage)}.`);}catch(e){toast('Falha ao mover OS: '+e.message,true);}}
+const stageUpdatePending=new Set();
+async function changeStage(orderId,stage,control=null){
+ const o=state.orders.find(x=>x.id===orderId);
+ if(!o||o.stage===stage||stageUpdatePending.has(orderId))return;
+ if(!STAGES.some(s=>s.id===stage)){if(control)control.value=o.stage;toast('Status inválido.',true);return;}
+ const copy=structuredClone(o),now=new Date().toISOString();
+ const before=stageLabel(copy.stage);
+ copy.stage=stage;
+ copy.delivered_at=stage==='entregue'?now:null;
+ copy.history=[...(copy.history||[]),{action:`Status alterado: ${before} → ${stageLabel(stage)}`,date:now}];
+ stageUpdatePending.add(orderId);
+ if(control){control.disabled=true;control.closest('.ng-table-stage-wrap')?.classList.add('is-saving');}
+ try{
+  const saved=state.mode==='cloud'?await cloud.persistOrder(copy,true):copy;
+  state.orders=state.orders.map(x=>x.id===orderId?saved:x);
+  if(state.mode==='demo')persistDemo();
+  // Mantém o deslocamento da página enquanto atualiza a lista e seus indicadores.
+  const x=window.scrollX,y=window.scrollY;
+  refreshView();
+  window.scrollTo(x,y);
+  toast(`${o.number}: status atualizado para ${stageLabel(stage)}.`);
+ }catch(e){
+  if(control){control.value=o.stage;control.closest('.ng-table-stage-wrap')?.classList.remove('is-saving');}
+  toast('Não foi possível salvar o status: '+e.message,true);
+ }finally{
+  stageUpdatePending.delete(orderId);
+  if(control?.isConnected){control.disabled=false;control.closest('.ng-table-stage-wrap')?.classList.remove('is-saving');}
+ }
+}
 async function printOrder(id,button){
  const order=state.orders.find(o=>o.id===id);
  if(!order||button?.disabled)return;
@@ -624,6 +675,8 @@ function moveImage(id,direction){if(!state.draft)return;updateDraft();const a=st
 function updateAttachment(id,key,value){if(!state.draft)return;const a=state.draft.attachments.find(x=>x.id===id);if(a)a[key]=value;}
 // Interações por delegação: os cartões e menus são renderizados novamente sem perder handlers.
 document.addEventListener('click',async e=>{
+ // Selecionar uma etapa na tabela nunca deve abrir a OS por acidente.
+ if(e.target.closest('[data-table-stage]'))return;
  const target=e.target.closest('button,[data-open-order],[data-client-id]');if(!target)return;
  if(target.matches('[data-choose-profile]')){chooseProfile(target.dataset.chooseProfile);return;}
  if(target.matches('[data-switch-profile]')){state.profile=null;localStorage.removeItem(PROFILE_KEY);profileScreen();return;}
@@ -663,6 +716,7 @@ document.addEventListener('click',async e=>{
  if(target.matches('[data-logout]')){await cloud.signout();renderLogin();return;}
 });
 document.addEventListener('change',async e=>{const target=e.target;
+ if(target.matches('[data-table-stage]')){await changeStage(target.dataset.tableStage,target.value,target);return;}
  if(target.id==='ng-quick-stage'){await saveQuickOrder(state.viewingOrderId,'stage');return;}
  if(target.id==='ng-revenue-year'){state.revenueYear=Number(target.value);state.revenueHoverMonth=null;refreshView();return;}
  if(target.id==='ng-revenue-month-select'){updateMonthlySelection(Number(target.value));return;}
