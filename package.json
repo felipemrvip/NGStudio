@@ -1,0 +1,12 @@
+{
+  "name":"ng-studio",
+  "version":"0.1.0",
+  "private":true,
+  "type":"module",
+  "description":"NG Studio - MVP funcional sem dependências externas",
+  "scripts":{
+    "dev":"node dev-server.mjs",
+    "test":"node --test tests/*.test.mjs"
+  },
+  "engines":{"node":">=20"}
+}
