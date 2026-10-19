@@ -1,5 +1,4 @@
 export const STAGES = [
- {id:'analise',label:'Análise',color:'#9da8b9'},
  {id:'andamento',label:'Em andamento',color:'#f2ba38'},
  {id:'producao',label:'Produção',color:'#ab6bdf'},
  {id:'pronto',label:'Pronto',color:'#22bb91'},
@@ -10,7 +9,7 @@ export function money(value){return Number(value||0).toLocaleString('pt-BR',{sty
 export function paid(order){return (order.payments||[]).reduce((sum,p)=>sum+Number(p.amount||0),0);}
 export function remaining(order){return Math.max(0,Number(order.total||0)-paid(order));}
 export function paymentStatus(order){const n=paid(order),total=Number(order.total||0);return total===0?'Sem cobrança':n>=total?'Pago':n>0?'Sinal':'Pendente';}
-export function stageLabel(id){return STAGES.find(s=>s.id===id)?.label||id;}
+export function stageLabel(id){return STAGES.find(s=>s.id===(id==='analise'?'andamento':id))?.label||id;}
 export function fmtDate(value){if(!value)return '—';const d=new Date(value.length===10?value+'T12:00:00':value);return Number.isNaN(d.getTime())?'—':d.toLocaleDateString('pt-BR');}
 export function currentMonth(value){const a=new Date(value),b=new Date();return a.getMonth()===b.getMonth()&&a.getFullYear()===b.getFullYear();}
 export function esc(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
