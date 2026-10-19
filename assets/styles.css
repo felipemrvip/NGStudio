@@ -493,3 +493,17 @@ body.ng-glance-modal-open{overflow:hidden}
 .ng-glance-payment-single{grid-template-columns:1fr}
 .ng-glance-payment-single button{min-height:44px}
 .ng-glance-payment-single button.is-paid:disabled{opacity:1;cursor:default}
+
+/* Cartões operacionais fixos no topo; relatório mensal recolhível */
+.ng-revenue-heading{margin-bottom:0}
+.ng-revenue-toggle{display:inline-flex;gap:7px;align-items:center;justify-content:center;min-width:112px;white-space:nowrap;border:1px solid #355375;background:#162e4b;color:#d7e5f5}
+.ng-revenue-toggle .ico{width:16px;height:16px;transform:rotate(180deg);transition:transform .35s cubic-bezier(.2,.8,.2,1)}
+.ng-revenue-panel.is-collapsed .ng-revenue-toggle .ico{transform:rotate(0)}
+.ng-revenue-content{display:grid;grid-template-rows:1fr;opacity:1;transition:grid-template-rows .42s cubic-bezier(.2,.8,.2,1),opacity .28s ease}
+.ng-revenue-content>*{min-height:0}
+.ng-revenue-panel.is-collapsed{padding-bottom:0}
+.ng-revenue-panel.is-collapsed .ng-revenue-content{grid-template-rows:0fr;opacity:0;visibility:hidden}
+.ng-revenue-panel.is-collapsed .ng-revenue-heading{padding-bottom:17px}
+.ng-revenue-panel.is-collapsed .ng-revenue-tools>label,.ng-revenue-panel.is-collapsed .ng-revenue-tools>.select{display:none}
+@media(max-width:700px){.ng-revenue-toggle{min-width:85px;padding:8px}.ng-revenue-panel.is-collapsed .ng-revenue-heading{padding-bottom:16px}}
+@media(prefers-reduced-motion:reduce){.ng-revenue-content,.ng-revenue-toggle .ico{transition:none}}
