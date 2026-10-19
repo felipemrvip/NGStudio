@@ -173,6 +173,14 @@ function render(){applyTheme(state.theme);if(!state.profile){profileScreen();ret
 function refreshView(){const view=$('#view');if(view)view.innerHTML=pageView();}
 function pageView(){switch(state.page){case 'dashboard':return dashboard(true);case 'geral':return dashboard(false);case 'equipe':return teamPage();case 'ordens':return ordersPage();case 'producao':return kanbanPage();case 'clientes':return clientsPage();case 'financeiro':return financePage();case 'historico':return historyPage();case 'configuracoes':return settingsPage();return dashboard();}}
 function kpi(label,value,icon,tone,desc,action=""){return `<button type="button" class="kpi" data-dashboard-action="${action}" aria-label="${esc(label)}: ${esc(value)}. Ver ordens correspondentes"><div class="badge-icon ${tone}">${ico(icon)}</div><div class="kpi-label">${label}</div><strong>${esc(value)}</strong><small>${esc(desc)}</small></button>`;}
+function statusPickerMarkup(stage,selectAttrs='',variant=''){
+ const selected=STAGES.some(item=>item.id===stage)?stage:STAGES[0].id;
+ return '<div class="ng-stage-picker '+variant+'" data-stage-picker>'+
+  '<select class="ng-stage-native" tabindex="-1" aria-hidden="true" '+selectAttrs+'>'+
+  STAGES.map(item=>'<option value="'+esc(item.id)+'" '+(selected===item.id?'selected':'')+'>'+esc(item.label)+'</option>').join('')+
+  '</select><button type="button" class="ng-stage-trigger stage-'+esc(selected)+'" data-stage-toggle aria-haspopup="listbox" aria-expanded="false" aria-label="Alterar status. Atual: '+esc(stageLabel(selected))+'">'+
+  '<span class="ng-stage-dot" aria-hidden="true"></span><span data-stage-current>'+esc(stageLabel(selected))+'</span>'+ico('chevron')+'</button></div>';
+}
 function paymentBadge(order){const label=paymentStatus(order);const tone={Pago:"paid",Sinal:"partial",Pendente:"pending","Sem cobrança":"no-charge"}[label];return `<span class="ng-payment-badge ${tone}">${label}</span>`;}
 function recentOrderRows(orders){
  return orders.map(o=>{
@@ -182,10 +190,7 @@ function recentOrderRows(orders){
    <td class="table-link">${esc(o.number)}</td>
    <td>${esc(o.client_name||'—')}</td>
    <td>${esc(o.title)}</td>
-   <td class="ng-table-stage-cell"><div class="ng-table-stage-wrap ${esc(stage)}">
-    <select class="ng-table-stage-select" data-table-stage="${esc(o.id)}" aria-label="Alterar status da OS ${esc(o.number)}" title="Alterar status e salvar automaticamente">
-     ${STAGES.map(s=>`<option value="${esc(s.id)}" ${stage===s.id?'selected':''}>${esc(s.label)}</option>`).join('')}
-    </select>${ico('chevron')}</div></td>
+   <td class="ng-table-stage-cell"><div class="ng-table-stage-wrap ${esc(stage)}">${statusPickerMarkup(stage, 'data-table-stage="'+esc(o.id)+'" title="Alterar status e salvar automaticamente"', 'ng-stage-compact')}</div></td>
    <td>${paymentBadge(o)}</td>
    <td>${money(o.total)}</td>
    <td class="text-green">${money(signalPaid(o))}</td>
@@ -471,7 +476,7 @@ function renderOrderDetail(){
     </section>
     <section class="panel ng-glance-actions" id="ng-glance-actions">
      <div class="ng-glance-section-heading"><span class="ng-glance-icon gold">${ico('dollar')}</span><div><h2>Ações rápidas</h2><p>Altere o status e o pagamento desta OS.</p></div></div>
-     <div class="ng-glance-action-field"><label for="ng-quick-stage">Status da OS</label><select id="ng-quick-stage" class="select" aria-label="Alterar status da OS">${stageOptions}</select></div>
+     <div class="ng-glance-action-field"><span class="ng-glance-stage-label">Status da OS</span>${statusPickerMarkup(order.stage,'id="ng-quick-stage" aria-label="Alterar status da OS"','ng-stage-quick')}</div>
      <div class="ng-glance-action-field"><span class="ng-glance-action-label">Status do pagamento ${paymentBadge(order)}</span><div class="ng-glance-payment-toggle ng-glance-payment-single"><button type="button" data-quick-payment="paid" aria-pressed="${fullyPaid}" class="${fullyPaid?'is-active is-paid':''}" ${total<=0||fullyPaid?'disabled':''}>${ico('check')} ${fullyPaid?'Pagamento concluído':'Marcar como pago'}</button></div></div>
      <p class="ng-glance-pay-hint" id="ng-quick-payment-hint">${total<=0?'Sem valor a receber nesta ordem.':fullyPaid?'Pagamento integral já registrado.':`Ao clicar, ${money(due)} serão registrados automaticamente como recebidos.`}</p>
      <p class="ng-glance-autosave" id="ng-glance-autosave" role="status" aria-live="polite">${ico('check')} Alterações salvas automaticamente</p>
@@ -519,6 +524,7 @@ async function saveQuickOrder(id,action){
  const indicator=$('#ng-glance-autosave');
  state.busy=true;
  control.disabled=true;
+ syncStatusPicker(control);
  if(paymentButton)paymentButton.disabled=true;
  if(indicator){indicator.classList.add('is-saving');indicator.classList.remove('is-error');indicator.innerHTML=ico('clock')+' Salvando...';}
  try{
@@ -530,6 +536,7 @@ async function saveQuickOrder(id,action){
  }catch(e){
   control.value=order.stage;
   control.disabled=false;
+  syncStatusPicker(control);
   if(paymentButton)paymentButton.disabled=Number(order.total||0)<=0||remaining(order)<=.001;
   if(indicator){indicator.classList.remove('is-saving');indicator.classList.add('is-error');indicator.innerHTML=ico('clock')+' Não foi possível salvar';}
   toast('Não foi possível salvar automaticamente: '+e.message,true);
@@ -589,7 +596,7 @@ function reconcileSimplePayments(order,signal,isPaid){
  if(isPaid&&settlement>0)entries.push({id:uid(),amount:settlement,method:order.method||'PIX',date:now,note:'Quitação automática'});
  return entries;
 }
-function renderModal(){const root=$('#modal-root');if(state.clientDraft){renderClientModal();return;}if(!state.draft){root.innerHTML='';if(state.viewingOrderId)renderOrderDetail();return;}const view=$('#view');if(!view)return;const oldScroll=window.scrollY;const hadEditor=Boolean($('#order-form'));if(hadEditor){updateDraft();state.editorPayment={signal:$('#initial-payment')?.value??'',paid:$('[name=payment_state]:checked')?.value==='paid'};}const o=state.draft;const attendants=[...new Set([...team(),o.attendant].filter(Boolean))];const imageRows=(o.attachments||[]).map((a,i)=>`<div class="attach-item" draggable="true" data-img-drag="${esc(a.id)}"><img data-img-preview="${esc(a.id)}" src="${esc(a.dataUrl||state.signCache.get(a.storage_path)||'')}" alt="Referência ${i+1}"/><div class="attach-fields"><div style="display:flex;align-items:center;justify-content:space-between"><b style="font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:240px">${esc(a.name||'Imagem do serviço')}</b><button type="button" class="iconbutton" data-remove-img="${esc(a.id)}" title="Remover imagem">${ico('trash')}</button></div><input class="input" style="padding:6px 8px;font-size:11px" data-img-caption="${esc(a.id)}" placeholder="Legenda opcional" value="${esc(a.caption||'')}"/><div class="attach-controls"><label class="checklabel"><input type="checkbox" data-img-enabled="${esc(a.id)}" ${a.include_pdf!==false?'checked':''}/> Incluir no PDF</label><select data-img-size="${esc(a.id)}" title="Tamanho no PDF"><option value="small" ${a.size==='small'?'selected':''}>Pequena</option><option value="medium" ${!a.size||a.size==='medium'?'selected':''}>Média</option><option value="large" ${a.size==='large'?'selected':''}>Grande</option></select><button type="button" data-img-rotate="${esc(a.id)}" title="Girar 90°">↻ Girar</button><button type="button" data-img-up="${esc(a.id)}" ${i===0?'disabled':''}>↑</button><button type="button" data-img-down="${esc(a.id)}" ${i===(o.attachments.length-1)?'disabled':''}>↓</button></div></div></div>`).join('');view.innerHTML=`<div class="ng-os-create"><div class="ng-os-page-head"><button type="button" class="ng-os-back" data-close title="Voltar">${ico('arrow')}</button><div class="ng-os-title"><h1>${state.orders.some(x=>x.id===o.id)?'Editar Ordem de Serviço':'Nova Ordem de Serviço'}</h1><p>Preencha as informações essenciais e crie sua OS rapidamente.</p></div><div class="ng-os-brand-chip"><img src="assets/brand-symbol.svg" alt="" /><div><b>NG Studio</b><small>NG PrintSign</small></div></div></div><div class="os-editor-main"><form id="order-form" class="drawer-body os-form"><section class="drawer-section ng-os-card ng-os-quick-card"><div class="ng-os-section-title"><span class="ng-os-section-icon">${ico('users')}</span><div><h3>Cliente</h3><p>Selecione ou cadastre o cliente.</p></div><button type="button" class="btn btn-sm" data-new-client>${ico('plus')} Novo cliente</button></div><div class="form-row"><div class="form-field"><label>Cliente *</label><input name="client_name" class="input" list="client-suggestions" required value="${esc(o.client_name)}" placeholder="Digite o nome do cliente..."/><datalist id="client-suggestions">${state.clients.map(c=>`<option value="${esc(c.name)}"></option>`).join('')}</datalist></div><div class="form-field"><label>Telefone / WhatsApp</label><input name="client_phone" class="input" value="${esc(o.client_phone||'')}" placeholder="(21) 99999-9999"/></div></div></section><section class="drawer-section ng-os-card ng-os-quick-card"><div class="ng-os-section-title"><span class="ng-os-section-icon">${ico('layers')}</span><div><h3>Serviço</h3><p>Informe o serviço a ser realizado.</p></div></div><div class="ng-os-quick-service"><div class="form-field"><label>Nome do serviço *</label><input name="title" class="input" required value="${esc(o.title)}" placeholder="Ex.: 20 camisas sublimadas"/></div><div class="ng-os-quick-stage"><div class="ng-os-stage-select"><div class="form-field"><label>Status</label><div class="ng-stage-picker" data-stage-picker><select name="stage" class="ng-stage-native" tabindex="-1" aria-hidden="true">${STAGES.map(s=>`<option value="${s.id}" ${o.stage===s.id?'selected':''}>${esc(s.label)}</option>`).join('')}</select><button type="button" class="ng-stage-trigger stage-${esc(o.stage)}" data-stage-toggle aria-haspopup="listbox" aria-expanded="false"><span class="ng-stage-dot"></span><span data-stage-current>${esc(stageLabel(o.stage))}</span>${ico('chevron')}</button><div class="ng-stage-options" role="listbox" aria-label="Selecionar status">${STAGES.map(s=>`<button type="button" role="option" aria-selected="${o.stage===s.id}" class="ng-stage-option stage-${esc(s.id)}" data-stage-option="${esc(s.id)}"><span class="ng-stage-dot"></span><span>${esc(s.label)}</span>${o.stage===s.id?ico('check'):'<span class="ng-stage-check"></span>'}</button>`).join('')}</div></div></div></div></div></div></section><section class="drawer-section ng-os-card ng-os-quick-card"><div class="ng-os-section-title"><span class="ng-os-section-icon payment">${ico('dollar')}</span><div><h3>Pagamento</h3><p>Valores da ordem de serviço.</p></div></div><div class="payment-simple-grid"><div class="form-field"><label for="order-total">Valor total (R$)</label><input id="order-total" name="total" type="number" min="0" step="0.01" class="input" value="${o.total>0?Number(o.total):''}" placeholder="0,00"/></div><div class="form-field"><label for="initial-payment">Sinal (R$)</label><input id="initial-payment" type="number" min="0" step="0.01" class="input" value="${esc(state.editorPayment?.signal??(signalPaid(o)>0?String(Number(signalPaid(o).toFixed(2))):''))}" placeholder="0,00"/></div><div class="form-field"><label>Restante (automático)</label><div class="payment-remaining ${o.total>0?'':'is-placeholder'}" id="remaining-live" aria-live="polite">${o.total>0?money(remaining(o)):'Calculado automaticamente'}</div></div></div><div class="payment-status-group"><span class="payment-status-title">Situação do pagamento</span><div class="payment-choices"><label class="payment-choice"><input type="radio" name="payment_state" value="pending" ${!(state.editorPayment?.paid??(o.total>0&&remaining(o)<=.001))?'checked':''}/><span>Falta pagar</span></label><label class="payment-choice"><input type="radio" name="payment_state" value="paid" ${(state.editorPayment?.paid??(o.total>0&&remaining(o)<=.001))?'checked':''}/><span>Pago</span></label></div></div></section><section class="drawer-section ng-os-card ng-os-quick-card ng-os-notes-card"><div class="ng-os-section-title"><span class="ng-os-section-icon">${ico('file')}</span><div><h3>Observações</h3><p>Informações adicionais sobre o serviço (opcional).</p></div></div><div class="form-field"><label>Observações / especificações</label><textarea class="textarea" name="notes" placeholder="Ex.: tamanho, material, cor, quantidade, detalhes...">${esc(o.notes||'')}</textarea></div></section><details class="ng-os-extras" ${o.attachments.length?'open':''}><summary>${ico('plus')} Anexos e opções adicionais <span>${o.attachments.length?o.attachments.length+' imagem(ns) anexada(s)':'Opcional'}</span>${ico('chevron')}</summary><div class="ng-os-extras-body"><div class="ng-os-extra-controls"><div class="ng-os-responsible"><div class="form-field"><label>Responsável pelo serviço</label><select name="attendant" class="select">${attendants.map(a=>`<option ${o.attendant===a?'selected':''} value="${esc(a)}">${esc(a)}</option>`).join('')}</select></div></div></div><div class="ng-os-attachment-controls"><div class="ng-os-section-title"><span class="ng-os-section-icon attachment">${ico('image')}</span><div><h3>Imagens e prints do serviço</h3><p>Referências para a produção e para o PDF.</p></div></div><input id="image-picker" type="file" accept="image/jpeg,image/png,image/webp" multiple class="hidden"/><button type="button" class="dropzone" data-pick-images>${ico('upload')}<b>Selecionar imagens ou colar print</b><p style="font-size:11px;margin-bottom:0">⌘V / Ctrl+V para colar · Arraste as imagens para reorganizar</p></button><div id="attachments-list" style="display:grid;gap:8px">${imageRows||'<span class="caption">Nenhuma imagem anexada.</span>'}</div></div></div></details></form><aside class="ng-os-summary"><div class="ng-os-summary-header"><span class="ng-os-summary-emblem">${ico('file')}</span><div><h2>Resumo da OS</h2><p>Confira os dados antes de salvar.</p></div></div><div class="ng-os-summary-pills"><div><small>Nº da OS</small><strong>${esc(o.number)}</strong></div><div><small>Data de criação</small><strong>${fmtDate(o.created_at)}</strong></div></div><div class="ng-os-summary-info"><div><span>Cliente</span><strong id="os-summary-client">Não informado</strong></div><div><span>Serviço</span><strong id="os-summary-service">Não informado</strong></div><div><span>Status da produção</span><strong id="os-summary-stage">Em andamento</strong></div></div><div class="ng-os-summary-finance"><h3>${ico('chart')} Resumo financeiro</h3><div><span>Valor total</span><b id="os-summary-total">R$ 0,00</b></div><div><span>Sinal</span><b id="os-summary-signal">R$ 0,00</b></div><div class="ng-os-summary-balance"><span>Restante</span><b id="os-summary-remaining">R$ 0,00</b></div></div><div class="ng-os-mini-preview"><div class="ng-os-mini-title"><span>${ico('file')} Pré-visualização da OS</span><button type="button" class="btn btn-sm" data-preview-expand>Ampliar ${ico('arrow')}</button></div><div class="ng-os-mini-canvas"><div class="os-preview-viewport" id="os-preview-viewport"><iframe id="os-preview-frame" title="Prévia do documento" sandbox="" referrerpolicy="no-referrer"></iframe></div></div></div><div class="ng-os-side-actions"><button type="button" class="btn btn-primary ng-os-save" data-save-order ${state.busy?'disabled':''}>${ico('check')} ${state.busy?'Salvando...':'Salvar OS'}</button><div class="ng-os-export" ${state.orders.some(x=>x.id===o.id)?'':'hidden'}><button type="button" class="btn" data-export-pdf="${esc(o.id)}" ${state.orders.some(x=>x.id===o.id)?'':'disabled title="Salve a OS antes de baixar"'}>${ico('download')} Baixar PDF</button><button type="button" class="btn" data-print="${esc(o.id)}" ${state.orders.some(x=>x.id===o.id)?'':'disabled title="Salve a OS antes de imprimir"'}>${ico('printer')} Imprimir</button></div>${state.orders.some(x=>x.id===o.id)?`<button type="button" class="btn btn-danger ng-os-delete" data-delete-order="${esc(o.id)}">${ico('trash')} Excluir OS</button>`:''}<button type="button" class="ng-os-cancel" data-close>Cancelar e voltar</button></div></aside></div></div>`;root.innerHTML='';renderOrderPreview();if(hadEditor)window.scrollTo(0,oldScroll);}
+function renderModal(){const root=$('#modal-root');if(state.clientDraft){renderClientModal();return;}if(!state.draft){root.innerHTML='';if(state.viewingOrderId)renderOrderDetail();return;}const view=$('#view');if(!view)return;const oldScroll=window.scrollY;const hadEditor=Boolean($('#order-form'));if(hadEditor){updateDraft();state.editorPayment={signal:$('#initial-payment')?.value??'',paid:$('[name=payment_state]:checked')?.value==='paid'};}const o=state.draft;const attendants=[...new Set([...team(),o.attendant].filter(Boolean))];const imageRows=(o.attachments||[]).map((a,i)=>`<div class="attach-item" draggable="true" data-img-drag="${esc(a.id)}"><img data-img-preview="${esc(a.id)}" src="${esc(a.dataUrl||state.signCache.get(a.storage_path)||'')}" alt="Referência ${i+1}"/><div class="attach-fields"><div style="display:flex;align-items:center;justify-content:space-between"><b style="font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:240px">${esc(a.name||'Imagem do serviço')}</b><button type="button" class="iconbutton" data-remove-img="${esc(a.id)}" title="Remover imagem">${ico('trash')}</button></div><input class="input" style="padding:6px 8px;font-size:11px" data-img-caption="${esc(a.id)}" placeholder="Legenda opcional" value="${esc(a.caption||'')}"/><div class="attach-controls"><label class="checklabel"><input type="checkbox" data-img-enabled="${esc(a.id)}" ${a.include_pdf!==false?'checked':''}/> Incluir no PDF</label><select data-img-size="${esc(a.id)}" title="Tamanho no PDF"><option value="small" ${a.size==='small'?'selected':''}>Pequena</option><option value="medium" ${!a.size||a.size==='medium'?'selected':''}>Média</option><option value="large" ${a.size==='large'?'selected':''}>Grande</option></select><button type="button" data-img-rotate="${esc(a.id)}" title="Girar 90°">↻ Girar</button><button type="button" data-img-up="${esc(a.id)}" ${i===0?'disabled':''}>↑</button><button type="button" data-img-down="${esc(a.id)}" ${i===(o.attachments.length-1)?'disabled':''}>↓</button></div></div></div>`).join('');view.innerHTML=`<div class="ng-os-create"><div class="ng-os-page-head"><button type="button" class="ng-os-back" data-close title="Voltar">${ico('arrow')}</button><div class="ng-os-title"><h1>${state.orders.some(x=>x.id===o.id)?'Editar Ordem de Serviço':'Nova Ordem de Serviço'}</h1><p>Preencha as informações essenciais e crie sua OS rapidamente.</p></div><div class="ng-os-brand-chip"><img src="assets/brand-symbol.svg" alt="" /><div><b>NG Studio</b><small>NG PrintSign</small></div></div></div><div class="os-editor-main"><form id="order-form" class="drawer-body os-form"><section class="drawer-section ng-os-card ng-os-quick-card"><div class="ng-os-section-title"><span class="ng-os-section-icon">${ico('users')}</span><div><h3>Cliente</h3><p>Selecione ou cadastre o cliente.</p></div><button type="button" class="btn btn-sm" data-new-client>${ico('plus')} Novo cliente</button></div><div class="form-row"><div class="form-field"><label>Cliente *</label><input name="client_name" class="input" list="client-suggestions" required value="${esc(o.client_name)}" placeholder="Digite o nome do cliente..."/><datalist id="client-suggestions">${state.clients.map(c=>`<option value="${esc(c.name)}"></option>`).join('')}</datalist></div><div class="form-field"><label>Telefone / WhatsApp</label><input name="client_phone" class="input" value="${esc(o.client_phone||'')}" placeholder="(21) 99999-9999"/></div></div></section><section class="drawer-section ng-os-card ng-os-quick-card"><div class="ng-os-section-title"><span class="ng-os-section-icon">${ico('layers')}</span><div><h3>Serviço</h3><p>Informe o serviço a ser realizado.</p></div></div><div class="ng-os-quick-service"><div class="form-field"><label>Nome do serviço *</label><input name="title" class="input" required value="${esc(o.title)}" placeholder="Ex.: 20 camisas sublimadas"/></div><div class="ng-os-quick-stage"><div class="ng-os-stage-select"><div class="form-field"><label>Status</label>${statusPickerMarkup(o.stage,'name="stage"','ng-stage-editor')}</div></div></div></div></section><section class="drawer-section ng-os-card ng-os-quick-card"><div class="ng-os-section-title"><span class="ng-os-section-icon payment">${ico('dollar')}</span><div><h3>Pagamento</h3><p>Valores da ordem de serviço.</p></div></div><div class="payment-simple-grid"><div class="form-field"><label for="order-total">Valor total (R$)</label><input id="order-total" name="total" type="number" min="0" step="0.01" class="input" value="${o.total>0?Number(o.total):''}" placeholder="0,00"/></div><div class="form-field"><label for="initial-payment">Sinal (R$)</label><input id="initial-payment" type="number" min="0" step="0.01" class="input" value="${esc(state.editorPayment?.signal??(signalPaid(o)>0?String(Number(signalPaid(o).toFixed(2))):''))}" placeholder="0,00"/></div><div class="form-field"><label>Restante (automático)</label><div class="payment-remaining ${o.total>0?'':'is-placeholder'}" id="remaining-live" aria-live="polite">${o.total>0?money(remaining(o)):'Calculado automaticamente'}</div></div></div><div class="payment-status-group"><span class="payment-status-title">Situação do pagamento</span><div class="payment-choices"><label class="payment-choice"><input type="radio" name="payment_state" value="pending" ${!(state.editorPayment?.paid??(o.total>0&&remaining(o)<=.001))?'checked':''}/><span>Falta pagar</span></label><label class="payment-choice"><input type="radio" name="payment_state" value="paid" ${(state.editorPayment?.paid??(o.total>0&&remaining(o)<=.001))?'checked':''}/><span>Pago</span></label></div></div></section><section class="drawer-section ng-os-card ng-os-quick-card ng-os-notes-card"><div class="ng-os-section-title"><span class="ng-os-section-icon">${ico('file')}</span><div><h3>Observações</h3><p>Informações adicionais sobre o serviço (opcional).</p></div></div><div class="form-field"><label>Observações / especificações</label><textarea class="textarea" name="notes" placeholder="Ex.: tamanho, material, cor, quantidade, detalhes...">${esc(o.notes||'')}</textarea></div></section><details class="ng-os-extras" ${o.attachments.length?'open':''}><summary>${ico('plus')} Anexos e opções adicionais <span>${o.attachments.length?o.attachments.length+' imagem(ns) anexada(s)':'Opcional'}</span>${ico('chevron')}</summary><div class="ng-os-extras-body"><div class="ng-os-extra-controls"><div class="ng-os-responsible"><div class="form-field"><label>Responsável pelo serviço</label><select name="attendant" class="select">${attendants.map(a=>`<option ${o.attendant===a?'selected':''} value="${esc(a)}">${esc(a)}</option>`).join('')}</select></div></div></div><div class="ng-os-attachment-controls"><div class="ng-os-section-title"><span class="ng-os-section-icon attachment">${ico('image')}</span><div><h3>Imagens e prints do serviço</h3><p>Referências para a produção e para o PDF.</p></div></div><input id="image-picker" type="file" accept="image/jpeg,image/png,image/webp" multiple class="hidden"/><button type="button" class="dropzone" data-pick-images>${ico('upload')}<b>Selecionar imagens ou colar print</b><p style="font-size:11px;margin-bottom:0">⌘V / Ctrl+V para colar · Arraste as imagens para reorganizar</p></button><div id="attachments-list" style="display:grid;gap:8px">${imageRows||'<span class="caption">Nenhuma imagem anexada.</span>'}</div></div></div></details></form><aside class="ng-os-summary"><div class="ng-os-summary-header"><span class="ng-os-summary-emblem">${ico('file')}</span><div><h2>Resumo da OS</h2><p>Confira os dados antes de salvar.</p></div></div><div class="ng-os-summary-pills"><div><small>Nº da OS</small><strong>${esc(o.number)}</strong></div><div><small>Data de criação</small><strong>${fmtDate(o.created_at)}</strong></div></div><div class="ng-os-summary-info"><div><span>Cliente</span><strong id="os-summary-client">Não informado</strong></div><div><span>Serviço</span><strong id="os-summary-service">Não informado</strong></div><div><span>Status da produção</span><strong id="os-summary-stage">Em andamento</strong></div></div><div class="ng-os-summary-finance"><h3>${ico('chart')} Resumo financeiro</h3><div><span>Valor total</span><b id="os-summary-total">R$ 0,00</b></div><div><span>Sinal</span><b id="os-summary-signal">R$ 0,00</b></div><div class="ng-os-summary-balance"><span>Restante</span><b id="os-summary-remaining">R$ 0,00</b></div></div><div class="ng-os-mini-preview"><div class="ng-os-mini-title"><span>${ico('file')} Pré-visualização da OS</span><button type="button" class="btn btn-sm" data-preview-expand>Ampliar ${ico('arrow')}</button></div><div class="ng-os-mini-canvas"><div class="os-preview-viewport" id="os-preview-viewport"><iframe id="os-preview-frame" title="Prévia do documento" sandbox="" referrerpolicy="no-referrer"></iframe></div></div></div><div class="ng-os-side-actions"><button type="button" class="btn btn-primary ng-os-save" data-save-order ${state.busy?'disabled':''}>${ico('check')} ${state.busy?'Salvando...':'Salvar OS'}</button><div class="ng-os-export" ${state.orders.some(x=>x.id===o.id)?'':'hidden'}><button type="button" class="btn" data-export-pdf="${esc(o.id)}" ${state.orders.some(x=>x.id===o.id)?'':'disabled title="Salve a OS antes de baixar"'}>${ico('download')} Baixar PDF</button><button type="button" class="btn" data-print="${esc(o.id)}" ${state.orders.some(x=>x.id===o.id)?'':'disabled title="Salve a OS antes de imprimir"'}>${ico('printer')} Imprimir</button></div>${state.orders.some(x=>x.id===o.id)?`<button type="button" class="btn btn-danger ng-os-delete" data-delete-order="${esc(o.id)}">${ico('trash')} Excluir OS</button>`:''}<button type="button" class="ng-os-cancel" data-close>Cancelar e voltar</button></div></aside></div></div>`;root.innerHTML='';renderOrderPreview();if(hadEditor)window.scrollTo(0,oldScroll);}
 function rerenderPaymentParts(){if(!state.draft)return;const total=Number($('[name=total]')?.value||0);const signal=Number($('#initial-payment')?.value||0);const isPaid=$('[name=payment_state]:checked')?.value==='paid';const remainingAmount=Math.max(0,total-(isPaid?total:signal));const r=$('#remaining-live');if(r){const hasTotal=String($('[name=total]')?.value||'').trim()!=='';r.classList.toggle('is-placeholder',!hasTotal);r.textContent=hasTotal?money(remainingAmount):'Calculado automaticamente';}state.editorPayment={signal:$('#initial-payment')?.value??'',paid:isPaid};scheduleOrderPreview();}
 function updateOrderPreviewScale(){
  const viewport=$('#os-preview-viewport');
@@ -713,7 +720,7 @@ async function changeStage(orderId,stage,control=null){
  copy.delivered_at=stage==='entregue'?now:null;
  copy.history=[...(copy.history||[]),{action:`Status alterado: ${before} → ${stageLabel(stage)}`,date:now}];
  stageUpdatePending.add(orderId);
- if(control){control.disabled=true;control.closest('.ng-table-stage-wrap')?.classList.add('is-saving');}
+ if(control){control.disabled=true;syncStatusPicker(control);control.closest('.ng-table-stage-wrap')?.classList.add('is-saving');}
  try{
   const saved=state.mode==='cloud'?await cloud.persistOrder(copy,true):copy;
   state.orders=state.orders.map(x=>x.id===orderId?saved:x);
@@ -724,11 +731,11 @@ async function changeStage(orderId,stage,control=null){
   window.scrollTo(x,y);
   toast(`${o.number}: status atualizado para ${stageLabel(stage)}.`);
  }catch(e){
-  if(control){control.value=o.stage;control.closest('.ng-table-stage-wrap')?.classList.remove('is-saving');}
+  if(control){control.value=o.stage;syncStatusPicker(control);control.closest('.ng-table-stage-wrap')?.classList.remove('is-saving');}
   toast('Não foi possível salvar o status: '+e.message,true);
  }finally{
   stageUpdatePending.delete(orderId);
-  if(control?.isConnected){control.disabled=false;control.closest('.ng-table-stage-wrap')?.classList.remove('is-saving');}
+  if(control?.isConnected){control.disabled=false;syncStatusPicker(control);control.closest('.ng-table-stage-wrap')?.classList.remove('is-saving');}
  }
 }
 async function printOrder(id,button){
@@ -774,18 +781,104 @@ async function saveClient(form){const c=state.clientDraft,fields=Object.fromEntr
 function moveImage(id,direction){if(!state.draft)return;updateDraft();const a=state.draft.attachments,i=a.findIndex(x=>x.id===id),j=i+direction;if(i<0||j<0||j>=a.length)return;[a[i],a[j]]=[a[j],a[i]];renderModal();}
 function updateAttachment(id,key,value){if(!state.draft)return;const a=state.draft.attachments.find(x=>x.id===id);if(a)a[key]=value;}
 // Interações por delegação: os cartões e menus são renderizados novamente sem perder handlers.
+let ngOpenStagePicker=null;
+function closeStatusMenu(focusTrigger=false){
+ const picker=ngOpenStagePicker;
+ document.getElementById('ng-stage-floating')?.remove();
+ ngOpenStagePicker=null;
+ if(!picker)return;
+ picker.classList.remove('is-open');
+ const trigger=picker.querySelector('[data-stage-toggle]');
+ trigger?.setAttribute('aria-expanded','false');
+ trigger?.removeAttribute('aria-controls');
+ if(focusTrigger&&trigger?.isConnected)trigger.focus({preventScroll:true});
+}
+function syncStatusPicker(select){
+ const picker=select?.closest('[data-stage-picker]');if(!picker)return;
+ const trigger=picker.querySelector('[data-stage-toggle]');
+ const value=STAGES.some(s=>s.id===select.value)?select.value:STAGES[0].id;
+ const label=stageLabel(value);
+ const title=trigger?.querySelector('[data-stage-current]');
+ if(title)title.textContent=label;
+ if(trigger){
+  trigger.className='ng-stage-trigger stage-'+value;
+  trigger.disabled=select.disabled;
+  trigger.setAttribute('aria-label','Alterar status. Atual: '+label);
+ }
+ const tableWrap=picker.closest('.ng-table-stage-wrap');
+ if(tableWrap)tableWrap.className='ng-table-stage-wrap '+value+(select.disabled?' is-saving':'');
+}
+function openStatusMenu(picker){
+ const select=picker?.querySelector('.ng-stage-native');
+ if(!select||select.disabled)return;
+ closeStatusMenu();
+ const trigger=picker.querySelector('[data-stage-toggle]');
+ const menu=document.createElement('div');
+ menu.id='ng-stage-floating';
+ menu.className='ng-stage-floating';
+ menu.setAttribute('role','listbox');
+ menu.setAttribute('aria-label','Selecionar status da ordem de serviço');
+ menu.innerHTML='<div class="ng-stage-menu-heading">ALTERAR STATUS</div>'+
+  STAGES.map(st=>'<button type="button" role="option" aria-selected="'+(st.id===select.value)+'" class="ng-stage-menu-choice stage-'+esc(st.id)+'" data-stage-menu-choice="'+esc(st.id)+'">'+
+  '<span class="ng-stage-menu-marker" aria-hidden="true"></span><span>'+esc(st.label)+'</span>'+
+  (st.id===select.value?ico('check'):'<span class="ng-stage-menu-spacer"></span>')+'</button>').join('');
+ document.body.appendChild(menu);
+ ngOpenStagePicker=picker;
+ picker.classList.add('is-open');
+ trigger.setAttribute('aria-expanded','true');
+ trigger.setAttribute('aria-controls',menu.id);
+ const rect=trigger.getBoundingClientRect();
+ const width=Math.min(Math.max(228,rect.width),window.innerWidth-24);
+ menu.style.width=width+'px';
+ const height=menu.getBoundingClientRect().height;
+ const left=Math.max(12,Math.min(rect.left,window.innerWidth-width-12));
+ const below=rect.bottom+8;
+ const top=below+height>window.innerHeight-12&&rect.top>height+20?rect.top-height-8:below;
+ menu.style.left=left+'px';
+ menu.style.top=Math.max(12,Math.min(top,window.innerHeight-height-12))+'px';
+ menu.querySelector('[aria-selected="true"]')?.focus({preventScroll:true});
+}
 document.addEventListener('click',e=>{
- const toggle=e.target.closest('[data-stage-toggle]');
- const option=e.target.closest('[data-stage-option]');
- const picker=e.target.closest('[data-stage-picker]');
- document.querySelectorAll('[data-stage-picker].is-open').forEach(p=>{if(p!==picker||toggle){p.classList.remove('is-open');p.querySelector('[data-stage-toggle]')?.setAttribute('aria-expanded','false');}});
- if(toggle){const p=toggle.closest('[data-stage-picker]');const open=p.classList.toggle('is-open');toggle.setAttribute('aria-expanded',String(open));return;}
- if(option){const p=option.closest('[data-stage-picker]');const select=p.querySelector('select[name="stage"]');select.value=option.dataset.stageOption;select.dispatchEvent(new Event('change',{bubbles:true}));p.querySelector('[data-stage-current]').textContent=option.querySelector('span:nth-child(2)').textContent;const trigger=p.querySelector('[data-stage-toggle]');trigger.className='ng-stage-trigger stage-'+select.value;trigger.setAttribute('aria-expanded','false');p.querySelectorAll('[data-stage-option]').forEach(b=>{const selected=b===option;b.setAttribute('aria-selected',String(selected));b.querySelector('.ico,.ng-stage-check')?.remove();b.insertAdjacentHTML('beforeend',selected?ico('check'):'<span class="ng-stage-check"></span>');});p.classList.remove('is-open');}
+ const trigger=e.target.closest('[data-stage-toggle]');
+ if(trigger){
+  const picker=trigger.closest('[data-stage-picker]');
+  if(ngOpenStagePicker===picker)closeStatusMenu(true);else openStatusMenu(picker);
+  return;
+ }
+ const choice=e.target.closest('[data-stage-menu-choice]');
+ if(choice){
+  const picker=ngOpenStagePicker;
+  if(!picker)return;
+  const select=picker.querySelector('.ng-stage-native');
+  if(select?.disabled)return;
+  const previous=select.value;
+  select.value=choice.dataset.stageMenuChoice;
+  closeStatusMenu(true);
+  syncStatusPicker(select);
+  if(previous!==select.value)select.dispatchEvent(new Event('change',{bubbles:true}));
+  return;
+ }
+ if(ngOpenStagePicker&&!e.target.closest('#ng-stage-floating'))closeStatusMenu();
 });
-document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('[data-stage-picker].is-open').forEach(p=>{p.classList.remove('is-open');p.querySelector('[data-stage-toggle]')?.setAttribute('aria-expanded','false');});});
+document.addEventListener('keydown',e=>{
+ if(!ngOpenStagePicker)return;
+ const menu=document.getElementById('ng-stage-floating');
+ if(e.key==='Escape'){e.preventDefault();closeStatusMenu(true);return;}
+ if(e.key==='Tab'){closeStatusMenu();return;}
+ if(!menu?.contains(document.activeElement))return;
+ const options=[...menu.querySelectorAll('[data-stage-menu-choice]')];
+ const index=options.indexOf(document.activeElement);
+ if(e.key==='ArrowDown'||e.key==='ArrowUp'||e.key==='Home'||e.key==='End'){
+  e.preventDefault();
+  const next=e.key==='Home'?0:e.key==='End'?options.length-1:(index+(e.key==='ArrowDown'?1:-1)+options.length)%options.length;
+  options[next]?.focus();
+ }
+});
+window.addEventListener('resize',()=>{if(ngOpenStagePicker)closeStatusMenu();});
+window.addEventListener('scroll',()=>{if(ngOpenStagePicker)closeStatusMenu();},true);
 document.addEventListener('click',async e=>{
  // Selecionar uma etapa na tabela nunca deve abrir a OS por acidente.
- if(e.target.closest('[data-table-stage]'))return;
+ if(e.target.closest('[data-table-stage],[data-stage-picker],#ng-stage-floating'))return;
  const target=e.target.closest('button,[data-open-order],[data-client-id]');if(!target)return;
  if(target.matches('[data-toggle-theme]')){toggleTheme();return;}
  if(target.matches('[data-choose-profile]')){chooseProfile(target.dataset.chooseProfile);return;}
