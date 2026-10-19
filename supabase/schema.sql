@@ -11,7 +11,7 @@ create table if not exists public.ng_orders (
   client_name text not null,
   client_phone text not null default '',
   attendant text not null default '',
-  stage text not null default 'analise' check(stage in ('analise','andamento','producao','pronto','entregue')),
+  stage text not null default 'andamento' check(stage in ('andamento','producao','pronto','entregue')),
   method text not null default 'PIX',
   total numeric(14,2) not null default 0 check(total>=0),
   due_date date,
