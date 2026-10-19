@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {paid,remaining,paymentStatus,money,esc,nextNumber,stats,stageLabel,monthlyRevenue,revenueYears} from '../assets/logic.mjs';
+import {paid,remaining,paymentStatus,money,esc,nextNumber,stats,stageLabel,monthlyRevenue,revenueYears,monthlyPerformance} from '../assets/logic.mjs';
 const order={number:'FEL-1473',total:800,stage:'andamento',payments:[{amount:400,date:new Date().toISOString()}]};
 test('sinal e restante conferem',()=>{assert.equal(paid(order),400);assert.equal(remaining(order),400);assert.equal(paymentStatus(order),'Sinal');});
 test('sinal total = pago',()=>{assert.equal(paymentStatus({...order,payments:[{amount:800}]}),'Pago');assert.equal(remaining({...order,payments:[{amount:800}]}),0);});
@@ -31,4 +31,23 @@ test('dashboard conta pagamentos recebidos de OS antigas no mês correto',()=>{
  assert.equal(mar.received,300);
  assert.equal(mar.outstanding,0);
  assert.deepEqual(revenueYears([order],2026),[2026,2025]);
+});
+
+test('painel de mês selecionado separa criação, entrega e recebimento',()=>{
+ const orders=[
+ {id:'a',stage:'entregue',created_at:'2026-08-03T12:00:00',delivered_at:'2026-09-05T12:00:00',total:300,payments:[{date:'2026-09-04T12:00:00',amount:100}]},
+ {id:'b',stage:'producao',created_at:'2026-09-07T12:00:00',total:450,payments:[{date:'2026-09-07T12:00:00',amount:200}]},
+ {id:'c',stage:'pronto',created_at:'2026-09-15T12:00:00',total:200,payments:[]}
+ ];
+ const report=monthlyPerformance(orders,2026,8);
+ assert.equal(report.orders,2);
+ assert.equal(report.delivered,1);
+ assert.equal(report.billed,650);
+ assert.equal(report.received,300);
+ assert.equal(report.outstanding,450);
+ assert.equal(report.stages.producao,1);
+ assert.equal(report.stages.pronto,1);
+ assert.equal(report.stages.entregue,0);
+ assert.equal(report.averageTicket,325);
+ assert.equal(report.ordersCreated.length,2);
 });
