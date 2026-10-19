@@ -286,3 +286,21 @@
 .ng-detail-event strong{font-size:11px;font-weight:550}
 @media(max-width:1050px){.ng-detail-layout{grid-template-columns:1fr}.ng-detail-aside{position:static;grid-row:1}.ng-detail-finance{padding:15px}}
 @media(max-width:600px){.ng-detail-header{gap:10px;align-items:flex-start;flex-wrap:wrap}.ng-detail-header h1{font-size:20px}.ng-detail-header>.status{margin-left:57px;margin-top:0}.ng-detail-panel{padding:12px}.ng-detail-fields{gap:12px}.ng-detail-document{padding:8px;min-height:350px}}
+
+/* Identidade visual oficial NG PrintSign extraída do PDF vetorial */
+.sidebar-brand-row .logo{padding:4px 7px 19px;display:flex;gap:10px;align-items:center;min-width:0}
+.sidebar-brand-logo{width:61px;height:61px;flex-shrink:0;object-fit:contain;border-radius:14px}
+.sidebar-brand-label{min-width:0}
+.sidebar-brand-label h2{font-size:16px;line-height:1.1;margin:0 0 5px;white-space:nowrap}
+.sidebar-brand-label p{font-size:10px;color:#93a9c7;margin:0;white-space:nowrap}
+.sidebar.is-collapsed .sidebar-brand-row .logo{padding:0;margin:0 auto 18px;display:flex}
+.sidebar.is-collapsed .sidebar-brand-logo{width:49px;height:49px;border-radius:11px}
+.sidebar.is-collapsed .sidebar-brand-label{display:none}
+.profile-brand{display:flex;justify-content:center;align-items:center;gap:13px;font-size:25px;font-weight:800;letter-spacing:-.6px}
+.profile-brand img{width:78px;height:78px;object-fit:contain;border-radius:16px}
+.login-brand{display:flex;align-items:center;gap:14px;font-weight:800;font-size:27px;letter-spacing:-.6px}
+.login-brand img{width:92px;height:92px;object-fit:contain;border-radius:18px}
+.auth-card-brand{display:none;width:80px;height:80px;object-fit:contain;margin:0 auto 18px;border-radius:16px}
+.splash-brand{width:104px;height:104px;margin:0 auto 14px;display:block;border-radius:22px}
+@media(max-width:1300px) and (min-width:701px){.sidebar-brand-row .logo{padding-left:0;gap:6px}.sidebar-brand-logo{width:51px;height:51px}.sidebar-brand-label h2{font-size:14px}.sidebar-brand-label p{font-size:9px}}
+@media(max-width:700px){.auth-card-brand{display:block}.profile-brand{gap:9px;font-size:21px}.profile-brand img{width:65px;height:65px}}
