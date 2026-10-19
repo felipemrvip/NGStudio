@@ -489,3 +489,7 @@ body.ng-glance-modal-open{overflow:hidden}
 @media(max-width:900px){.ng-glance-layout{grid-template-columns:1fr}.ng-glance-right{position:static}.ng-glance-main{grid-template-columns:minmax(0,1fr) minmax(235px,.8fr)}}
 @media(max-width:620px){.ng-glance-main{grid-template-columns:1fr;padding:13px}.ng-glance-header{gap:10px;flex-wrap:wrap}.ng-glance-order-number{min-width:80px;padding-right:10px}.ng-glance-order-number strong{font-size:21px}.ng-glance-heading h1{font-size:19px}.ng-glance-current-status{margin-left:50px}.ng-glance-gallery{grid-template-columns:repeat(2,minmax(0,1fr))}.ng-glance-preview-crop{height:210px}.ng-glance-preview-modal{padding:6px}.ng-glance-modal-scroll{padding:8px}}
 @media(prefers-reduced-motion:reduce){.ng-order-glance .ng-glance-main,.ng-order-glance .ng-glance-attachments,.ng-order-glance .ng-glance-finance,.ng-order-glance .ng-glance-actions,.ng-order-glance .ng-glance-history,.ng-glance-preview-modal{animation:none}.ng-glance-photo img,.ng-glance-payment-toggle button{transition:none}}
+
+.ng-glance-payment-single{grid-template-columns:1fr}
+.ng-glance-payment-single button{min-height:44px}
+.ng-glance-payment-single button.is-paid:disabled{opacity:1;cursor:default}
