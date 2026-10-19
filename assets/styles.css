@@ -507,3 +507,8 @@ body.ng-glance-modal-open{overflow:hidden}
 .ng-revenue-panel.is-collapsed .ng-revenue-tools>label,.ng-revenue-panel.is-collapsed .ng-revenue-tools>.select{display:none}
 @media(max-width:700px){.ng-revenue-toggle{min-width:85px;padding:8px}.ng-revenue-panel.is-collapsed .ng-revenue-heading{padding-bottom:16px}}
 @media(prefers-reduced-motion:reduce){.ng-revenue-content,.ng-revenue-toggle .ico{transition:none}}
+
+/* O conteúdo inclui vários blocos: max-height recolhe todos sem deixar linhas do grid visíveis. */
+.ng-revenue-content{display:block;overflow:hidden;max-height:5000px;transition:max-height .45s cubic-bezier(.2,.8,.2,1),opacity .3s ease}
+.ng-revenue-panel.is-collapsed .ng-revenue-content{max-height:0;overflow:hidden}
+@media(prefers-reduced-motion:reduce){.ng-revenue-content{transition:none}}
