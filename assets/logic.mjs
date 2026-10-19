@@ -70,3 +70,48 @@ export function revenueYears(orders,currentYear=new Date().getFullYear()){
  }
  return [...years].sort((a,b)=>b-a);
 }
+
+/** Recorte mensal da operação. Datas de criação e entrega medem eventos no
+ * período; estágios mostram a SITUAÇÃO ATUAL das OS criadas naquele mês.
+ * Pagamentos entram no mês em que foram registrados, inclusive de OS antigas.
+ */
+export function monthlyPerformance(orders,year,month){
+ const selectedYear=Number(year),selectedMonth=Number(month);
+ if(!Number.isInteger(selectedYear)||!Number.isInteger(selectedMonth)||selectedMonth<0||selectedMonth>11)throw Error('Período inválido');
+ const isMonth=value=>{
+  if(!value)return false;
+  const str=String(value);
+  const date=new Date(/^\d{4}-\d{2}-\d{2}$/.test(str)?str+'T12:00:00':str);
+  return !Number.isNaN(date.getTime())&&date.getFullYear()===selectedYear&&date.getMonth()===selectedMonth;
+ };
+ const valid=(orders||[]).filter(o=>o&&o.stage!=='cancelado');
+ const created=valid.filter(o=>isMonth(o.created_at));
+ const delivered=valid.filter(o=>isMonth(o.delivered_at));
+ const stageCounts=Object.fromEntries(STAGES.map(stage=>[stage.id,0]));
+ for(const order of created)if(Object.hasOwn(stageCounts,order.stage))stageCounts[order.stage]++;
+ const billed=created.reduce((sum,order)=>sum+(Number(order.total)||0),0);
+ const outstanding=created.reduce((sum,order)=>sum+remaining(order),0);
+ let received=0,paymentCount=0;
+ for(const order of valid)for(const payment of order.payments||[]){
+  if(isMonth(payment.date)){
+   received+=Number(payment.amount)||0;
+   paymentCount++;
+  }
+ }
+ const round=num=>Math.round((num+Number.EPSILON)*100)/100;
+ return {
+  year:selectedYear,month:selectedMonth,
+  orders:created.length,
+  billed:round(billed),
+  received:round(received),
+  outstanding:round(outstanding),
+  payments:paymentCount,
+  delivered:delivered.length,
+  // Apenas as OS que começaram neste mês, com situação ATUAL.
+  stages:stageCounts,
+  active:created.length-(stageCounts.entregue||0),
+  averageTicket:created.length?round(billed/created.length):0,
+  ordersCreated:[...created].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)),
+  ordersDelivered:[...delivered].sort((a,b)=>new Date(b.delivered_at)-new Date(a.delivered_at))
+ };
+}
