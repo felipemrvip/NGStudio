@@ -33,25 +33,86 @@ const ICONS={
  grip:'<circle cx="9" cy="5" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="19" r="1"/>',
  more:'<circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/>',
  dollar:'<path d="M12 2v20M17 6H9a4 4 0 1 0 0 8h6a4 4 0 0 1 0 8H7"/>',
- alert:'<path d="M12 2 1 21h22L12 2ZM12 9v4m0 4h.01"/>'
+ alert:'<path d="M12 2 1 21h22L12 2ZM12 9v4m0 4h.01"/>',
+ chevron:'<path d="m6 9 6 6 6-6"/>',
+ panel:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/>',
+ menu:'<path d="M4 6h16M4 12h16M4 18h16"/>'
 };
 function ico(name){return `<svg class="ico" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${ICONS[name]||ICONS.info}</svg>`;}
 const $=s=>document.querySelector(s);
 const DEMO_KEY='ngstudio_demo_v1';
 const PROFILE_KEY='ngstudio_selected_profile_v1';
+const SIDEBAR_KEY='ngstudio_sidebar_v1';
+function sidebarPrefs(){try{return JSON.parse(localStorage.getItem(SIDEBAR_KEY)||'null')||{};}catch{return {};}}
+const storedSidebar=sidebarPrefs();
+function persistSidebar(){try{localStorage.setItem(SIDEBAR_KEY,JSON.stringify({collapsed:state.sidebarCollapsed,groups:state.sidebarGroups}));}catch{}}
 function team(){return [...new Set(String(state.settings.attendants||'').split(',').map(n=>n.trim()).filter(Boolean))];}
 function selectedName(){return team().find(n=>n===state.profile)||null;}
 function profileOrders(){return state.orders.filter(o=>String(o.attendant||'').trim().toLocaleLowerCase('pt-BR')===String(state.profile||'').toLocaleLowerCase('pt-BR'));}
 function chooseProfile(name){if(!team().includes(name))return;state.profile=name;localStorage.setItem(PROFILE_KEY,name);render();}
 function profileScreen(){const root=$('#app');root.innerHTML=`<div class="profile-screen"><section class="profile-panel"><div class="logo-word">N<span>G</span> Studio</div><h1>Quem está trabalhando?</h1><p>Escolha seu perfil para abrir seu dashboard individual.</p><div class="profile-grid">${team().map(n=>`<button class="profile-choice" data-choose-profile="${esc(n)}"><span class="profile-avatar">${esc(n.slice(0,2).toUpperCase())}</span><b>${esc(n)}</b></button>`).join('')}</div><p class="caption">Todos os perfis têm o mesmo acesso. A seleção não exige senha individual.</p>${state.mode==='demo'?'<p class="caption">Modo demonstração: perfis e serviços ficam somente neste navegador.</p>':''}<span class="caption">Para cadastrar novos perfis, selecione um nome e abra Equipe.</span></section></div>`;$('#modal-root').innerHTML='';}
 function ready(){const saved=localStorage.getItem(PROFILE_KEY);state.profile=team().includes(saved)?saved:null;if(state.profile)render();else profileScreen();}
-const state={mode:cloud.isConfigured?'cloud':'demo',page:'dashboard',orders:[],clients:[],settings:{...defaultSettings},search:'',filter:'todos',draft:null,clientDraft:null,loading:false,busy:false,signCache:new Map(),pendingFiles:new Map(),menuOpen:false,profile:null};
+const state={mode:cloud.isConfigured?'cloud':'demo',page:'dashboard',orders:[],clients:[],settings:{...defaultSettings},search:'',filter:'todos',draft:null,clientDraft:null,loading:false,busy:false,signCache:new Map(),pendingFiles:new Map(),menuOpen:false,profile:null,sidebarCollapsed:storedSidebar.collapsed===true,sidebarGroups:{gerenciamento:true,analises:false,administracao:false,...storedSidebar.groups},mobileMenuOpen:false};
 function toast(message,error=false){const root=$('#toast-root');root.innerHTML=`<div class="notify ${error?'err':''}">${esc(message)}</div>`;clearTimeout(toast.t);toast.t=setTimeout(()=>root.innerHTML='',4400);}
 function getDemo(){try{const data=JSON.parse(localStorage.getItem(DEMO_KEY)||'null');if(data&&Array.isArray(data.orders)&&Array.isArray(data.clients))return data;}catch{}return seedDemo();}
 function persistDemo(){try{localStorage.setItem(DEMO_KEY,JSON.stringify({orders:state.orders,clients:state.clients,settings:state.settings}));}catch{toast('Armazenamento local cheio. Reduza as imagens ou conecte o Supabase.',true);}}
 async function boot(){if(state.mode==='demo'){const data=getDemo();state.orders=data.orders;state.clients=data.clients;state.settings={...defaultSettings,...(data.settings||{})};ready();return;}try{const sess=await cloud.restoreSession();if(!sess){renderLogin();return;}await loadCloud();}catch(e){toast('Erro ao acessar banco: '+e.message,true);renderLogin();}}
 async function loadCloud(){try{const data=await cloud.loadAll();state.orders=data.orders||[];state.clients=data.clients||[];state.settings={...defaultSettings,...(data.settings||{})};ready();}catch(e){toast('Não foi possível carregar: '+e.message,true);if(/Sessão/.test(e.message))renderLogin();else render();}}
-function nav(){const menu=[['dashboard','home','Meu Dashboard'],['geral','chart','Dashboard Geral'],['equipe','users','Equipe'],['ordens','file','Ordens de Serviço'],['producao','layers','Produção'],['clientes','users','Clientes'],['financeiro','chart','Financeiro'],['historico','clock','Histórico'],['configuracoes','settings','Configurações']];return `<aside class="sidebar"><div class="logo"><div class="logo-word">N<span>G</span></div><h2>NG Studio</h2><p>NG PrintSign Gráfica</p></div><nav class="nav-list" aria-label="Menu principal">${menu.map(([key,icon,label])=>`<button class="navbtn ${key===state.page?'active':''}" data-nav="${key}">${ico(icon)}<span>${label}</span></button>`).join('')}</nav><div class="sidebar-bottom"><div class="promo">${ico('printer')}<b>Do seu projeto<br>à realidade.</b><p>Qualidade, agilidade e resultado para a sua marca.</p></div></div></aside>`;}
+
+const NAV_GROUPS=[
+ {id:'gerenciamento',title:'Gerenciamento',icon:'layers',items:[['ordens','file','Ordens de Serviço'],['producao','layers','Produção'],['clientes','users','Clientes']]},
+ {id:'analises',title:'Análises e finanças',icon:'chart',items:[['geral','chart','Dashboard Geral'],['financeiro','wallet','Financeiro'],['historico','clock','Histórico']]},
+ {id:'administracao',title:'Administração',icon:'settings',items:[['equipe','users','Equipe'],['configuracoes','settings','Configurações']]}
+];
+function navItem(id,icon,label,mobile=false){
+ const selected=state.page===id;
+ return `<button type="button" class="navbtn ${mobile?'mobile-menu-link':'sidebar-sub-link'} ${selected?'active':''}" data-nav="${id}" title="${esc(label)}" ${selected?'aria-current="page"':''}>${ico(icon)}<span>${esc(label)}</span></button>`;
+}
+function nav(){
+ const collapsed=state.sidebarCollapsed;
+ const sidebarGroups=NAV_GROUPS.map(group=>{
+  const open=Boolean(state.sidebarGroups[group.id]);
+  const active=group.items.some(([id])=>state.page===id);
+  return `<div class="sidebar-group ${open?'is-open':''} ${active?'has-active':''}">
+    <button type="button" class="sidebar-group-toggle ${active?'has-active':''}" data-toggle-group="${group.id}" aria-expanded="${open&&!collapsed}" title="${esc(group.title)}">${ico(group.icon)}<span class="sidebar-text">${esc(group.title)}</span>${ico('chevron')}</button>
+    <div class="sidebar-group-items" ${open&&!collapsed?'':'hidden'}>${group.items.map(([id,icon,label])=>navItem(id,icon,label)).join('')}</div>
+   </div>`;
+ }).join('');
+ const mobileMenu=NAV_GROUPS.map(group=>`<div class="mobile-menu-category"><span>${esc(group.title)}</span>${group.items.map(([id,icon,label])=>navItem(id,icon,label,true)).join('')}</div>`).join('');
+ return `<aside class="sidebar ${collapsed?'is-collapsed':''}" aria-label="Navegação">
+  <div class="sidebar-brand-row">
+   <div class="logo"><div class="logo-word">N<span>G</span></div><h2>NG Studio</h2><p>NG PrintSign Gráfica</p></div>
+   <button type="button" class="sidebar-collapse" data-collapse-sidebar title="${collapsed?'Expandir menu':'Recolher menu'}" aria-label="${collapsed?'Expandir menu':'Recolher menu'}">${ico('panel')}</button>
+  </div>
+  <nav class="nav-list sidebar-navigation" aria-label="Menu principal">
+   ${navItem('dashboard','home','Meu Dashboard')}
+   <div class="sidebar-section-caption">ÁREA DE TRABALHO</div>
+   ${sidebarGroups}
+  </nav>
+  <div class="sidebar-bottom">
+   <button class="sidebar-create" data-new title="Nova Ordem de Serviço">${ico('plus')}<span>Nova Ordem de Serviço</span></button>
+   <button class="sidebar-profile" data-switch-profile title="Trocar perfil"><span class="sidebar-profile-avatar">${esc((state.profile||'NG').slice(0,2).toUpperCase())}</span><span class="sidebar-profile-info"><b>${esc(state.profile||'Selecionar perfil')}</b><small>Trocar perfil</small></span>${ico('chevron')}</button>
+  </div>
+  <nav class="mobile-quick-nav" aria-label="Navegação rápida">
+   ${navItem('dashboard','home','Início',true)}
+   ${navItem('ordens','file','Ordens',true)}
+   ${navItem('producao','layers','Produção',true)}
+   ${navItem('financeiro','wallet','Financeiro',true)}
+   <button type="button" class="mobile-more ${state.mobileMenuOpen?'active':''}" data-mobile-more aria-expanded="${state.mobileMenuOpen}">${ico('menu')}<span>Mais</span></button>
+  </nav>
+  <div class="mobile-menu-overlay ${state.mobileMenuOpen?'is-open':''}" ${state.mobileMenuOpen?'':'hidden'}>
+   <div class="mobile-menu-heading"><div><b>NG Studio</b><small>Todas as páginas</small></div><button type="button" class="iconbutton" data-mobile-more aria-label="Fechar menu">${ico('close')}</button></div>
+   <nav class="mobile-menu-links" aria-label="Todas as páginas">${navItem('dashboard','home','Meu Dashboard',true)}${mobileMenu}</nav>
+   <button class="sidebar-create mobile-create" data-new>${ico('plus')} Nova Ordem de Serviço</button>
+  </div>
+ </aside>`;
+}
+function refreshSidebar(){
+ const old=$('.sidebar'),shell=$('.shell');
+ if(!old||!shell)return;
+ old.outerHTML=nav();
+ shell.classList.toggle('sidebar-collapsed',state.sidebarCollapsed);
+}
 function teamPage(){return `<div class="toolbar-line"><div><h2>Funcionários</h2><p>Todos têm acesso às mesmas funcionalidades. Os dashboards são individuais.</p></div></div><section class="panel panel-body"><h3>Cadastrar funcionário</h3><form id="team-form" class="team-form"><input class="input" name="name" placeholder="Nome do funcionário" maxlength="60" required/><button class="btn btn-primary" type="submit">${ico('plus')} Adicionar</button></form><div class="team-list">${team().map(n=>`<div class="team-member"><span class="profile-avatar">${esc(n.slice(0,2).toUpperCase())}</span><b>${esc(n)}</b><small>${profileOrdersFor(n).length} serviço(s)</small><button class="btn btn-sm" data-remove-profile="${esc(n)}" ${team().length<=1?'disabled':''}>Remover</button></div>`).join('')}</div><p class="caption">Remover um perfil não exclui suas ordens de serviço. Reatribua os serviços antes de remover o funcionário.</p></section>`;}
 function profileOrdersFor(name){return state.orders.filter(o=>String(o.attendant||'').toLocaleLowerCase('pt-BR')===name.toLocaleLowerCase('pt-BR'));}
 async function persistTeam(names){const updated={...state.settings,attendants:names.join(', ')};try{const saved=state.mode==='cloud'?await cloud.persistSettings(updated):updated;state.settings={...defaultSettings,...saved};if(state.mode==='demo')persistDemo();if(state.profile&&!team().includes(state.profile)){state.profile=null;localStorage.removeItem(PROFILE_KEY);profileScreen();}else render();return true;}catch(e){toast('Erro ao salvar equipe: '+e.message,true);return false;}}
@@ -59,7 +120,7 @@ async function addProfile(raw){const name=String(raw||'').trim().replace(/\\s+/g
 async function removeProfile(name){if(team().length<=1)return;if(profileOrdersFor(name).length){toast('Reatribua os serviços deste funcionário antes de removê-lo.',true);return;}if(!window.confirm('Remover o perfil '+name+'?'))return;if(await persistTeam(team().filter(n=>n!==name)))toast('Perfil removido.');}
 function pageTitle(){return {geral:['Dashboard Geral','Indicadores de toda a gráfica.'],equipe:['Equipe','Gerencie os perfis de funcionários.'],dashboard:['Meu Dashboard','Seus serviços e indicadores individuais.'],ordens:['Ordens de Serviço','Cadastre, consulte e organize os pedidos da sua gráfica.'],producao:['Produção','Mova os serviços entre as etapas arrastando os cartões.'],clientes:['Clientes','Contatos e histórico de serviços em um único lugar.'],financeiro:['Financeiro','Pagamentos recebidos e valores ainda pendentes.'],historico:['Histórico','Serviços entregues e últimas movimentações.'],configuracoes:['Configurações','Personalize os dados que aparecem nos documentos da NG.']}[state.page];}
 function header(){const [title,subtitle]=pageTitle();return `<div class="topbar"><div class="heading"><h1>${esc(title)}</h1><p>${esc(subtitle)}</p></div><div class="tools"><label class="search">${ico('search')}<input id="global-search" aria-label="Buscar OS, cliente ou serviço" placeholder="Buscar OS, cliente ou serviço..." value="${esc(state.search)}"/><span class="shortcut">⌘ K</span></label>${state.mode==='cloud'?`<button class="iconbutton" title="Atualizar dados" data-refresh>${ico('refresh')}</button>`:''}<div class="userchip"><div class="avatar">NG</div><div><b>${esc(state.profile||'Selecionar perfil')}</b><small>${state.mode==='cloud'?'Equipe NG Studio':'Demonstração'}</small></div></div><button class="btn btn-sm" data-switch-profile>Trocar perfil</button>${state.mode==='cloud'?`<button class="iconbutton" title="Sair" data-logout>${ico('logout')}</button>`:''}</div></div>`;}
-function render(){if(!state.profile){profileScreen();return;}const root=$('#app');root.innerHTML=`<div class="shell">${nav()}<main class="main ${state.draft?'os-editor-page':''}">${header()}${state.mode==='demo'?`<div class="demo-banner">${ico('alert')} <span><b>MODO DEMONSTRAÇÃO:</b> os dados ficam somente neste navegador. Configure o Supabase antes de cadastrar serviços reais ou compartilhar entre computadores.</span></div>`:''}<div id="view">${state.draft?'':pageView()}</div></main></div>`;renderModal();}
+function render(){if(!state.profile){profileScreen();return;}const root=$('#app');root.innerHTML=`<div class="shell ${state.sidebarCollapsed?'sidebar-collapsed':''}">${nav()}<main class="main ${state.draft?'os-editor-page':''}">${header()}${state.mode==='demo'?`<div class="demo-banner">${ico('alert')} <span><b>MODO DEMONSTRAÇÃO:</b> os dados ficam somente neste navegador. Configure o Supabase antes de cadastrar serviços reais ou compartilhar entre computadores.</span></div>`:''}<div id="view">${state.draft?'':pageView()}</div></main></div>`;renderModal();}
 function refreshView(){const view=$('#view');if(view)view.innerHTML=pageView();}
 function pageView(){switch(state.page){case 'dashboard':return dashboard(true);case 'geral':return dashboard(false);case 'equipe':return teamPage();case 'ordens':return ordersPage();case 'producao':return kanbanPage();case 'clientes':return clientsPage();case 'financeiro':return financePage();case 'historico':return historyPage();case 'configuracoes':return settingsPage();return dashboard();}}
 function kpi(label,value,icon,tone,desc){return `<div class="kpi"><div class="badge-icon ${tone}">${ico(icon)}</div><div class="kpi-label">${label}</div><strong>${esc(value)}</strong><small>${esc(desc)}</small></div>`;}
@@ -229,7 +290,7 @@ async function exportOrderPdf(id,button){
  }catch(error){toast('Não foi possível exportar o PDF: '+error.message,true);}
  finally{if(button?.isConnected){button.disabled=false;button.innerHTML=label;}}
 }
-function switchPage(page){state.page=page;state.filter='todos';state.search='';closeModal();render();window.scrollTo({top:0,behavior:'instant'});}
+function switchPage(page){state.page=page;state.filter='todos';state.search='';state.mobileMenuOpen=false;const group=NAV_GROUPS.find(g=>g.items.some(([id])=>id===page));if(group)state.sidebarGroups[group.id]=true;persistSidebar();closeModal();render();window.scrollTo({top:0,behavior:'instant'});}
 async function saveSettings(form){const data=Object.fromEntries(new FormData(form).entries());const s={...state.settings,...data,prefix:String(data.prefix||'FEL').replace(/[^A-Za-z0-9_-]/g,'').slice(0,12).toUpperCase()};try{state.settings=state.mode==='cloud'?{...defaultSettings,...await cloud.persistSettings(s)}:s;if(state.mode==='demo')persistDemo();refreshView();toast('Configurações salvas.');}catch(e){toast('Falha ao salvar configurações: '+e.message,true);}}
 async function saveClient(form){const c=state.clientDraft,fields=Object.fromEntries(new FormData(form).entries());if(!fields.name?.trim()){toast('Informe o nome do cliente.',true);return;}const exists=state.clients.some(x=>x.id===c.id);const object={...c,name:fields.name.trim(),phone:fields.phone?.trim()||''};try{const saved=state.mode==='cloud'?await cloud.persistClient(object,exists):object;state.clients=exists?state.clients.map(x=>x.id===c.id?saved:x):[saved,...state.clients];if(state.mode==='demo')persistDemo();if(state.draft){updateDraft();const clientField=$('#order-form [name=client_name]');const phoneField=$('#order-form [name=client_phone]');if(clientField)clientField.value=saved.name;if(phoneField)phoneField.value=saved.phone||'';state.draft.client_name=saved.name;state.draft.client_phone=saved.phone||'';state.clientDraft=null;$('#modal-root').innerHTML='';renderModal();}else{closeModal();refreshView();}toast('Cliente salvo.');}catch(e){toast(e.message,true);}}
 function moveImage(id,direction){if(!state.draft)return;updateDraft();const a=state.draft.attachments,i=a.findIndex(x=>x.id===id),j=i+direction;if(i<0||j<0||j>=a.length)return;[a[i],a[j]]=[a[j],a[i]];renderModal();}
@@ -240,8 +301,11 @@ document.addEventListener('click',async e=>{
  if(target.matches('[data-choose-profile]')){chooseProfile(target.dataset.chooseProfile);return;}
  if(target.matches('[data-switch-profile]')){state.profile=null;localStorage.removeItem(PROFILE_KEY);profileScreen();return;}
  if(target.matches('[data-remove-profile]')){await removeProfile(target.dataset.removeProfile);return;}
+ if(target.matches('[data-toggle-group]')){const group=target.dataset.toggleGroup;if(!Object.hasOwn(state.sidebarGroups,group))return;if(state.sidebarCollapsed){state.sidebarCollapsed=false;state.sidebarGroups[group]=true;}else{state.sidebarGroups[group]=!state.sidebarGroups[group];}persistSidebar();refreshSidebar();return;}
+ if(target.matches('[data-collapse-sidebar]')){state.sidebarCollapsed=!state.sidebarCollapsed;persistSidebar();refreshSidebar();return;}
+ if(target.matches('[data-mobile-more]')){state.mobileMenuOpen=!state.mobileMenuOpen;refreshSidebar();return;}
  if(target.matches('[data-nav]')){switchPage(target.dataset.nav);return;}
- if(target.matches('[data-new]')){openEditor();return;}
+ if(target.matches('[data-new]')){state.mobileMenuOpen=false;openEditor();return;}
  if(target.matches('[data-open-order]')){openEditor(target.dataset.openOrder);return;}
  if(target.matches('[data-client-id]')){state.clientDraft=structuredClone(state.clients.find(c=>c.id===target.dataset.clientId));state.draft=null;renderModal();return;}
  if(target.matches('[data-new-client]')){state.clientDraft={id:uid(),name:'',phone:'',created_at:new Date().toISOString()};renderModal();return;}
