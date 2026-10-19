@@ -57,7 +57,7 @@ function toast(message,error=false){const root=$('#toast-root');root.innerHTML=`
 function getDemo(){try{const data=JSON.parse(localStorage.getItem(DEMO_KEY)||'null');if(data&&Array.isArray(data.orders)&&Array.isArray(data.clients))return data;}catch{}return seedDemo();}
 function persistDemo(){try{localStorage.setItem(DEMO_KEY,JSON.stringify({orders:state.orders,clients:state.clients,settings:state.settings}));}catch{toast('Armazenamento local cheio. Reduza as imagens ou conecte o Supabase.',true);}}
 async function boot(){if(state.mode==='demo'){const data=getDemo();state.orders=data.orders;state.clients=data.clients;state.settings={...defaultSettings,...(data.settings||{})};ready();return;}try{const sess=await cloud.restoreSession();if(!sess){renderLogin();return;}await loadCloud();}catch(e){toast('Erro ao acessar banco: '+e.message,true);renderLogin();}}
-async function loadCloud(){try{const data=await cloud.loadAll();state.orders=data.orders||[];state.clients=data.clients||[];state.settings={...defaultSettings,...(data.settings||{})};ready();}catch(e){toast('Não foi possível carregar: '+e.message,true);if(/Sessão/.test(e.message))renderLogin();else render();}}
+async function loadCloud(){try{const data=await cloud.loadAll();state.orders=data.orders||[];if(state.viewingOrderId&&!state.orders.some(o=>o.id===state.viewingOrderId))state.viewingOrderId=null;state.clients=data.clients||[];state.settings={...defaultSettings,...(data.settings||{})};ready();}catch(e){toast('Não foi possível carregar: '+e.message,true);if(/Sessão/.test(e.message))renderLogin();else render();}}
 
 const NAV_GROUPS=[
  {id:'gerenciamento',title:'Gerenciamento',icon:'layers',items:[['ordens','file','Ordens de Serviço'],['producao','layers','Produção'],['clientes','users','Clientes']]},
@@ -224,6 +224,44 @@ function openOrderDetail(id){
  state.viewingOrderId=order.id;
  render();
  window.scrollTo(0,0);
+}
+function renderOrderDetail(){
+ const view=$('#view');
+ const order=state.orders.find(o=>o.id===state.viewingOrderId);
+ if(!view)return;
+ if(!order){state.viewingOrderId=null;view.innerHTML=pageView();return;}
+ const a=order.attachments||[];
+ const items=a.map((img,i)=>`<div class="ng-detail-attachment"><div class="ng-detail-thumb"><img data-detail-image="${esc(img.id)}" src="${esc(img.dataUrl||state.signCache.get(img.storage_path)||'')}" alt="${esc(img.caption||img.name||'Anexo '+(i+1))}" loading="lazy"/></div><div><strong>${esc(img.caption||img.name||'Imagem '+(i+1))}</strong><small>${img.include_pdf===false?'Não incluída no PDF':'Incluída no PDF'}</small></div></div>`).join('');
+ const history=(order.history||[]).slice().reverse().map(h=>`<div class="ng-detail-event"><span>${fmtDate(h.date)}</span><strong>${esc(h.action||'Atualização')}</strong></div>`).join('');
+ const total=Number(order.total||0);
+ const received=paid(order);
+ view.innerHTML=`<div class="ng-order-detail">
+ <div class="ng-detail-header"><button type="button" class="ng-os-back" data-order-back aria-label="Voltar">${ico('arrow')}</button><div><span class="ng-detail-eyebrow">ORDEM DE SERVIÇO · ${esc(order.number)}</span><h1>${esc(order.title)}</h1><p>Criada em ${fmtDate(order.created_at)} · Responsável: ${esc(order.attendant||'—')}</p></div><span class="status ${esc(order.stage)}">${esc(stageLabel(order.stage))}</span></div>
+ <div class="ng-detail-layout"><div class="ng-detail-content">
+ <section class="panel ng-detail-panel"><div class="ng-detail-panel-heading"><span class="ng-detail-heading-icon">${ico('file')}</span><div><h2>Documento da OS</h2><p>Nota gerada com os dados salvos. Use os botões para baixar ou imprimir.</p></div></div><div class="ng-detail-document"><div class="os-preview-viewport" id="os-preview-viewport"><iframe id="os-preview-frame" title="Nota de serviço ${esc(order.number)}" sandbox="" referrerpolicy="no-referrer"></iframe></div></div></section>
+ <section class="panel ng-detail-panel"><div class="ng-detail-panel-heading"><span class="ng-detail-heading-icon">${ico('layers')}</span><div><h2>Informações do serviço</h2><p>Dados registrados nesta OS</p></div></div><div class="ng-detail-fields"><div><small>Cliente</small><strong>${esc(order.client_name||'—')}</strong></div><div><small>Telefone / WhatsApp</small><strong>${esc(order.client_phone||'Não informado')}</strong></div><div><small>Serviço</small><strong>${esc(order.title||'—')}</strong></div><div><small>Responsável</small><strong>${esc(order.attendant||'—')}</strong></div><div><small>Data de criação</small><strong>${fmtDate(order.created_at)}</strong></div><div><small>Status</small><strong>${esc(stageLabel(order.stage))}</strong></div></div>${order.notes?.trim()?`<div class="ng-detail-notes"><small>Observações / especificações</small><p>${esc(order.notes)}</p></div>`:''}</section>
+ ${a.length?`<section class="panel ng-detail-panel"><div class="ng-detail-panel-heading"><span class="ng-detail-heading-icon">${ico('image')}</span><div><h2>Imagens do serviço</h2><p>${a.length} arquivo(s) anexado(s)</p></div></div><div class="ng-detail-gallery">${items}</div></section>`:''}
+ </div>
+ <aside class="ng-detail-aside"><section class="panel ng-detail-finance"><h2>${ico('wallet')} Resumo financeiro</h2><div><span>Valor total</span><strong>${money(total)}</strong></div><div><span>Sinal recebido</span><strong>${money(signalPaid(order))}</strong></div><div><span>Total pago</span><strong class="text-green">${money(received)}</strong></div><div class="ng-detail-due"><span>Restante</span><strong>${money(remaining(order))}</strong></div><p class="ng-detail-payment-status">${esc(paymentStatus(order))}</p></section>
+ <div class="ng-detail-buttons"><button type="button" class="btn btn-primary" data-order-edit="${esc(order.id)}">${ico('edit')} Editar OS</button><button type="button" class="btn" data-export-pdf="${esc(order.id)}">${ico('download')} Baixar PDF</button><button type="button" class="btn" data-print="${esc(order.id)}">${ico('printer')} Imprimir</button><button type="button" class="btn btn-danger" data-delete-order="${esc(order.id)}">${ico('trash')} Excluir OS</button></div>
+ ${history?`<section class="panel ng-detail-history"><h2>${ico('clock')} Histórico</h2>${history}</section>`:''}
+ </aside></div></div>`;
+ const frame=$('#os-preview-frame');
+ if(frame){frame.srcdoc=buildPrintHtml(order,state.settings,a.map(img=>({id:img.id,src:img.dataUrl||state.signCache.get(img.storage_path)||''}))).replace('</style>','body{background:#fff!important}.printbar{display:none!important}main{margin:0!important;box-shadow:none!important;min-height:0!important}</style>');updateOrderPreviewScale();}
+ void ensureDetailImages(order.id,a);
+}
+async function ensureDetailImages(id,attachments){
+ for(const img of attachments){
+  if(state.viewingOrderId!==id)return;
+  if(!img.storage_path||state.signCache.has(img.storage_path))continue;
+  try{state.signCache.set(img.storage_path,await cloud.signImage(img.storage_path));}catch{}
+  if(state.viewingOrderId!==id)return;
+  const el=document.querySelector(`[data-detail-image="${CSS.escape(img.id)}"]`);
+  if(el)el.src=state.signCache.get(img.storage_path)||'';
+  const order=state.orders.find(o=>o.id===id);
+  const frame=$('#os-preview-frame');
+  if(frame&&order){frame.srcdoc=buildPrintHtml(order,state.settings,order.attachments.map(a=>({id:a.id,src:a.dataUrl||state.signCache.get(a.storage_path)||''}))).replace('</style>','body{background:#fff!important}.printbar{display:none!important}main{margin:0!important;box-shadow:none!important;min-height:0!important}</style>');}
+ }
 }
 function updateDraft(){if(!state.draft)return;const fields=$('#order-form');if(!fields)return;const data=new FormData(fields);for(const key of ['title','client_name','client_phone','attendant','stage','notes'])state.draft[key]=String(data.get(key)||'');state.draft.total=Math.max(0,Number(data.get('total')||0));state.draft.items=[{description:state.draft.title,quantity:1,unit_price:state.draft.total}];}
 /** O sinal é o total recebido, exceto quitações automáticas feitas ao marcar "Pago". */
@@ -437,5 +475,5 @@ document.addEventListener('dragover',e=>{const col=e.target.closest('[data-stage
 document.addEventListener('dragleave',e=>{const col=e.target.closest('[data-stage]');if(col&&!col.contains(e.relatedTarget))col.classList.remove('dragging-over');});
 document.addEventListener('drop',async e=>{const col=e.target.closest('[data-stage]');if(col){e.preventDefault();col.classList.remove('dragging-over');const id=e.dataTransfer.getData('text/ng-order');if(id)await changeStage(id,col.dataset.stage);return;}const img=e.target.closest('[data-img-drag]');if(img&&state.draft){e.preventDefault();updateDraft();const drag=e.dataTransfer.getData('text/ng-image');const a=state.draft.attachments,from=a.findIndex(x=>x.id===drag),to=a.findIndex(x=>x.id===img.dataset.imgDrag);if(from>=0&&to>=0&&from!==to){a.splice(to,0,a.splice(from,1)[0]);renderModal();}}});
 // Atualização periódica para outros computadores, sem sobrescrever uma OS em edição.
-if(state.mode==='cloud')setInterval(()=>{if(document.visibilityState==='visible'&&!state.draft&&!state.clientDraft&&cloud.getSession())loadCloud().catch(()=>{});},30000);
+if(state.mode==='cloud')setInterval(()=>{if(document.visibilityState==='visible'&&!state.draft&&!state.clientDraft&&!state.viewingOrderId&&cloud.getSession())loadCloud().catch(()=>{});},30000);
 boot();
