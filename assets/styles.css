@@ -235,3 +235,54 @@
 .ng-backup-panel>.caption{flex-basis:100%}
 @media(max-width:950px){.ng-usage-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:550px){.ng-pagination{padding:13px 10px}.ng-pagination-controls{gap:6px}.ng-usage-stats>div{padding:13px}.ng-usage-stats strong{font-size:19px}.ng-backup-panel>.btn{width:100%}}
+
+/* Consulta de OS salva: separada do formulário de edição */
+.ng-order-detail{display:grid;gap:20px;padding-bottom:40px}
+.ng-detail-header{display:flex;align-items:center;gap:16px}
+.ng-detail-header>div{flex:1;min-width:0}
+.ng-detail-eyebrow{color:#ffcf47;font-size:10px;letter-spacing:1.1px;font-weight:750}
+.ng-detail-header h1{font-size:25px;letter-spacing:-.6px;margin:7px 0}
+.ng-detail-header p{font-size:12px;color:#9aabc2;margin:0}
+.ng-detail-header>.status{align-self:flex-start;margin-top:10px}
+.ng-detail-layout{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(280px,.82fr);gap:18px;align-items:start}
+.ng-detail-content{display:grid;gap:16px;min-width:0}
+.ng-detail-panel{padding:18px}
+.ng-detail-panel-heading{display:flex;align-items:center;gap:12px;margin-bottom:15px}
+.ng-detail-panel-heading h2{font-size:16px;margin:0 0 5px}
+.ng-detail-panel-heading p{font-size:11px;color:#9eafc7;margin:0}
+.ng-detail-heading-icon{width:39px;height:39px;border-radius:10px;background:#193454;display:grid;place-items:center;color:#77b5ff}
+.ng-detail-document{background:#101c30;border:1px solid #273e5b;border-radius:12px;padding:15px;min-height:460px;overflow:auto}
+.ng-detail-document .os-preview-viewport{width:100%;max-width:794px;margin:0 auto;background:white;box-shadow:0 8px 26px #0008}
+.ng-detail-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.ng-detail-fields>div{display:grid;gap:5px;min-width:0}
+.ng-detail-fields small,.ng-detail-notes small{font-size:11px;color:#90a4c0}
+.ng-detail-fields strong{font-size:13px;overflow-wrap:anywhere}
+.ng-detail-notes{margin-top:18px;border-top:1px solid #283c56;padding-top:16px}
+.ng-detail-notes p{font-size:12px;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere}
+.ng-detail-gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+.ng-detail-attachment{border:1px solid #2d425e;background:#12253b;border-radius:10px;padding:9px;min-width:0}
+.ng-detail-thumb{height:145px;background:#0b1727;border-radius:7px;display:grid;place-items:center;margin-bottom:8px;overflow:hidden}
+.ng-detail-thumb img{max-width:100%;max-height:100%;object-fit:contain}
+.ng-detail-attachment strong{font-size:11px;display:block;overflow-wrap:anywhere}
+.ng-detail-attachment small{font-size:10px;color:#95a8c2;display:block;margin-top:5px}
+.ng-detail-aside{position:sticky;top:15px;display:grid;gap:13px}
+.ng-detail-finance{padding:18px}
+.ng-detail-finance h2,.ng-detail-history h2{display:flex;align-items:center;gap:8px;font-size:15px;margin:0 0 18px}
+.ng-detail-finance h2 .ico,.ng-detail-history h2 .ico{color:#ffcb36}
+.ng-detail-finance>div{display:flex;justify-content:space-between;gap:10px;font-size:12px;padding:10px 0;border-bottom:1px solid #273a51}
+.ng-detail-finance>div span{color:#b1bed0}
+.ng-detail-finance>div strong{white-space:nowrap}
+.ng-detail-finance .ng-detail-due{font-size:14px;border-bottom:0}
+.ng-detail-finance .ng-detail-due strong{color:#ffcb36}
+.ng-detail-payment-status{display:inline-block;margin:10px 0 0;padding:7px 11px;border-radius:8px;background:#1d354a;color:#a7d5fa;font-size:11px}
+.ng-detail-buttons{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.ng-detail-buttons [data-order-edit]{grid-column:1/-1;padding:13px}
+.ng-detail-buttons .btn-danger{grid-column:1/-1}
+.ng-detail-buttons>.btn:not([data-order-edit]){min-width:0}
+.ng-detail-history{padding:17px}
+.ng-detail-event{display:grid;gap:5px;padding:10px 0;border-bottom:1px solid #273b52}
+.ng-detail-event:last-child{border:0}
+.ng-detail-event span{font-size:10px;color:#849bb4}
+.ng-detail-event strong{font-size:11px;font-weight:550}
+@media(max-width:1050px){.ng-detail-layout{grid-template-columns:1fr}.ng-detail-aside{position:static;grid-row:1}.ng-detail-finance{padding:15px}}
+@media(max-width:600px){.ng-detail-header{gap:10px;align-items:flex-start;flex-wrap:wrap}.ng-detail-header h1{font-size:20px}.ng-detail-header>.status{margin-left:57px;margin-top:0}.ng-detail-panel{padding:12px}.ng-detail-fields{gap:12px}.ng-detail-document{padding:8px;min-height:350px}}
