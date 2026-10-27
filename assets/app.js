@@ -21,6 +21,7 @@ const ICONS={
  wallet:'<path d="M20 7H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h15a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2ZM3 11h19M3 7V5a2 2 0 0 1 2-2h13"/><path d="M17 16h1"/>',
  download:'<path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/>',
  calendar:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/>',
+ calculator:'<rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h2m4 0h2M8 14h2m4 0h2M8 18h2m4 0h2"/>',
  filter:'<path d="M4 7h16M7 12h10M10 17h4"/>',
  arrow:'<path d="M5 12h14m-6-6 6 6-6 6"/>',
  image:'<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/>',
@@ -59,7 +60,7 @@ function profileOrders(){return state.orders.filter(o=>String(o.attendant||'').t
 function chooseProfile(name){if(!team().includes(name))return;state.profile=name;localStorage.setItem(PROFILE_KEY,name);render();}
 function profileScreen(){applyTheme(state.theme);const root=$('#app');root.innerHTML=`<div class="profile-screen"><section class="profile-panel"><div class="profile-brand"><img src="assets/brand.svg" alt="NG PrintSign Gráfica"/><span>NG Studio</span></div><h1>Quem está trabalhando?</h1><p>Escolha seu perfil para abrir seu dashboard individual.</p><div class="profile-grid">${team().map(n=>`<button class="profile-choice" data-choose-profile="${esc(n)}"><span class="profile-avatar">${esc(n.slice(0,2).toUpperCase())}</span><b>${esc(n)}</b></button>`).join('')}</div><p class="caption">Todos os perfis têm o mesmo acesso. A seleção não exige senha individual.</p>${state.mode==='demo'?'<p class="caption">Modo demonstração: perfis e serviços ficam somente neste navegador.</p>':''}<span class="caption">Para cadastrar novos perfis, selecione um nome e abra Equipe.</span></section></div>`;$('#modal-root').innerHTML='';}
 function ready(){const saved=localStorage.getItem(PROFILE_KEY);state.profile=team().includes(saved)?saved:null;if(state.profile)render();else profileScreen();}
-const state={theme:savedTheme(),mode:cloud.isConfigured?'cloud':'demo',page:'dashboard',orders:[],clients:[],settings:{...defaultSettings},search:'',filter:'todos',paymentFilter:'todos',actionFilter:'',orderScope:'all',draft:null,clientDraft:null,loading:false,busy:false,signCache:new Map(),pendingFiles:new Map(),menuOpen:false,profile:null,sidebarCollapsed:storedSidebar.collapsed===true,sidebarGroups:{gerenciamento:true,analises:false,administracao:false,...storedSidebar.groups},mobileMenuOpen:false,ordersPage:1,ordersPerPage:15,storageUsage:null,storageLoading:false,storageError:'',viewingOrderId:null,revenueYear:new Date().getFullYear(),revenueHoverMonth:null,revenueCollapsed:localStorage.getItem('ngstudio_revenue_collapsed_v1')!=='false'};
+const state={theme:savedTheme(),mode:cloud.isConfigured?'cloud':'demo',page:'dashboard',orders:[],clients:[],settings:{...defaultSettings},search:'',filter:'todos',paymentFilter:'todos',actionFilter:'',orderScope:'all',draft:null,clientDraft:null,loading:false,busy:false,signCache:new Map(),pendingFiles:new Map(),menuOpen:false,profile:null,sidebarCollapsed:storedSidebar.collapsed===true,sidebarGroups:{gerenciamento:true,analises:false,administracao:false,...storedSidebar.groups},mobileMenuOpen:false,ordersPage:1,ordersPerPage:15,storageUsage:null,storageLoading:false,storageError:'',viewingOrderId:null,revenueYear:new Date().getFullYear(),revenueHoverMonth:null,revenueCollapsed:localStorage.getItem('ngstudio_revenue_collapsed_v1')!=='false',calculator:{width:'',height:'',price:'',quantity:'1',unit:'cm'}};
 function toast(message,error=false){const root=$('#toast-root');root.innerHTML=`<div class="notify ${error?'err':''}">${esc(message)}</div>`;clearTimeout(toast.t);toast.t=setTimeout(()=>root.innerHTML='',4400);}
 function getDemo(){try{const data=JSON.parse(localStorage.getItem(DEMO_KEY)||'null');if(data&&Array.isArray(data.orders)&&Array.isArray(data.clients))return data;}catch{}return seedDemo();}
 function persistDemo(){try{localStorage.setItem(DEMO_KEY,JSON.stringify({orders:state.orders,clients:state.clients,settings:state.settings}));}catch{toast('Armazenamento local cheio. Reduza as imagens ou conecte o Supabase.',true);}}
@@ -68,7 +69,7 @@ async function loadCloud(){try{const data=await cloud.loadAll();state.orders=(da
 
 const NAV_GROUPS=[
  {id:'gerenciamento',title:'Gerenciamento',icon:'layers',items:[['ordens','file','Ordens de Serviço'],['producao','layers','Produção'],['clientes','users','Clientes']]},
- {id:'analises',title:'Análises e finanças',icon:'chart',items:[['geral','chart','Dashboard Geral'],['financeiro','wallet','Financeiro'],['resultados','calendar','Resultados mês a mês'],['historico','clock','Histórico']]},
+ {id:'analises',title:'Análises e finanças',icon:'chart',items:[['geral','chart','Dashboard Geral'],['financeiro','wallet','Financeiro'],['resultados','calendar','Resultados mês a mês'],['calculadora','calculator','Calculadora de orçamento'],['historico','clock','Histórico']]},
  {id:'administracao',title:'Administração',icon:'settings',items:[['equipe','users','Equipe'],['configuracoes','settings','Configurações']]}
 ];
 function navItem(id,icon,label,mobile=false){
@@ -85,6 +86,7 @@ function nav(){
   ['clientes','users','Clientes'],
   ['financeiro','wallet','Financeiro'],
   ['resultados','calendar','Resultados mês a mês'],
+  ['calculadora','calculator','Calculadora de orçamento'],
   ['historico','clock','Histórico'],
   ['equipe','users','Equipe'],
   ['configuracoes','settings','Configurações']
@@ -103,9 +105,9 @@ function nav(){
    <span class="ng-sidebar-caption">VISÃO GERAL</span>
    ${links.slice(0,2).map(([id,icon,label])=>navItem(id,icon,label)).join('')}
    <span class="ng-sidebar-caption ng-sidebar-caption-later">GESTÃO</span>
-   ${links.slice(2,8).map(([id,icon,label])=>navItem(id,icon,label)).join('')}
+   ${links.slice(2,9).map(([id,icon,label])=>navItem(id,icon,label)).join('')}
    <span class="ng-sidebar-caption ng-sidebar-caption-later">PREFERÊNCIAS</span>
-   ${links.slice(8).map(([id,icon,label])=>navItem(id,icon,label)).join('')}
+   ${links.slice(9).map(([id,icon,label])=>navItem(id,icon,label)).join('')}
   </nav>
   <div class="sidebar-bottom">
    <button type="button" class="sidebar-create" data-new title="Nova Ordem de Serviço">${ico('plus')}<span>Nova ordem de serviço</span></button>
@@ -142,7 +144,7 @@ function profileOrdersFor(name){return state.orders.filter(o=>String(o.attendant
 async function persistTeam(names){const updated={...state.settings,attendants:names.join(', ')};try{const saved=state.mode==='cloud'?await cloud.persistSettings(updated):updated;state.settings={...defaultSettings,...saved};if(state.mode==='demo')persistDemo();if(state.profile&&!team().includes(state.profile)){state.profile=null;localStorage.removeItem(PROFILE_KEY);profileScreen();}else render();return true;}catch(e){toast('Erro ao salvar equipe: '+e.message,true);return false;}}
 async function addProfile(raw){const name=String(raw||'').trim().replace(/\\s+/g,' ');if(!name||name.includes(',')||name.length>60){toast('Digite um nome válido, sem vírgulas.',true);return;}if(team().some(n=>n.toLocaleLowerCase('pt-BR')===name.toLocaleLowerCase('pt-BR'))){toast('Funcionário já cadastrado.',true);return;}if(await persistTeam([...team(),name]))toast('Funcionário adicionado.');}
 async function removeProfile(name){if(team().length<=1)return;if(profileOrdersFor(name).length){toast('Reatribua os serviços deste funcionário antes de removê-lo.',true);return;}if(!window.confirm('Remover o perfil '+name+'?'))return;if(await persistTeam(team().filter(n=>n!==name)))toast('Perfil removido.');}
-function pageTitle(){return {geral:['Dashboard Geral','Indicadores de toda a gráfica.'],equipe:['Equipe','Gerencie os perfis de funcionários.'],dashboard:['Meu Dashboard','Seus serviços e indicadores individuais.'],ordens:['Ordens de Serviço','Cadastre, consulte e organize os pedidos da sua gráfica.'],producao:['Produção','Mova os serviços entre as etapas arrastando os cartões.'],clientes:['Clientes','Contatos e histórico de serviços em um único lugar.'],financeiro:['Financeiro','Pagamentos recebidos e valores ainda pendentes.'],resultados:['Resultados mês a mês','Evolução mensal de pedidos, valores e recebimentos de toda a equipe.'],historico:['Histórico','Serviços entregues e últimas movimentações.'],configuracoes:['Configurações','Personalize os dados que aparecem nos documentos da NG.']}[state.page];}
+function pageTitle(){return {geral:['Dashboard Geral','Indicadores de toda a gráfica.'],equipe:['Equipe','Gerencie os perfis de funcionários.'],dashboard:['Meu Dashboard','Seus serviços e indicadores individuais.'],ordens:['Ordens de Serviço','Cadastre, consulte e organize os pedidos da sua gráfica.'],producao:['Produção','Mova os serviços entre as etapas arrastando os cartões.'],clientes:['Clientes','Contatos e histórico de serviços em um único lugar.'],financeiro:['Financeiro','Pagamentos recebidos e valores ainda pendentes.'],resultados:['Resultados mês a mês','Evolução mensal de pedidos, valores e recebimentos de toda a equipe.'],calculadora:['Calculadora de orçamento','Calcule preços por metro quadrado para os materiais da gráfica.'],historico:['Histórico','Serviços entregues e últimas movimentações.'],configuracoes:['Configurações','Personalize os dados que aparecem nos documentos da NG.']}[state.page];}
 function header(){
  const [title,subtitle]=pageTitle();
  const searchPlace=state.page==='equipe'?'Buscar funcionário...':state.page==='clientes'?'Buscar cliente ou telefone...':'Buscar OS, cliente ou serviço...';
@@ -150,7 +152,7 @@ function header(){
  return `<header class="topbar ng-design-topbar">
   <div class="heading"><span class="ng-heading-eyebrow">NG STUDIO / WORKSPACE</span><h1>${esc(title)}</h1><p>${esc(subtitle)}</p></div>
   <div class="tools">
-   ${state.page==='configuracoes'||state.draft||state.viewingOrderId?'':`<label class="search">${ico('search')}<input id="global-search" type="search" autocomplete="off" spellcheck="false" aria-label="${esc(searchPlace)}" placeholder="${esc(searchPlace)}" value="${esc(state.search)}"/><span class="shortcut">⌘ K</span></label>`}
+   ${state.page==='configuracoes'||state.page==='calculadora'||state.draft||state.viewingOrderId?'':`<label class="search">${ico('search')}<input id="global-search" type="search" autocomplete="off" spellcheck="false" aria-label="${esc(searchPlace)}" placeholder="${esc(searchPlace)}" value="${esc(state.search)}"/><span class="shortcut">⌘ K</span></label>`}
    <button type="button" class="iconbutton theme-toggle" data-toggle-theme title="${state.theme==='light'?'Ativar modo escuro':'Ativar modo claro'}" aria-label="${state.theme==='light'?'Ativar modo escuro':'Ativar modo claro'}">${ico(state.theme==='light'?'moon':'sun')}</button>
    ${state.mode==='cloud'?`<button type="button" class="iconbutton ng-refresh-btn" title="Atualizar dados" aria-label="Atualizar dados" data-refresh>${ico('refresh')}</button>`:''}
    <button type="button" class="ng-topbar-profile" data-switch-profile title="Trocar perfil" aria-label="Trocar perfil de funcionário"><span>${esc(initials)}</span>${ico('chevron')}</button>
@@ -170,9 +172,9 @@ function animateNgScene(){
  void view.offsetWidth;
  view.classList.add('ng-scene-enter');
 }
-function render(){applyTheme(state.theme);if(!state.profile){profileScreen();return;}const root=$('#app');root.innerHTML=`<div class="shell ng-v2-shell studio-shell ${state.sidebarCollapsed?'sidebar-collapsed':''}">${nav()}<main class="main ng-v2-main ${(state.draft||state.viewingOrderId)?'os-editor-page':''}">${header()}${state.mode==='demo'?`<div class="demo-banner">${ico('alert')} <span><b>MODO DEMONSTRAÇÃO:</b> os dados ficam somente neste navegador. Configure o Supabase antes de cadastrar serviços reais ou compartilhar entre computadores.</span></div>`:''}<div id="view">${state.draft||state.viewingOrderId?'':pageView()}</div></main></div>`;renderModal();animateNgScene();}
-function refreshView(){const view=$('#view');if(view)view.innerHTML=pageView();}
-function pageView(){switch(state.page){case 'dashboard':return dashboard(true);case 'geral':return dashboard(false);case 'equipe':return teamPage();case 'ordens':return ordersPage();case 'producao':return kanbanPage();case 'clientes':return clientsPage();case 'financeiro':return financePage();case 'resultados':return resultsPage();case 'historico':return historyPage();case 'configuracoes':return settingsPage();return dashboard();}}
+function render(){applyTheme(state.theme);if(!state.profile){profileScreen();return;}const root=$('#app');root.innerHTML=`<div class="shell ng-v2-shell studio-shell ${state.sidebarCollapsed?'sidebar-collapsed':''}">${nav()}<main class="main ng-v2-main ${(state.draft||state.viewingOrderId)?'os-editor-page':''}">${header()}${state.mode==='demo'?`<div class="demo-banner">${ico('alert')} <span><b>MODO DEMONSTRAÇÃO:</b> os dados ficam somente neste navegador. Configure o Supabase antes de cadastrar serviços reais ou compartilhar entre computadores.</span></div>`:''}<div id="view">${state.draft||state.viewingOrderId?'':pageView()}</div></main></div>`;renderModal();if(state.page==='calculadora')calculatorRefresh();animateNgScene();}
+function refreshView(){const view=$('#view');if(view){view.innerHTML=pageView();if(state.page==='calculadora')calculatorRefresh();}}
+function pageView(){switch(state.page){case 'dashboard':return dashboard(true);case 'geral':return dashboard(false);case 'equipe':return teamPage();case 'ordens':return ordersPage();case 'producao':return kanbanPage();case 'clientes':return clientsPage();case 'financeiro':return financePage();case 'resultados':return resultsPage();case 'calculadora':return calculatorPage();case 'historico':return historyPage();case 'configuracoes':return settingsPage();return dashboard();}}
 function kpi(label,value,icon,tone,desc,action=""){return `<button type="button" class="kpi" data-dashboard-action="${action}" aria-label="${esc(label)}: ${esc(value)}. Ver ordens correspondentes"><div class="badge-icon ${tone}">${ico(icon)}</div><div class="kpi-label">${label}</div><strong>${esc(value)}</strong><small>${esc(desc)}</small></button>`;}
 function statusPickerMarkup(stage,selectAttrs='',variant=''){
  const selected=STAGES.some(item=>item.id===stage)?stage:STAGES[0].id;
@@ -277,6 +279,116 @@ function revenuePanel(source,individual){
   </div>
  </section>`;
 }
+
+/** Orçamento rápido: cálculo independente das OS e do banco de dados. */
+function calculatorNumber(raw){
+ const value=String(raw??'').trim().replace(/\s/g,'').replace(/^R\$/i,'');
+ if(!value||!/^[0-9.,]+$/.test(value))return NaN;
+ let normalized=value;
+ if(value.includes(',')&&value.includes('.')){
+  const comma=value.lastIndexOf(',');
+  const dot=value.lastIndexOf('.');
+  normalized=comma>dot?value.replace(/\./g,'').replace(',','.'):value.replace(/,/g,'');
+ }else if(value.includes(',')){
+  normalized=value.replace(/\./g,'').replace(',','.');
+ }else if(/^\d{1,3}(?:\.\d{3})+$/.test(value)){
+  normalized=value.replace(/\./g,'');
+ }
+ const number=Number(normalized);
+ return Number.isFinite(number)?number:NaN;
+}
+function calculatorData(){
+ const c=state.calculator;
+ const width=calculatorNumber(c.width),height=calculatorNumber(c.height);
+ const price=calculatorNumber(c.price);
+ const quantity=Number(c.quantity);
+ const valid=Number.isFinite(width)&&width>0&&Number.isFinite(height)&&height>0
+  &&Number.isFinite(price)&&price>=0&&Number.isInteger(quantity)&&quantity>=1&&quantity<=100000;
+ if(!valid)return null;
+ const meters=c.unit==='m'?1:0.01;
+ const unitArea=(width*meters)*(height*meters);
+ const totalArea=unitArea*quantity;
+ const unitTotal=unitArea*price;
+ const total=totalArea*price;
+ if(!Number.isFinite(total)||!Number.isFinite(totalArea))return null;
+ return {width,height,price,quantity,unitArea,totalArea,unitTotal,total,unit:c.unit};
+}
+function calculatorPage(){
+ const c=state.calculator;
+ return `<div class="ng-calculator-page">
+ <section class="ng-calc-intro">
+  <div class="ng-calc-intro-badge">${ico('calculator')}</div>
+  <div><span class="ng-calc-overline">FERRAMENTA DE ORÇAMENTO · NG PRINTSIGN</span><h2>Calculadora de orçamento</h2><p>Informe as medidas do material e o valor do metro quadrado. O preço é atualizado automaticamente, sem precisar salvar uma OS.</p></div>
+ </section>
+ <div class="ng-calc-grid">
+  <section class="panel ng-calc-form-panel" aria-label="Medidas e preço do orçamento">
+   <div class="ng-calc-section-heading"><div><h3>Dados do material</h3><p>Preencha as informações abaixo</p></div><span class="ng-calc-step">01 / 02</span></div>
+   <div class="ng-calc-field ng-calc-unit-field"><label for="ng-calc-unit">Unidade das medidas</label><select id="ng-calc-unit" class="select"><option value="cm" ${c.unit==='cm'?'selected':''}>Centímetros (cm)</option><option value="m" ${c.unit==='m'?'selected':''}>Metros (m)</option></select></div>
+   <div class="ng-calc-dimensions">
+    <div class="ng-calc-field"><label for="ng-calc-width">Largura <small>(${esc(c.unit)})</small></label><div class="ng-calc-input-wrap"><input id="ng-calc-width" class="input" type="text" inputmode="decimal" autocomplete="off" maxlength="20" placeholder="${c.unit==='cm'?'Ex.: 150':'Ex.: 1,50'}" value="${esc(c.width)}"/><span>${esc(c.unit)}</span></div></div>
+    <div class="ng-calc-times" aria-hidden="true">×</div>
+    <div class="ng-calc-field"><label for="ng-calc-height">Altura <small>(${esc(c.unit)})</small></label><div class="ng-calc-input-wrap"><input id="ng-calc-height" class="input" type="text" inputmode="decimal" autocomplete="off" maxlength="20" placeholder="${c.unit==='cm'?'Ex.: 200':'Ex.: 2,00'}" value="${esc(c.height)}"/><span>${esc(c.unit)}</span></div></div>
+   </div>
+   <div class="ng-calc-separator"></div>
+   <div class="ng-calc-field"><label for="ng-calc-price">Valor do metro quadrado</label><div class="ng-calc-input-wrap ng-calc-price-input"><span>R$</span><input id="ng-calc-price" class="input" type="text" inputmode="decimal" autocomplete="off" maxlength="20" placeholder="Ex.: 40,00" value="${esc(c.price)}"/><span>/m²</span></div></div>
+   <div class="ng-calc-field"><label for="ng-calc-quantity">Quantidade de peças</label><div class="ng-calc-input-wrap"><input id="ng-calc-quantity" class="input" type="number" min="1" max="100000" step="1" value="${esc(c.quantity)}"/><span>un.</span></div></div>
+   <p class="ng-calc-hint">Cálculo: largura × altura = área em m²; área × preço por m² × quantidade = total.</p>
+   <button class="btn ng-calc-clear" type="button" data-calculator-clear>${ico('trash')} Limpar campos</button>
+  </section>
+  <section class="panel ng-calc-result-panel" aria-live="polite" aria-label="Resultado do orçamento">
+   <div class="ng-calc-section-heading"><div><h3>Resumo do orçamento</h3><p>Resultado calculado na hora</p></div><span class="ng-calc-step">02 / 02</span></div>
+   <div class="ng-calc-total">
+    <span>Valor total do orçamento</span>
+    <strong id="ng-calc-total">R$ 0,00</strong>
+    <small id="ng-calc-status">Informe as medidas e o valor por m² para calcular.</small>
+   </div>
+   <div class="ng-calc-result-list">
+    <div><span>Área por peça</span><strong id="ng-calc-area-unit">—</strong></div>
+    <div><span>Quantidade</span><strong id="ng-calc-count">1 un.</strong></div>
+    <div><span>Área total</span><strong id="ng-calc-area-total">—</strong></div>
+    <div><span>Preço por peça</span><strong id="ng-calc-unit-total">—</strong></div>
+    <div><span>Preço por m²</span><strong id="ng-calc-price-unit">—</strong></div>
+   </div>
+   <div class="ng-calc-footer"><span class="ng-calc-formula" id="ng-calc-formula">Exemplo: 150 × 200 cm = 3 m²</span><p>Estimativa baseada na metragem. Acabamentos, instalação, impostos e outras despesas não estão incluídos automaticamente.</p></div>
+  </section>
+ </div>
+ </div>`;
+}
+function calculatorRefresh(){
+ if(state.page!=='calculadora')return;
+ const data=calculatorData();
+ const set=(selector,value)=>{const node=$(selector);if(node)node.textContent=value;};
+ const area=(n)=>n.toLocaleString('pt-BR',{maximumFractionDigits:6})+' m²';
+ const count=Number(state.calculator.quantity);
+ set('#ng-calc-total',data?money(data.total):'R$ 0,00');
+ set('#ng-calc-status',data?'Orçamento calculado automaticamente.':'Informe medidas positivas, preço por m² e quantidade válida.');
+ set('#ng-calc-area-unit',data?area(data.unitArea):'—');
+ set('#ng-calc-count',Number.isInteger(count)&&count>0?count.toLocaleString('pt-BR')+' un.':'—');
+ set('#ng-calc-area-total',data?area(data.totalArea):'—');
+ set('#ng-calc-unit-total',data?money(data.unitTotal):'—');
+ set('#ng-calc-price-unit',data?money(data.price)+'/m²':'—');
+ set('#ng-calc-formula',data?`${data.width.toLocaleString('pt-BR')} × ${data.height.toLocaleString('pt-BR')} ${data.unit} = ${area(data.unitArea)} por peça`:'Exemplo: 150 × 200 cm = 3 m²');
+}
+function calculatorChangeUnit(unit){
+ const c=state.calculator;
+ if(unit!== 'cm'&&unit!=='m')return;
+ if(unit===c.unit)return;
+ const factor=unit==='m'?0.01:100;
+ const convert=raw=>{
+  if(String(raw).trim()==='')return raw;
+  const value=calculatorNumber(raw);
+  return Number.isFinite(value)?(value*factor).toLocaleString('pt-BR',{useGrouping:false,maximumFractionDigits:6}):raw;
+ };
+ c.width=convert(c.width);c.height=convert(c.height);c.unit=unit;
+ const width=$('#ng-calc-width'),height=$('#ng-calc-height');
+ if(width)width.value=c.width;
+ if(height)height.value=c.height;
+ document.querySelectorAll('.ng-calc-dimensions label small,.ng-calc-dimensions .ng-calc-input-wrap span').forEach(node=>node.textContent=unit);
+ if(width)width.placeholder=unit==='cm'?'Ex.: 150':'Ex.: 1,50';
+ if(height)height.placeholder=unit==='cm'?'Ex.: 200':'Ex.: 2,00';
+ calculatorRefresh();
+}
+
 function resultsPage(){
  const allOrders=filteredOrders(state.orders);
  return `<div class="ng-new-dashboard studio-dashboard ng-results-page">
@@ -919,6 +1031,7 @@ document.addEventListener('click',async e=>{
  if(target.matches('[data-clear-order-filters]')){state.filter='todos';state.paymentFilter='todos';state.actionFilter='';state.orderScope='all';state.search='';state.ordersPage=1;render();return;}
  if(target.matches('[data-nav]')){switchPage(target.dataset.nav);return;}
  if(target.matches('[data-download-results-pdf]')){await exportResultsPdf(target);return;}
+ if(target.matches('[data-calculator-clear]')){state.calculator={width:'',height:'',price:'',quantity:'1',unit:state.calculator.unit};refreshView();calculatorRefresh();return;}
  if(target.matches('[data-new]')){state.mobileMenuOpen=false;openEditor();return;}
  if(target.matches('[data-open-order]')){openOrderDetail(target.dataset.openOrder);return;}
  if(target.matches('[data-client-id]')){state.clientDraft=structuredClone(state.clients.find(c=>c.id===target.dataset.clientId));state.draft=null;renderModal();return;}
@@ -954,6 +1067,7 @@ document.addEventListener('change',async e=>{const target=e.target;
  if(target.id==='ng-quick-stage'){await saveQuickOrder(state.viewingOrderId,'stage');return;}
  if(target.id==='ng-revenue-year'){state.revenueYear=Number(target.value);state.revenueHoverMonth=null;refreshView();return;}
  if(target.id==='ng-revenue-month-select'){updateMonthlySelection(Number(target.value));return;}
+ if(target.id==='ng-calc-unit'){calculatorChangeUnit(target.value);return;}
  if(target.id==='orders-page-size'){state.ordersPerPage=Number(target.value)||15;state.ordersPage=1;refreshView();return;}
  if(target.id==='image-picker'){await addImages(target.files);target.value='';return;}
  if(target.matches('[data-img-enabled]')){updateAttachment(target.dataset.imgEnabled,'include_pdf',target.checked);scheduleOrderPreview();return;}
@@ -962,7 +1076,10 @@ document.addEventListener('change',async e=>{const target=e.target;
  if(state.draft&&target.closest('#order-form'))scheduleOrderPreview();
  if(target.matches('[name=client_name]')&&state.draft){const client=state.clients.find(c=>c.name.toLowerCase()===target.value.trim().toLowerCase());if(client){const phone=$('[name=client_phone]');if(phone&&!phone.value)phone.value=client.phone||'';}scheduleOrderPreview();}
 });
-document.addEventListener('input',e=>{const target=e.target;if(target.id==='global-search'){state.search=target.value;state.ordersPage=1;refreshView();return;}
+document.addEventListener('input',e=>{const target=e.target;
+ const calcInputs={'ng-calc-width':'width','ng-calc-height':'height','ng-calc-price':'price','ng-calc-quantity':'quantity'};
+ if(Object.hasOwn(calcInputs,target.id)){state.calculator[calcInputs[target.id]]=target.value;calculatorRefresh();return;}
+ if(target.id==='global-search'){state.search=target.value;state.ordersPage=1;refreshView();return;}
  if(state.draft&&target.closest('#order-form')){if(target.matches('[name=total]')){state.draft.total=Math.max(0,Number(target.value||0));rerenderPaymentParts();}if(target.id==='initial-payment')rerenderPaymentParts();if(target.matches('[data-img-caption]'))updateAttachment(target.dataset.imgCaption,'caption',target.value);scheduleOrderPreview();}
 });
 document.addEventListener('submit',async e=>{if(e.target.id==='team-form'){e.preventDefault();await addProfile(new FormData(e.target).get('name'));return;}if(e.target.id==='login-form'){e.preventDefault();const data=new FormData(e.target);const btn=e.target.querySelector('button');btn.disabled=true;try{await cloud.signin(String(data.get('email')),String(data.get('password')),data.has('remember'));await loadCloud();}catch(error){renderLogin('Falha no login: '+error.message);}return;}
