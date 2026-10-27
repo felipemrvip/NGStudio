@@ -23,6 +23,32 @@ function loadScript(name){
  }
  return loading.get(name);
 }
+// A captura HTML->PDF nem sempre desenha SVGs externos em iframes.
+// Converte a logo oficial em PNG e embute no documento antes da captura.
+let embeddedBrandPromise;
+async function embeddedBrandPng(){
+ if(!embeddedBrandPromise){
+  embeddedBrandPromise=(async()=>{
+   const response=await fetch(new URL('./brand.svg',import.meta.url));
+   if(!response.ok)throw Error('Arquivo da logo indisponível (HTTP '+response.status+').');
+   const svg=await response.text();
+   const url=URL.createObjectURL(new Blob([svg],{type:'image/svg+xml;charset=utf-8'}));
+   try{
+    const image=new Image();
+    image.src=url;
+    await image.decode();
+    const canvas=document.createElement('canvas');
+    canvas.width=600;
+    canvas.height=600;
+    const ctx=canvas.getContext('2d');
+    if(!ctx)throw Error('Não foi possível preparar a imagem.');
+    ctx.drawImage(image,0,0,600,600);
+    return canvas.toDataURL('image/png');
+   }finally{URL.revokeObjectURL(url);}
+  })().catch(error=>{embeddedBrandPromise=null;throw Error('Falha ao preparar a logo NG PrintSign: '+error.message);});
+ }
+ return embeddedBrandPromise;
+}
 export function orderFilename(number){
  return 'OS-'+String(number||'SEM-NUMERO').replace(/[^A-Za-z0-9_-]/g,'-').slice(0,70)+'.pdf';
 }
@@ -57,6 +83,11 @@ export async function prepareOrderDocument(order,settings,images=[]){
   const style=doc.createElement('style');
   style.textContent='body{background:#fff!important}.printbar{display:none!important}main{margin:0!important;box-shadow:none!important;min-height:0!important}';
   doc.head.appendChild(style);
+  // PNG embutido: não depende da URL relativa nem do suporte a SVG do html2canvas.
+  const logo=doc.querySelector('header .print-logo');
+  if(!logo)throw Error('Logo não encontrada no modelo da OS.');
+  logo.src=await embeddedBrandPng();
+  await logo.decode();
   await waitForImages(doc);
   return {frame,doc,main};
  }catch(e){frame.remove();throw e;}
