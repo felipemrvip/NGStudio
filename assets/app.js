@@ -1,7 +1,7 @@
 import {STAGES,defaultSettings,money,paid,remaining,paymentStatus,stageLabel,fmtDate,currentMonth,esc,uid,nextNumber,stats,monthlyRevenue,revenueYears,monthlyPerformance,actionMatches} from './logic.mjs';
 import {seedDemo} from './demo.js';
 import {buildPrintHtml} from './print.js';
-import {downloadOrderPdf,printOrderDocument} from './pdf.js';
+import {downloadOrderPdf,printOrderDocument,downloadMonthlyResultsPdf} from './pdf.js';
 import * as cloud from './supabase.js';
 
 const ICONS={
@@ -280,7 +280,7 @@ function revenuePanel(source,individual){
 function resultsPage(){
  const allOrders=filteredOrders(state.orders);
  return `<div class="ng-new-dashboard studio-dashboard ng-results-page">
-  <div class="toolbar-line"><div><h2>Resultados mês a mês</h2><p>Acompanhe os pedidos, pagamentos e valores pendentes de toda a equipe. Escolha o ano e o mês para conferir os detalhes.</p></div></div>
+  <div class="toolbar-line"><div><h2>Resultados mês a mês</h2><p>Acompanhe os pedidos, pagamentos e valores pendentes de toda a equipe. Escolha o ano e o mês para conferir os detalhes.</p></div><button type="button" class="btn btn-primary" data-download-results-pdf>${ico('download')} Baixar PDF</button></div>
   ${revenuePanel(allOrders,false)}
  </div>`;
 }
@@ -770,6 +770,26 @@ async function orderImageSources(order){
  }
  return images;
 }
+async function exportResultsPdf(button){
+ if(!button||button.disabled)return;
+ const previous=button.innerHTML;
+ button.disabled=true;
+ button.textContent='Gerando PDF...';
+ try{
+  const source=filteredOrders(state.orders);
+  const months=monthlyRevenue(source,state.revenueYear);
+  const selectedMonth=state.revenueHoverMonth!=null?state.revenueHoverMonth:Number($('#ng-revenue-month-select')?.value??new Date().getMonth());
+  const detail=monthlyPerformance(source,state.revenueYear,selectedMonth);
+  await downloadMonthlyResultsPdf({settings:state.settings,year:state.revenueYear,month:selectedMonth,months,detail:{
+   ...detail,ordersCreated:detail.ordersCreated.map(order=>({...order,stage_label:stageLabel(order.stage)}))
+  }});
+  toast('Relatório de resultados baixado.');
+ }catch(error){
+  toast('Não foi possível gerar o PDF de resultados: '+error.message,true);
+ }finally{
+  if(button.isConnected){button.disabled=false;button.innerHTML=previous;}
+ }
+}
 async function exportOrderPdf(id,button){
  const order=state.orders.find(o=>o.id===id);
  if(!order)return;
@@ -898,6 +918,7 @@ document.addEventListener('click',async e=>{
  if(target.matches('[data-dashboard-action]')){const action=target.dataset.dashboardAction;const scope=state.page==='dashboard'?'profile':'all';const search=state.search;switchPage('ordens');state.actionFilter=action;state.orderScope=scope;state.search=search;render();return;}
  if(target.matches('[data-clear-order-filters]')){state.filter='todos';state.paymentFilter='todos';state.actionFilter='';state.orderScope='all';state.search='';state.ordersPage=1;render();return;}
  if(target.matches('[data-nav]')){switchPage(target.dataset.nav);return;}
+ if(target.matches('[data-download-results-pdf]')){await exportResultsPdf(target);return;}
  if(target.matches('[data-new]')){state.mobileMenuOpen=false;openEditor();return;}
  if(target.matches('[data-open-order]')){openOrderDetail(target.dataset.openOrder);return;}
  if(target.matches('[data-client-id]')){state.clientDraft=structuredClone(state.clients.find(c=>c.id===target.dataset.clientId));state.draft=null;renderModal();return;}
