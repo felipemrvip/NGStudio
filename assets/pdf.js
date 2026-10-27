@@ -144,3 +144,170 @@ export async function printOrderDocument(order,settings,images=[]){
  win.focus();
  win.print();
 }
+
+
+/**
+ * Relatório gerencial vetorial: ano completo + resumo do mês escolhido.
+ * Usa as mesmas métricas do painel (calculadas em logic.mjs), sem refazer somas.
+ * Pagamentos são contabilizados na data de recebimento.
+ */
+export async function downloadMonthlyResultsPdf({settings,year,month,months,detail}){
+ const JsPDF=await loadScript('jspdf');
+ const brand=await embeddedBrandPng();
+ const pdf=new JsPDF({orientation:'portrait',unit:'mm',format:'a4',compress:true});
+ const W=210,H=297,L=16,R=194;
+ const navy=[9,22,83],gold=[255,202,48],ink=[31,45,69],muted=[104,118,140],pale=[244,247,251];
+ const monthNames=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+ const selected=monthNames[month];
+ const currency=value=>Number(value||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+ const integer=value=>Number(value||0).toLocaleString('pt-BR');
+ const generated=new Date().toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'});
+ const totals=months.reduce((a,m)=>({
+  orders:a.orders+m.orders,
+  billed:a.billed+m.billed,
+  received:a.received+m.received,
+  outstanding:a.outstanding+m.outstanding
+ }),{orders:0,billed:0,received:0,outstanding:0});
+ let y=45;
+ const color=(rgb)=>pdf.setTextColor(...rgb);
+ function line(text,x,baseline,{fontSize=9,bold=false,rgb=ink,align='left',maxWidth}={}){
+  pdf.setFont('helvetica',bold?'bold':'normal');pdf.setFontSize(fontSize);color(rgb);
+  let value=String(text??'');
+  if(maxWidth&&pdf.getTextWidth(value)>maxWidth){
+   while(value.length&&pdf.getTextWidth(value+'…')>maxWidth)value=value.slice(0,-1);
+   value=value+'…';
+  }
+  pdf.text(value,x,baseline,{align});
+ }
+ function pageHeader(){
+  pdf.setFillColor(...navy);pdf.rect(0,0,W,36,'F');
+  pdf.setFillColor(...gold);pdf.rect(0,36,W,2,'F');
+  pdf.addImage(brand,'PNG',L,5,26,26);
+  line(settings.company||'NG PrintSign Gráfica',47,14,{fontSize:14,bold:true,rgb:[255,255,255],maxWidth:145});
+  line('RELATÓRIO DE RESULTADOS',47,23,{fontSize:9,bold:true,rgb:gold});
+  line(year+' • Destaque: '+selected,47,30,{fontSize:9,rgb:[222,232,248]});
+  y=46;
+ }
+ function nextPage(){pdf.addPage();pageHeader();}
+ function space(height){if(y+height>270)nextPage();}
+ function section(text){
+  space(15);
+  pdf.setFillColor(...gold);pdf.roundedRect(L,y-4,2,7,1,1,'F');
+  line(text,L+6,y+1,{fontSize:12,bold:true,rgb:navy});
+  y+=12;
+ }
+ function note(text){
+  pdf.setFont('helvetica','normal');pdf.setFontSize(8.2);color(muted);
+  const lines=pdf.splitTextToSize(text,R-L);
+  space(lines.length*4.2+4);
+  pdf.text(lines,L,y);y+=lines.length*4.2+5;
+ }
+ function metric(x,top,w,title,value){
+  pdf.setFillColor(...pale);pdf.roundedRect(x,top,w,24,2.5,2.5,'F');
+  line(title,x+4,top+7.5,{fontSize:8,rgb:muted,maxWidth:w-8});
+  line(value,x+4,top+17.5,{fontSize:11,bold:true,rgb:navy,maxWidth:w-8});
+ }
+ function tableHeader(columns){
+  space(10);pdf.setFillColor(...navy);pdf.roundedRect(L,y,R-L,9,1.4,1.4,'F');
+  for(const item of columns)line(item.title,item.x,y+6,{fontSize:7.4,bold:true,rgb:[255,255,255],align:item.align||'left'});
+  y+=10;
+ }
+ function tableRow(entries,{height=8,highlight=false,index=0}={}){
+  space(height+1);
+  if(highlight||index%2===0){pdf.setFillColor(...pale);pdf.rect(L,y,R-L,height,'F');}
+  for(const entry of entries)line(entry.value,entry.x,y+height/2+2.2,{fontSize:entry.size||8,bold:Boolean(entry.bold),align:entry.align||'left',maxWidth:entry.maxWidth});
+  y+=height;
+ }
+ // Página 1: consolidado do ano.
+ pageHeader();
+ section('Panorama anual • '+year);
+ const cw=(R-L-9)/4;
+ metric(L,y,cw,'Ordens criadas',integer(totals.orders));
+ metric(L+cw+3,y,cw,'Serviços lançados',currency(totals.billed));
+ metric(L+2*(cw+3),y,cw,'Recebido no ano',currency(totals.received));
+ metric(L+3*(cw+3),y,cw,'Saldo pendente',currency(totals.outstanding));
+ y+=31;
+ section('Evolução dos 12 meses');
+ const annualColumns=[
+  {title:'MÊS',x:L+3},{title:'OS',x:68,align:'right'},
+  {title:'SERVIÇOS',x:109,align:'right'},
+  {title:'RECEBIDO',x:151,align:'right'},
+  {title:'A RECEBER',x:R-3,align:'right'}
+ ];
+ tableHeader(annualColumns);
+ months.forEach((m,i)=>tableRow([
+  {value:monthNames[m.month],x:L+3,bold:m.month===month,maxWidth:38},
+  {value:integer(m.orders),x:68,align:'right'},
+  {value:currency(m.billed),x:109,align:'right'},
+  {value:currency(m.received),x:151,align:'right'},
+  {value:currency(m.outstanding),x:R-3,align:'right'}
+ ],{index:i,highlight:m.month===month,height:9.2}));
+ y+=2;
+ tableRow([
+  {value:'TOTAL',x:L+3,bold:true},
+  {value:integer(totals.orders),x:68,align:'right',bold:true},
+  {value:currency(totals.billed),x:109,align:'right',bold:true},
+  {value:currency(totals.received),x:151,align:'right',bold:true},
+  {value:currency(totals.outstanding),x:R-3,align:'right',bold:true}
+ ],{height:10,highlight:true});
+ y+=6;
+ note('Serviços lançados: valor das OS pela data de criação. Recebido: pagamentos registrados em cada mês, inclusive de OS anteriores. A receber: saldo ainda pendente das OS criadas no período (posição atual). OS canceladas não entram no relatório.');
+ // Página 2 em diante: recorte mensal com detalhes das OS.
+ nextPage();
+ section('Resumo mensal • '+selected+' de '+year);
+ const half=(R-L-5)/3;
+ metric(L,y,half,'OS criadas',integer(detail.orders));
+ metric(L+half+2.5,y,half,'OS entregues',integer(detail.delivered));
+ metric(L+2*(half+2.5),y,half,'Pagamentos',integer(detail.payments));
+ y+=29;
+ metric(L,y,half,'Valor dos serviços',currency(detail.billed));
+ metric(L+half+2.5,y,half,'Valor recebido',currency(detail.received));
+ metric(L+2*(half+2.5),y,half,'Saldo pendente',currency(detail.outstanding));
+ y+=33;
+ section('Situação atual das OS criadas no mês');
+ const stages=[
+  ['Em andamento',detail.stages?.andamento||0],
+  ['Em produção',detail.stages?.producao||0],
+  ['Prontas',detail.stages?.pronto||0],
+  ['Entregues',detail.stages?.entregue||0]
+ ];
+ const stageW=(R-L-6)/4;
+ stages.forEach(([name,count],i)=>metric(L+i*(stageW+2),y,stageW,name,integer(count)));
+ y+=30;
+ note('Os status representam a situação atual das OS abertas neste mês. As entregas e os recebimentos consideram suas respectivas datas de registro, mesmo quando a OS foi criada em outro mês.');
+ section('Ordens de serviço criadas no mês ('+integer(detail.orders)+')');
+ const list=detail.ordersCreated||[];
+ const orderColumns=[
+  {title:'OS',x:L+3},{title:'CLIENTE / SERVIÇO',x:43},
+  {title:'SITUAÇÃO',x:145},{title:'VALOR',x:R-3,align:'right'}
+ ];
+ tableHeader(orderColumns);
+ if(!list.length){
+  tableRow([{value:'Nenhuma OS cadastrada no mês selecionado.',x:L+3}],{height:13});
+ }else{
+  list.forEach((order,i)=>{
+   if(y+12>267){nextPage();section('Ordens de serviço • '+selected+' ('+(i+1)+'–'+list.length+')');tableHeader(orderColumns);}
+   tableRow([
+    {value:order.number||'—',x:L+3,maxWidth:23,bold:true},
+    {value:(order.client_name||'Cliente não informado')+' • '+(order.title||'Serviço'),x:43,maxWidth:95},
+    {value:order.stage_label||order.stage||'—',x:145,maxWidth:26},
+    {value:currency(order.total),x:R-3,align:'right',maxWidth:24}
+   ],{index:i,height:10});
+  });
+ }
+ const count=pdf.getNumberOfPages();
+ for(let page=1;page<=count;page++){
+  pdf.setPage(page);
+  pdf.setDrawColor(224,230,240);pdf.line(L,280,R,280);
+  line('NG Studio • Relatório gerencial • Gerado em '+generated,L,285,{fontSize:7.3,rgb:muted,maxWidth:150});
+  line(page+' / '+count,R,285,{fontSize:7.3,rgb:muted,align:'right'});
+ }
+ // Download direto sem abrir uma nova aba, igual às OS.
+ const url=URL.createObjectURL(pdf.output('blob'));
+ const link=document.createElement('a');
+ link.href=url;link.download='NGStudio-Resultados-'+year+'-'+String(month+1).padStart(2,'0')+'.pdf';
+ document.body.appendChild(link);
+ try{link.click();}finally{
+  link.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);
+ }
+}
