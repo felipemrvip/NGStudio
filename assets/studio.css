@@ -644,3 +644,60 @@ html[data-theme] .ng-calc-footer p{font-size:11px;line-height:1.6;color:var(--st
 html[data-theme] .ng-calc-formula{font-size:12px;font-weight:750;color:var(--studio-gold)}
 @media(max-width:1050px){html[data-theme] .ng-calc-grid{grid-template-columns:1fr}}
 @media(max-width:550px){html[data-theme] .ng-calc-intro{align-items:flex-start}html[data-theme] .ng-calc-intro-badge{width:49px;height:49px;flex-basis:49px}html[data-theme] .ng-calc-intro h2{font-size:22px}html[data-theme] .ng-calc-form-panel,html[data-theme] .ng-calc-result-panel{padding:18px;gap:19px}html[data-theme] .ng-calc-dimensions{gap:7px;grid-template-columns:minmax(0,1fr) 14px minmax(0,1fr)}html[data-theme] .ng-calc-input-wrap .input{padding-right:36px;font-size:15px}html[data-theme] .ng-calc-input-wrap>span{right:10px}html[data-theme] .ng-calc-total strong{font-size:31px}}
+
+
+/* Corrige a sobreposição do prefixo R$ no campo de preço (desktop e celular).
+   Prefixo, entrada e sufixo ocupam colunas próprias, sem posição absoluta. */
+html[data-theme] .ng-calc-price-input{
+ display:grid;
+ grid-template-columns:max-content minmax(0,1fr) max-content;
+ align-items:center;
+ column-gap:12px;
+ width:100%;
+ min-height:48px;
+ padding:0 15px;
+ border:1px solid var(--studio-line);
+ border-radius:11px;
+ background:var(--studio-raised);
+ transition:border-color .18s ease,box-shadow .18s ease;
+}
+html[data-theme] .ng-calc-price-input:focus-within{
+ border-color:var(--studio-gold);
+ box-shadow:0 0 0 3px color-mix(in srgb,var(--studio-gold),transparent 82%);
+}
+html[data-theme] .ng-calc-price-input>span,
+html[data-theme] .ng-calc-price-input>span:first-child{
+ position:static;
+ inset:auto;
+ display:block;
+ width:auto;
+ flex:none;
+ transform:none;
+ margin:0;
+ pointer-events:none;
+ white-space:nowrap;
+ line-height:1;
+ font-size:13px;
+}
+html[data-theme] .ng-calc-price-input>span:first-child{font-weight:800;color:var(--studio-gold)}
+html[data-theme] .ng-v2-main .ng-calc-price-input .input{
+ display:block;
+ width:100%;
+ min-width:0;
+ height:46px;
+ padding:0 !important;
+ margin:0;
+ border:0 !important;
+ border-radius:0;
+ outline:0 !important;
+ box-shadow:none !important;
+ background:transparent !important;
+ font-size:16px;
+ text-align:left;
+ appearance:none;
+}
+html[data-theme] .ng-v2-main .ng-calc-price-input .input:focus{
+ border:0 !important;
+ outline:0 !important;
+ box-shadow:none !important;
+}
