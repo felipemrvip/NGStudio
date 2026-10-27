@@ -598,3 +598,49 @@ html[data-theme=light] .ng-stage-floating{
  html[data-theme] .ng-stage-menu-choice:hover,
  html[data-theme] .ng-stage-menu-choice:focus-visible{transform:none}
 }
+
+
+/* Calculadora de orçamento — tema NG Studio */
+html[data-theme] .ng-calculator-page{display:grid;gap:24px;max-width:1200px;margin:0 auto;padding:4px 0 32px}
+html[data-theme] .ng-calc-intro{display:flex;align-items:center;gap:17px;padding:20px 0}
+html[data-theme] .ng-calc-intro-badge{display:grid;place-items:center;width:60px;height:60px;flex:0 0 60px;border-radius:17px;background:var(--studio-tint);color:var(--studio-blue)}
+html[data-theme=dark] .ng-calc-intro-badge{color:#f3c447}
+html[data-theme] .ng-calc-intro-badge .ico{width:29px;height:29px}
+html[data-theme] .ng-calc-overline{display:block;font-size:10px;letter-spacing:1.5px;font-weight:800;color:var(--studio-gold);margin-bottom:7px}
+html[data-theme] .ng-calc-intro h2{margin:0 0 7px;font-size:28px;line-height:1.2;color:var(--studio-text)}
+html[data-theme] .ng-calc-intro p{margin:0;max-width:680px;line-height:1.55;font-size:13px;color:var(--studio-muted)}
+html[data-theme] .ng-calc-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:19px;align-items:start}
+html[data-theme] .ng-calc-form-panel,html[data-theme] .ng-calc-result-panel{padding:27px;display:grid;gap:23px;min-width:0;border-radius:18px;background:var(--studio-surface);border:1px solid var(--studio-line);box-shadow:var(--studio-shadow)}
+html[data-theme] .ng-calc-section-heading{display:flex;align-items:start;justify-content:space-between;gap:16px}
+html[data-theme] .ng-calc-section-heading h3{margin:0 0 6px;font-size:17px;font-weight:750;color:var(--studio-text)}
+html[data-theme] .ng-calc-section-heading p{margin:0;font-size:12px;color:var(--studio-muted)}
+html[data-theme] .ng-calc-step{font-size:10px;letter-spacing:1px;color:var(--studio-muted);font-weight:750;white-space:nowrap}
+html[data-theme] .ng-calc-field{display:grid;gap:9px;min-width:0}
+html[data-theme] .ng-calc-field label{font-size:12px;font-weight:750;color:var(--studio-text)}
+html[data-theme] .ng-calc-field label small{font-size:11px;color:var(--studio-muted);font-weight:500}
+html[data-theme] .ng-calc-field>.select{width:100%;min-height:48px}
+html[data-theme] .ng-calc-dimensions{display:grid;grid-template-columns:minmax(0,1fr) 20px minmax(0,1fr);gap:12px;align-items:end}
+html[data-theme] .ng-calc-times{color:var(--studio-muted);font-size:20px;text-align:center;line-height:47px}
+html[data-theme] .ng-calc-input-wrap{position:relative;display:flex;align-items:center;min-width:0}
+html[data-theme] .ng-calc-input-wrap .input{width:100%;height:48px;min-width:0;padding:0 55px 0 15px;font-size:16px;font-weight:650;border-radius:11px;color:var(--studio-text);background:var(--studio-raised);border:1px solid var(--studio-line);font-variant-numeric:tabular-nums}
+html[data-theme] .ng-calc-input-wrap .input:focus{border-color:var(--studio-gold);outline:2px solid color-mix(in srgb,var(--studio-gold),transparent 75%);outline-offset:0}
+html[data-theme] .ng-calc-input-wrap>span{position:absolute;right:14px;font-size:12px;font-weight:750;color:var(--studio-muted);pointer-events:none}
+html[data-theme] .ng-calc-price-input .input{padding-left:46px;padding-right:52px}
+html[data-theme] .ng-calc-price-input>span:first-child{left:15px;right:auto;color:var(--studio-gold)}
+html[data-theme] .ng-calc-separator{height:1px;background:var(--studio-line)}
+html[data-theme] .ng-calc-hint{margin:-3px 0 0;font-size:12px;line-height:1.6;color:var(--studio-muted)}
+html[data-theme] .ng-calc-clear{justify-self:start;display:inline-flex;gap:9px;align-items:center;border:1px solid var(--studio-line);background:var(--studio-raised);color:var(--studio-text);padding:12px 17px;border-radius:10px}
+html[data-theme] .ng-calc-clear .ico{width:16px;height:16px}
+html[data-theme] .ng-calc-total{padding:23px;border:1px solid color-mix(in srgb,var(--studio-gold),transparent 70%);border-radius:15px;background:color-mix(in srgb,var(--studio-gold),transparent 92%);display:grid;gap:8px}
+html[data-theme] .ng-calc-total span{font-size:12px;color:var(--studio-muted);font-weight:700}
+html[data-theme] .ng-calc-total strong{color:var(--studio-text);font-size:38px;letter-spacing:-1.2px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+html[data-theme] .ng-calc-total small{font-size:11px;color:var(--studio-muted);line-height:1.4}
+html[data-theme] .ng-calc-result-list{display:grid;gap:0}
+html[data-theme] .ng-calc-result-list>div{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0;border-bottom:1px solid var(--studio-line)}
+html[data-theme] .ng-calc-result-list span{color:var(--studio-muted);font-size:12px}
+html[data-theme] .ng-calc-result-list strong{font-size:13px;color:var(--studio-text);font-variant-numeric:tabular-nums;text-align:right}
+html[data-theme] .ng-calc-footer{display:grid;gap:12px}
+html[data-theme] .ng-calc-footer p{font-size:11px;line-height:1.6;color:var(--studio-muted);margin:0}
+html[data-theme] .ng-calc-formula{font-size:12px;font-weight:750;color:var(--studio-gold)}
+@media(max-width:1050px){html[data-theme] .ng-calc-grid{grid-template-columns:1fr}}
+@media(max-width:550px){html[data-theme] .ng-calc-intro{align-items:flex-start}html[data-theme] .ng-calc-intro-badge{width:49px;height:49px;flex-basis:49px}html[data-theme] .ng-calc-intro h2{font-size:22px}html[data-theme] .ng-calc-form-panel,html[data-theme] .ng-calc-result-panel{padding:18px;gap:19px}html[data-theme] .ng-calc-dimensions{gap:7px;grid-template-columns:minmax(0,1fr) 14px minmax(0,1fr)}html[data-theme] .ng-calc-input-wrap .input{padding-right:36px;font-size:15px}html[data-theme] .ng-calc-input-wrap>span{right:10px}html[data-theme] .ng-calc-total strong{font-size:31px}}
