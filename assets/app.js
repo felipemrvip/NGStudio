@@ -330,7 +330,7 @@ function calculatorPage(){
     <div class="ng-calc-field"><label for="ng-calc-height">Altura <small>(${esc(c.unit)})</small></label><div class="ng-calc-input-wrap"><input id="ng-calc-height" class="input" type="text" inputmode="decimal" autocomplete="off" maxlength="20" placeholder="${c.unit==='cm'?'Ex.: 200':'Ex.: 2,00'}" value="${esc(c.height)}"/><span>${esc(c.unit)}</span></div></div>
    </div>
    <div class="ng-calc-separator"></div>
-   <div class="ng-calc-field"><label for="ng-calc-price">Valor do metro quadrado</label><div class="ng-calc-input-wrap ng-calc-price-input"><span>R$</span><input id="ng-calc-price" class="input" type="text" inputmode="decimal" autocomplete="off" maxlength="20" placeholder="Ex.: 40,00" value="${esc(c.price)}"/><span>/m²</span></div></div>
+   <div class="ng-calc-field"><label for="ng-calc-price">Valor do metro quadrado (R$)</label><div class="ng-calc-input-wrap"><input id="ng-calc-price" class="input" type="text" inputmode="decimal" autocomplete="off" maxlength="20" placeholder="Ex.: 40,00" value="${esc(c.price)}"/><span>/m²</span></div></div>
    <div class="ng-calc-field"><label for="ng-calc-quantity">Quantidade de peças</label><div class="ng-calc-input-wrap"><input id="ng-calc-quantity" class="input" type="number" min="1" max="100000" step="1" value="${esc(c.quantity)}"/><span>un.</span></div></div>
    <p class="ng-calc-hint">Cálculo: largura × altura = área em m²; área × preço por m² × quantidade = total.</p>
    <button class="btn ng-calc-clear" type="button" data-calculator-clear>${ico('trash')} Limpar campos</button>
