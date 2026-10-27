@@ -68,7 +68,7 @@ async function loadCloud(){try{const data=await cloud.loadAll();state.orders=(da
 
 const NAV_GROUPS=[
  {id:'gerenciamento',title:'Gerenciamento',icon:'layers',items:[['ordens','file','Ordens de Serviço'],['producao','layers','Produção'],['clientes','users','Clientes']]},
- {id:'analises',title:'Análises e finanças',icon:'chart',items:[['geral','chart','Dashboard Geral'],['financeiro','wallet','Financeiro'],['historico','clock','Histórico']]},
+ {id:'analises',title:'Análises e finanças',icon:'chart',items:[['geral','chart','Dashboard Geral'],['financeiro','wallet','Financeiro'],['resultados','calendar','Resultados mês a mês'],['historico','clock','Histórico']]},
  {id:'administracao',title:'Administração',icon:'settings',items:[['equipe','users','Equipe'],['configuracoes','settings','Configurações']]}
 ];
 function navItem(id,icon,label,mobile=false){
@@ -84,6 +84,7 @@ function nav(){
   ['producao','layers','Produção'],
   ['clientes','users','Clientes'],
   ['financeiro','wallet','Financeiro'],
+  ['resultados','calendar','Resultados mês a mês'],
   ['historico','clock','Histórico'],
   ['equipe','users','Equipe'],
   ['configuracoes','settings','Configurações']
@@ -102,9 +103,9 @@ function nav(){
    <span class="ng-sidebar-caption">VISÃO GERAL</span>
    ${links.slice(0,2).map(([id,icon,label])=>navItem(id,icon,label)).join('')}
    <span class="ng-sidebar-caption ng-sidebar-caption-later">GESTÃO</span>
-   ${links.slice(2,7).map(([id,icon,label])=>navItem(id,icon,label)).join('')}
+   ${links.slice(2,8).map(([id,icon,label])=>navItem(id,icon,label)).join('')}
    <span class="ng-sidebar-caption ng-sidebar-caption-later">PREFERÊNCIAS</span>
-   ${links.slice(7).map(([id,icon,label])=>navItem(id,icon,label)).join('')}
+   ${links.slice(8).map(([id,icon,label])=>navItem(id,icon,label)).join('')}
   </nav>
   <div class="sidebar-bottom">
    <button type="button" class="sidebar-create" data-new title="Nova Ordem de Serviço">${ico('plus')}<span>Nova ordem de serviço</span></button>
@@ -141,7 +142,7 @@ function profileOrdersFor(name){return state.orders.filter(o=>String(o.attendant
 async function persistTeam(names){const updated={...state.settings,attendants:names.join(', ')};try{const saved=state.mode==='cloud'?await cloud.persistSettings(updated):updated;state.settings={...defaultSettings,...saved};if(state.mode==='demo')persistDemo();if(state.profile&&!team().includes(state.profile)){state.profile=null;localStorage.removeItem(PROFILE_KEY);profileScreen();}else render();return true;}catch(e){toast('Erro ao salvar equipe: '+e.message,true);return false;}}
 async function addProfile(raw){const name=String(raw||'').trim().replace(/\\s+/g,' ');if(!name||name.includes(',')||name.length>60){toast('Digite um nome válido, sem vírgulas.',true);return;}if(team().some(n=>n.toLocaleLowerCase('pt-BR')===name.toLocaleLowerCase('pt-BR'))){toast('Funcionário já cadastrado.',true);return;}if(await persistTeam([...team(),name]))toast('Funcionário adicionado.');}
 async function removeProfile(name){if(team().length<=1)return;if(profileOrdersFor(name).length){toast('Reatribua os serviços deste funcionário antes de removê-lo.',true);return;}if(!window.confirm('Remover o perfil '+name+'?'))return;if(await persistTeam(team().filter(n=>n!==name)))toast('Perfil removido.');}
-function pageTitle(){return {geral:['Dashboard Geral','Indicadores de toda a gráfica.'],equipe:['Equipe','Gerencie os perfis de funcionários.'],dashboard:['Meu Dashboard','Seus serviços e indicadores individuais.'],ordens:['Ordens de Serviço','Cadastre, consulte e organize os pedidos da sua gráfica.'],producao:['Produção','Mova os serviços entre as etapas arrastando os cartões.'],clientes:['Clientes','Contatos e histórico de serviços em um único lugar.'],financeiro:['Financeiro','Pagamentos recebidos e valores ainda pendentes.'],historico:['Histórico','Serviços entregues e últimas movimentações.'],configuracoes:['Configurações','Personalize os dados que aparecem nos documentos da NG.']}[state.page];}
+function pageTitle(){return {geral:['Dashboard Geral','Indicadores de toda a gráfica.'],equipe:['Equipe','Gerencie os perfis de funcionários.'],dashboard:['Meu Dashboard','Seus serviços e indicadores individuais.'],ordens:['Ordens de Serviço','Cadastre, consulte e organize os pedidos da sua gráfica.'],producao:['Produção','Mova os serviços entre as etapas arrastando os cartões.'],clientes:['Clientes','Contatos e histórico de serviços em um único lugar.'],financeiro:['Financeiro','Pagamentos recebidos e valores ainda pendentes.'],resultados:['Resultados mês a mês','Evolução mensal de pedidos, valores e recebimentos de toda a equipe.'],historico:['Histórico','Serviços entregues e últimas movimentações.'],configuracoes:['Configurações','Personalize os dados que aparecem nos documentos da NG.']}[state.page];}
 function header(){
  const [title,subtitle]=pageTitle();
  const searchPlace=state.page==='equipe'?'Buscar funcionário...':state.page==='clientes'?'Buscar cliente ou telefone...':'Buscar OS, cliente ou serviço...';
@@ -171,7 +172,7 @@ function animateNgScene(){
 }
 function render(){applyTheme(state.theme);if(!state.profile){profileScreen();return;}const root=$('#app');root.innerHTML=`<div class="shell ng-v2-shell studio-shell ${state.sidebarCollapsed?'sidebar-collapsed':''}">${nav()}<main class="main ng-v2-main ${(state.draft||state.viewingOrderId)?'os-editor-page':''}">${header()}${state.mode==='demo'?`<div class="demo-banner">${ico('alert')} <span><b>MODO DEMONSTRAÇÃO:</b> os dados ficam somente neste navegador. Configure o Supabase antes de cadastrar serviços reais ou compartilhar entre computadores.</span></div>`:''}<div id="view">${state.draft||state.viewingOrderId?'':pageView()}</div></main></div>`;renderModal();animateNgScene();}
 function refreshView(){const view=$('#view');if(view)view.innerHTML=pageView();}
-function pageView(){switch(state.page){case 'dashboard':return dashboard(true);case 'geral':return dashboard(false);case 'equipe':return teamPage();case 'ordens':return ordersPage();case 'producao':return kanbanPage();case 'clientes':return clientsPage();case 'financeiro':return financePage();case 'historico':return historyPage();case 'configuracoes':return settingsPage();return dashboard();}}
+function pageView(){switch(state.page){case 'dashboard':return dashboard(true);case 'geral':return dashboard(false);case 'equipe':return teamPage();case 'ordens':return ordersPage();case 'producao':return kanbanPage();case 'clientes':return clientsPage();case 'financeiro':return financePage();case 'resultados':return resultsPage();case 'historico':return historyPage();case 'configuracoes':return settingsPage();return dashboard();}}
 function kpi(label,value,icon,tone,desc,action=""){return `<button type="button" class="kpi" data-dashboard-action="${action}" aria-label="${esc(label)}: ${esc(value)}. Ver ordens correspondentes"><div class="badge-icon ${tone}">${ico(icon)}</div><div class="kpi-label">${label}</div><strong>${esc(value)}</strong><small>${esc(desc)}</small></button>`;}
 function statusPickerMarkup(stage,selectAttrs='',variant=''){
  const selected=STAGES.some(item=>item.id===stage)?stage:STAGES[0].id;
@@ -275,6 +276,13 @@ function revenuePanel(source,individual){
   <div id="ng-monthly-performance">${monthlyPerformanceMarkup(detail)}</div>
   </div>
  </section>`;
+}
+function resultsPage(){
+ const allOrders=filteredOrders(state.orders);
+ return `<div class="ng-new-dashboard studio-dashboard ng-results-page">
+  <div class="toolbar-line"><div><h2>Resultados mês a mês</h2><p>Acompanhe os pedidos, pagamentos e valores pendentes de toda a equipe. Escolha o ano e o mês para conferir os detalhes.</p></div></div>
+  ${revenuePanel(allOrders,false)}
+ </div>`;
 }
 function dashboardActivity(orders){
  const events=[];
@@ -775,7 +783,7 @@ async function exportOrderPdf(id,button){
  }catch(error){toast('Não foi possível exportar o PDF: '+error.message,true);}
  finally{if(button?.isConnected){button.disabled=false;button.innerHTML=label;}}
 }
-function switchPage(page){state.page=page;state.filter='todos';state.paymentFilter='todos';state.actionFilter='';state.orderScope='all';state.search='';state.ordersPage=1;state.mobileMenuOpen=false;const group=NAV_GROUPS.find(g=>g.items.some(([id])=>id===page));if(group)state.sidebarGroups[group.id]=true;persistSidebar();closeModal();render();window.scrollTo({top:0,behavior:'instant'});if(page==='configuracoes'&&state.mode==='cloud'&&!state.storageUsage&&!state.storageLoading)void refreshStorageUsage();}
+function switchPage(page){state.page=page;if(page==='resultados')state.revenueCollapsed=false;state.filter='todos';state.paymentFilter='todos';state.actionFilter='';state.orderScope='all';state.search='';state.ordersPage=1;state.mobileMenuOpen=false;const group=NAV_GROUPS.find(g=>g.items.some(([id])=>id===page));if(group)state.sidebarGroups[group.id]=true;persistSidebar();closeModal();render();window.scrollTo({top:0,behavior:'instant'});if(page==='configuracoes'&&state.mode==='cloud'&&!state.storageUsage&&!state.storageLoading)void refreshStorageUsage();}
 async function saveSettings(form){const data=Object.fromEntries(new FormData(form).entries());const s={...state.settings,...data,prefix:String(data.prefix||'FEL').replace(/[^A-Za-z0-9_-]/g,'').slice(0,12).toUpperCase()};try{state.settings=state.mode==='cloud'?{...defaultSettings,...await cloud.persistSettings(s)}:s;if(state.mode==='demo')persistDemo();refreshView();toast('Configurações salvas.');}catch(e){toast('Falha ao salvar configurações: '+e.message,true);}}
 async function saveClient(form){const c=state.clientDraft,fields=Object.fromEntries(new FormData(form).entries());if(!fields.name?.trim()){toast('Informe o nome do cliente.',true);return;}const exists=state.clients.some(x=>x.id===c.id);const object={...c,name:fields.name.trim(),phone:fields.phone?.trim()||''};try{const saved=state.mode==='cloud'?await cloud.persistClient(object,exists):object;state.clients=exists?state.clients.map(x=>x.id===c.id?saved:x):[saved,...state.clients];if(state.mode==='demo')persistDemo();if(state.draft){updateDraft();const clientField=$('#order-form [name=client_name]');const phoneField=$('#order-form [name=client_phone]');if(clientField)clientField.value=saved.name;if(phoneField)phoneField.value=saved.phone||'';state.draft.client_name=saved.name;state.draft.client_phone=saved.phone||'';state.clientDraft=null;$('#modal-root').innerHTML='';renderModal();}else{closeModal();refreshView();}toast('Cliente salvo.');}catch(e){toast(e.message,true);}}
 function moveImage(id,direction){if(!state.draft)return;updateDraft();const a=state.draft.attachments,i=a.findIndex(x=>x.id===id),j=i+direction;if(i<0||j<0||j>=a.length)return;[a[i],a[j]]=[a[j],a[i]];renderModal();}
