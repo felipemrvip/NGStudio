@@ -167,13 +167,17 @@ function animateNgScene(){
  const next=[state.page,state.profile||'',state.draft?'editor':state.viewingOrderId?'detail':'list'].join('|');
  if(next===ngMotionScene)return;
  ngMotionScene=next;
+ // Cada render() cria um #view novo: animar sem forçar leitura síncrona de layout.
  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
- view.classList.remove('ng-scene-enter');
- void view.offsetWidth;
  view.classList.add('ng-scene-enter');
 }
 function render(){applyTheme(state.theme);if(!state.profile){profileScreen();return;}const root=$('#app');root.innerHTML=`<div class="shell ng-v2-shell studio-shell ${state.sidebarCollapsed?'sidebar-collapsed':''}">${nav()}<main class="main ng-v2-main ${(state.draft||state.viewingOrderId)?'os-editor-page':''}">${header()}${state.mode==='demo'?`<div class="demo-banner">${ico('alert')} <span><b>MODO DEMONSTRAÇÃO:</b> os dados ficam somente neste navegador. Configure o Supabase antes de cadastrar serviços reais ou compartilhar entre computadores.</span></div>`:''}<div id="view">${state.draft||state.viewingOrderId?'':pageView()}</div></main></div>`;renderModal();if(state.page==='calculadora')calculatorRefresh();animateNgScene();}
-function refreshView(){const view=$('#view');if(view){view.innerHTML=pageView();if(state.page==='calculadora')calculatorRefresh();}}
+function refreshView(){const view=$('#view');if(view){
+ // Busca, filtros e edição atualizam o conteúdo sem reiniciar as animações de navegação.
+ view.classList.remove('ng-scene-enter');
+ view.innerHTML=pageView();
+ if(state.page==='calculadora')calculatorRefresh();
+}}
 function pageView(){switch(state.page){case 'dashboard':return dashboard(true);case 'geral':return dashboard(false);case 'equipe':return teamPage();case 'ordens':return ordersPage();case 'producao':return kanbanPage();case 'clientes':return clientsPage();case 'financeiro':return financePage();case 'resultados':return resultsPage();case 'calculadora':return calculatorPage();case 'historico':return historyPage();case 'configuracoes':return settingsPage();return dashboard();}}
 function kpi(label,value,icon,tone,desc,action=""){return `<button type="button" class="kpi" data-dashboard-action="${action}" aria-label="${esc(label)}: ${esc(value)}. Ver ordens correspondentes"><div class="badge-icon ${tone}">${ico(icon)}</div><div class="kpi-label">${label}</div><strong>${esc(value)}</strong><small>${esc(desc)}</small></button>`;}
 function statusPickerMarkup(stage,selectAttrs='',variant=''){
