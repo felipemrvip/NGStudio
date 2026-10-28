@@ -199,8 +199,8 @@ function recentOrderRows(orders){
    <td>${esc(o.title)}</td>
    <td class="ng-table-stage-cell"><div class="ng-table-stage-wrap ${esc(stage)}">${statusPickerMarkup(stage, 'data-table-stage="'+esc(o.id)+'" title="Alterar status e salvar automaticamente"', 'ng-stage-compact')}</div></td>
    <td>${paymentBadge(o)}</td>
-   <td class="ng-os-value-total">${money(o.total)}</td>
-   <td class="ng-os-value-signal">${money(signalPaid(o))}</td>
+   <td class="${Number(o.total||0)>.001?'ng-os-value-total':'ng-os-value-settled'}">${money(o.total)}</td>
+   <td class="${signalPaid(o)>.001?'ng-os-value-signal':'ng-os-value-settled'}">${money(signalPaid(o))}</td>
    <td class="${due>.001?'ng-os-value-due':'ng-os-value-settled'}">${money(due)}</td>
    <td>${fmtDate(o.created_at)}</td>
   </tr>`;
