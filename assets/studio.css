@@ -976,3 +976,15 @@ html[data-theme] .ng-glance-preview-modal:not([hidden]) .ng-glance-preview-modal
   scroll-behavior:auto!important;
  }
 }
+
+
+/* Tabela OS — cores financeiras específicas sem alterar valores ou status. */
+html[data-theme=dark] .studio-shell .ng-v2-main .data-table td.ng-os-value-total{color:#49dfa7!important}
+html[data-theme=dark] .studio-shell .ng-v2-main .data-table td.ng-os-value-signal{color:#f3c759!important}
+html[data-theme=dark] .studio-shell .ng-v2-main .data-table td.ng-os-value-due{color:#ff7388!important}
+html[data-theme=dark] .studio-shell .ng-v2-main .data-table td.ng-os-value-settled{color:#f0f5ff!important}
+html[data-theme=light] .studio-shell .ng-v2-main .data-table td.ng-os-value-total{color:#087a50!important}
+html[data-theme=light] .studio-shell .ng-v2-main .data-table td.ng-os-value-signal{color:#9f6700!important}
+html[data-theme=light] .studio-shell .ng-v2-main .data-table td.ng-os-value-due{color:#c7243b!important}
+html[data-theme=light] .studio-shell .ng-v2-main .data-table td.ng-os-value-settled{color:#172239!important}
+html[data-theme] .studio-shell .ng-v2-main .data-table td:is(.ng-os-value-total,.ng-os-value-signal,.ng-os-value-due,.ng-os-value-settled){font-weight:750;font-variant-numeric:tabular-nums}
