@@ -865,3 +865,114 @@ html[data-theme] .studio-shell .ng-v2-main .ng-calc-result-list strong{font-size
  html[data-theme] .studio-shell .ng-v2-main .filter-pill{font-size:12px;padding:9px 11px}
  html[data-theme] .studio-shell .sidebar .navbtn{font-size:13px}
 }
+
+
+/* NG Motion v2 — movimento suave e rápido, com economia de renderizações. */
+@keyframes ng-fluid-page{
+ from{opacity:.45;transform:translate3d(0,9px,0)}
+ to{opacity:1;transform:translate3d(0,0,0)}
+}
+@keyframes ng-fluid-card{
+ from{opacity:.5;transform:translate3d(0,10px,0) scale(.992)}
+ to{opacity:1;transform:translate3d(0,0,0) scale(1)}
+}
+@keyframes ng-fluid-rise{
+ from{opacity:.65;transform:translate3d(0,6px,0)}
+ to{opacity:1;transform:translate3d(0,0,0)}
+}
+html[data-theme] .ng-v2-main #view.ng-scene-enter> :first-child{
+ animation:ng-fluid-page .32s cubic-bezier(.2,.75,.25,1) both!important;
+}
+html[data-theme] .ng-v2-main #view.ng-scene-enter :is(
+ .ng-new-kpis>.kpi,.mini-stat-grid>.mini-stat,
+ .client-grid>.client-card,.kanban>.kan-col,
+ .ng-attention-grid>button,.ng-os-card,
+ .ng-glance-layout .panel
+){
+ animation:ng-fluid-card .36s cubic-bezier(.2,.75,.25,1) both!important;
+ animation-delay:calc(var(--ng-sequence,0) * 28ms)!important;
+}
+html[data-theme] .ng-v2-main #view.ng-scene-enter .ng-dash-aside>.panel{
+ animation:ng-fluid-rise .36s cubic-bezier(.2,.75,.25,1) both!important;
+ animation-delay:75ms!important;
+}
+html[data-theme] .ng-v2-main #view.ng-scene-enter .ng-dash-aside>.panel:nth-child(2){
+ animation-delay:115ms!important;
+}
+html[data-theme] .ng-v2-main #view.ng-scene-enter .studio-welcome{
+ animation:ng-fluid-page .32s cubic-bezier(.2,.75,.25,1) both!important;
+}
+html[data-theme] .ng-v2-main #view.ng-scene-enter .ng-activity-item{
+ animation:ng-fluid-rise .28s cubic-bezier(.2,.75,.25,1) both!important;
+ animation-delay:0ms!important;
+}
+html[data-theme] .ng-v2-main #view.ng-scene-enter .ng-activity-item:nth-child(2){animation-delay:24ms!important}
+html[data-theme] .ng-v2-main #view.ng-scene-enter .ng-activity-item:nth-child(3){animation-delay:48ms!important}
+html[data-theme] .ng-v2-main #view.ng-scene-enter .ng-activity-item:nth-child(4){animation-delay:72ms!important}
+html[data-theme] .ng-v2-main #view.ng-scene-enter .ng-activity-item:nth-child(5){animation-delay:96ms!important}
+html[data-theme] .ng-v2-main #view.ng-scene-enter .table-scroll tbody tr{
+ animation:ng-fluid-rise .26s cubic-bezier(.2,.75,.25,1) both!important;
+ animation-delay:0ms!important;
+}
+html[data-theme] .ng-v2-main #view.ng-scene-enter .table-scroll tbody tr:nth-child(2){animation-delay:20ms!important}
+html[data-theme] .ng-v2-main #view.ng-scene-enter .table-scroll tbody tr:nth-child(3){animation-delay:40ms!important}
+html[data-theme] .ng-v2-main #view.ng-scene-enter .table-scroll tbody tr:nth-child(4){animation-delay:60ms!important}
+html[data-theme] .ng-v2-main #view.ng-scene-enter .table-scroll tbody tr:nth-child(5){animation-delay:80ms!important}
+html[data-theme] .ng-v2-main #view.ng-scene-enter .ng-design-week-panel .bar,
+html[data-theme] .ng-v2-main #view.ng-scene-enter .ng-revenue-panel:not(.is-collapsed) :is(.ng-revenue-bar,.ng-month-bar){
+ animation-duration:.55s!important;
+}
+html[data-theme] .ng-v2-main #view.ng-scene-enter .ng-design-donut{
+ animation-duration:.45s!important;
+ animation-delay:60ms!important;
+}
+/* Navegação e botões: microinterações mais discretas, menos sensação de atraso. */
+html[data-theme] .studio-shell .sidebar .navbtn,
+html[data-theme] .studio-shell .mobile-quick-nav .navbtn,
+html[data-theme] .studio-shell .btn,
+html[data-theme] .studio-shell :is(.iconbutton,.ng-topbar-profile,.filter-pill,.studio-segment button,.ng-revenue-toggle),
+html[data-theme] .studio-shell :is(.client-card,.kan-card,.ng-new-kpis>.kpi,.ng-activity-item),
+html[data-theme] .profile-choice{
+ transition:
+  transform .2s cubic-bezier(.2,.75,.25,1),
+  background-color .18s ease,
+  border-color .18s ease,
+  box-shadow .2s ease,
+  color .18s ease!important;
+}
+html[data-theme] .studio-shell .sidebar .navbtn:not(.active):hover{transform:translateX(2px)!important}
+html[data-theme] .studio-shell .btn:not(:disabled):hover,
+html[data-theme] .studio-shell .ng-topbar-profile:hover,
+html[data-theme] .studio-shell .ng-revenue-toggle:hover{
+ transform:translateY(-1px);
+ box-shadow:0 4px 13px #14274616;
+}
+html[data-theme] .studio-shell :is(.client-card,.kan-card,.ng-new-kpis>.kpi):hover{
+ transform:translateY(-2px)!important;
+ box-shadow:0 9px 22px #09284920!important;
+}
+html[data-theme] .studio-shell :is(.btn,.iconbutton,.ng-new-kpis>.kpi,.filter-pill,.ng-topbar-profile):not(:disabled):active{
+ transform:scale(.985)!important;
+}
+html[data-theme] #modal-root .overlay{animation-duration:.15s!important}
+html[data-theme] #modal-root .drawer{
+ animation:ng-fluid-page .3s cubic-bezier(.2,.75,.25,1) both!important;
+}
+html[data-theme] #toast-root .notify{
+ animation:ng-fluid-rise .22s cubic-bezier(.2,.75,.25,1) both!important;
+}
+html[data-theme] .ng-glance-preview-modal:not([hidden]) .ng-glance-preview-modal-inner{
+ animation:ng-fluid-page .3s cubic-bezier(.2,.75,.25,1) both!important;
+}
+@media(prefers-reduced-motion:reduce){
+ html[data-theme] .studio-shell *,
+ html[data-theme] .ng-v2-main #view.ng-scene-enter *,
+ html[data-theme] .ng-v2-main #view.ng-scene-enter> :first-child,
+ html[data-theme] #modal-root *,
+ html[data-theme] #toast-root *,
+ html[data-theme] .profile-screen *{
+  animation:none!important;
+  transition:none!important;
+  scroll-behavior:auto!important;
+ }
+}
