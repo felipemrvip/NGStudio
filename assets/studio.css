@@ -701,3 +701,167 @@ html[data-theme] .ng-v2-main .ng-calc-price-input .input:focus{
  outline:0 !important;
  box-shadow:none !important;
 }
+
+
+/* ===== Legibilidade global v1 — tipografia NG Studio =====
+   Ajustes de leitura para telas grandes e dispositivos móveis.
+   Não modifica dados, formulários nem lógica de negócio. */
+html[data-theme] .studio-shell .ng-v2-main{
+ font-size:14px;
+ line-height:1.55;
+ -webkit-font-smoothing:antialiased;
+}
+html[data-theme] .studio-shell .ng-v2-main :is(p,small,.caption){
+ line-height:1.55;
+}
+html[data-theme] .studio-shell .ng-heading-eyebrow{
+ font-size:10px;
+ font-weight:750;
+ letter-spacing:.12em;
+}
+html[data-theme] .studio-shell .heading h1{
+ font-size:26px;
+ font-weight:750;
+ letter-spacing:-.65px;
+ line-height:1.25;
+}
+html[data-theme] .studio-shell .ng-sidebar-caption{
+ font-size:11px;
+ font-weight:750;
+ letter-spacing:.085em;
+}
+html[data-theme] .studio-shell .sidebar .navbtn{
+ font-size:14px;
+ font-weight:600;
+ line-height:1.35;
+ min-height:44px;
+ padding:11px 12px;
+}
+html[data-theme] .studio-shell .sidebar .navbtn.active{font-weight:750}
+html[data-theme] .studio-shell .sidebar .navbtn .ico{width:18px;height:18px;flex-shrink:0}
+html[data-theme] .studio-shell .sidebar-brand-label h2{font-size:18px;font-weight:750}
+html[data-theme] .studio-shell .sidebar-brand-label p{font-size:11px}
+html[data-theme] .studio-shell .ng-person-copy strong{font-size:13px;font-weight:700}
+html[data-theme] .studio-shell .ng-person-copy small{font-size:12px}
+html[data-theme] .studio-shell .sidebar-create{font-size:13px;font-weight:650}
+html[data-theme] .studio-shell .search{height:43px}
+html[data-theme] .studio-shell .search input{font-size:13px;font-weight:500}
+html[data-theme] .studio-shell .search .shortcut{font-size:10px}
+html[data-theme] .studio-shell .ng-v2-main .toolbar-line h2{
+ font-size:26px;
+ font-weight:750;
+ line-height:1.2;
+ letter-spacing:-.65px;
+}
+html[data-theme] .studio-shell .ng-v2-main .toolbar-line p{
+ font-size:13px;
+ font-weight:500;
+}
+html[data-theme] .studio-shell .ng-v2-main :is(.btn,.btn-sm),
+html[data-theme] #modal-root :is(.btn,.btn-sm){
+ font-size:13px;
+ font-weight:700;
+ min-height:40px;
+ line-height:1.3;
+}
+html[data-theme] .studio-shell .ng-v2-main .btn-sm{min-height:36px;padding:8px 12px}
+html[data-theme] .studio-shell .ng-v2-main .filter-pill{
+ font-size:13px;
+ font-weight:600;
+ padding:10px 14px;
+ min-height:39px;
+}
+html[data-theme] .studio-shell .ng-v2-main .page-actions,
+html[data-theme] .studio-shell .ng-v2-main .ng-order-filters{
+ font-size:13px;
+}
+html[data-theme] .studio-shell .ng-v2-main .ng-order-filters label{
+ font-size:13px;
+ font-weight:650;
+}
+html[data-theme] .studio-shell .ng-v2-main .table-scroll{
+ overflow-x:auto;
+ -webkit-overflow-scrolling:touch;
+}
+html[data-theme] .studio-shell .ng-v2-main .data-table{
+ font-size:13px;
+ line-height:1.45;
+}
+html[data-theme] .studio-shell .ng-v2-main .data-table th{
+ font-size:11px;
+ font-weight:750;
+ letter-spacing:.045em;
+ padding:14px 13px;
+ white-space:nowrap;
+}
+html[data-theme] .studio-shell .ng-v2-main .data-table td{
+ font-size:13px;
+ font-weight:550;
+ line-height:1.5;
+ padding:17px 13px;
+}
+html[data-theme] .studio-shell .ng-v2-main .data-table td:first-child,
+html[data-theme] .studio-shell .ng-v2-main .data-table .table-link{
+ font-weight:750;
+}
+html[data-theme] .studio-shell .ng-v2-main .ng-table-stage-select{
+ font-size:12px;
+ font-weight:700;
+}
+html[data-theme] .studio-shell .ng-v2-main .ng-stage-compact .ng-stage-trigger{
+ font-size:12px;
+ font-weight:700;
+ min-height:36px;
+ padding:8px 11px;
+}
+html[data-theme] .studio-shell .ng-v2-main .ng-payment-badge{
+ font-size:12px;
+ font-weight:700;
+ padding:7px 10px;
+}
+html[data-theme] .studio-shell .ng-v2-main .ng-pagination,
+html[data-theme] .studio-shell .ng-v2-main .ng-pagination :is(span,label,b){
+ font-size:13px;
+ font-weight:600;
+}
+html[data-theme] .studio-shell .ng-v2-main :is(.input,.select,.textarea),
+html[data-theme] #modal-root :is(.input,.select,.textarea){
+ font-size:14px;
+ font-weight:500;
+ line-height:1.45;
+}
+html[data-theme] .studio-shell .ng-v2-main .form-field label,
+html[data-theme] #modal-root .form-field label{
+ font-size:13px;
+ font-weight:650;
+}
+html[data-theme] .studio-shell .ng-v2-main .panel-head p{font-size:12px}
+html[data-theme] .studio-shell .ng-v2-main .panel-head h3{font-size:17px;font-weight:750}
+html[data-theme] .studio-shell .ng-v2-main .studio-dashboard .ng-new-kpis>.kpi>.kpi-label{
+ font-size:12px!important;
+ font-weight:650!important;
+}
+html[data-theme] .studio-shell .ng-v2-main .studio-dashboard .ng-new-kpis>.kpi>strong{
+ font-weight:750!important;
+}
+html[data-theme] .studio-shell .ng-v2-main .studio-dashboard .ng-new-kpis>.kpi>small{
+ font-size:11px!important;
+ font-weight:500;
+}
+html[data-theme] .studio-shell .ng-v2-main .ng-activity-item b{font-size:12px;font-weight:700}
+html[data-theme] .studio-shell .ng-v2-main .studio-segment button{font-size:12px;font-weight:650}
+html[data-theme] .studio-shell .ng-v2-main .ng-calc-field label{font-size:13px;font-weight:700}
+html[data-theme] .studio-shell .ng-v2-main .ng-calc-result-list span{font-size:13px}
+html[data-theme] .studio-shell .ng-v2-main .ng-calc-result-list strong{font-size:14px;font-weight:750}
+@media(max-width:1100px){
+ html[data-theme] .studio-shell .ng-v2-main .data-table{min-width:900px}
+}
+@media(max-width:700px){
+ html[data-theme] .studio-shell .heading h1{font-size:23px}
+ html[data-theme] .studio-shell .ng-v2-main .toolbar-line h2{font-size:23px}
+ html[data-theme] .studio-shell .ng-v2-main .data-table{min-width:900px}
+ html[data-theme] .studio-shell .ng-v2-main .data-table th{font-size:10.5px;padding:12px 10px}
+ html[data-theme] .studio-shell .ng-v2-main .data-table td{font-size:12.5px;padding:14px 10px}
+ html[data-theme] .studio-shell .ng-v2-main .filter-pill{font-size:12px;padding:9px 11px}
+ html[data-theme] .studio-shell .sidebar .navbtn{font-size:13px}
+}
